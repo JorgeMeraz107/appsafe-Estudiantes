@@ -1298,7 +1298,7 @@ html, body {
           <div class="s-sub" id="s-gps-status">
             <span class="live-dot-small"></span>En vivo
           </div>
-          <div class="s-sub" id="s-gps-coords" style="margin-top:2px;font-size:10px;">14.0817, -87.2068</div>
+          <div class="s-sub" id="s-gps-coords" style="margin-top:2px;font-size:10px;">Esperando GPS...</div>
         </div>
 
         <!-- Movimiento -->
@@ -1653,11 +1653,11 @@ html, body {
       <div class="fullmap-coords">
         <div class="coord-chip">
           <div class="coord-label">Latitud</div>
-          <div class="coord-value" id="full-lat">14.0817</div>
+          <div class="coord-value" id="full-lat">--</div>
         </div>
         <div class="coord-chip">
           <div class="coord-label">Longitud</div>
-          <div class="coord-value" id="full-lng">-87.2068</div>
+          <div class="coord-value" id="full-lng">--</div>
         </div>
         <div class="coord-chip">
           <div class="coord-label">Precisión</div>
@@ -1695,14 +1695,14 @@ let holdProgress = 0;
 let sensorInterval = null;
 let dataInterval = null;
 
-// Simulated student data — will come from real sensors
+// Simulated student data — lat/lng null until real GPS arrives
 let sensorData = {
-  lat: 14.0817, lng: -87.2068,
-  accuracy: 6,
+  lat: null, lng: null,   // ← null hasta que el GPS real responda
+  accuracy: null,
   battery: 82,
   charging: true,
-  speed: 1.8,
-  motion: 'Caminando',
+  speed: 0,
+  motion: 'Quieto',
   accel: { x: 0.2, y: 9.8, z: 0.1 }
 };
 
@@ -1875,7 +1875,11 @@ function triggerSOS() {
 
   // Set location in SOS screen
   const locText = document.getElementById('sos-location-text');
-  locText.textContent = `${sensorData.lat.toFixed(4)}, ${sensorData.lng.toFixed(4)}`;
+  if (sensorData.lat !== null) {
+    locText.textContent = `${sensorData.lat.toFixed(5)}, ${sensorData.lng.toFixed(5)}`;
+  } else {
+    locText.textContent = 'Obteniendo ubicación GPS...';
+  }
 
   // Set battery in SOS screen
   document.getElementById('sos-battery').textContent = sensorData.battery + '%';
@@ -2031,31 +2035,74 @@ function updateMarkerPosition() {
 
 
 function startSensors() {
-  // ── GPS Real ──────────────────────────
+
+  // ── GPS Real — pide permiso y obtiene ubicación real ──
   if ('geolocation' in navigator) {
-    navigator.geolocation.watchPosition(
-      (pos) => {
-        sensorData.lat      = pos.coords.latitude;
-        sensorData.lng      = pos.coords.longitude;
-        sensorData.accuracy = Math.round(pos.coords.accuracy);
-        sensorData.speed    = pos.coords.speed ? +(pos.coords.speed * 3.6).toFixed(1) : 0;
-        updateGPSUI();
+
+    const gpsOptions = {
+      enableHighAccuracy: true,  // ← usa GPS satelital, no solo WiFi/torres
+      maximumAge: 0,             // ← no usar cache, siempre coords frescas
+      timeout: 15000
+    };
+
+    const onGpsSuccess = (pos) => {
+      const wasNull = sensorData.lat === null;
+      sensorData.lat      = pos.coords.latitude;
+      sensorData.lng      = pos.coords.longitude;
+      sensorData.accuracy = Math.round(pos.coords.accuracy);
+      sensorData.speed    = pos.coords.speed ? +(pos.coords.speed * 3.6).toFixed(1) : 0;
+
+      updateGPSUI();
+
+      // Primera vez que llegan coords reales → carga el mapa
+      if (wasNull) {
+        loadMiniMap();
+      } else {
         updateMarkerPosition();
-      },
-      (err) => {
-        // GPS not available — simulate
-        simulateGPS();
-        console.warn('GPS error:', err.message);
-      },
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
-    );
+      }
+    };
+
+    const onGpsError = (err) => {
+      console.warn('GPS error:', err.code, err.message);
+      const gpsEl  = document.getElementById('s-gps-acc');
+      const coordEl = document.getElementById('s-gps-coords');
+      if (err.code === 1) {
+        // PERMISSION_DENIED
+        if (gpsEl)   gpsEl.textContent  = 'Permiso denegado';
+        if (coordEl) coordEl.textContent = 'Activa la ubicación en ajustes';
+        showSToast('⚠️ Activa la ubicación en Ajustes del celular');
+        // Muestra mapa con aviso en lugar de coords falsas
+        showMapPermissionDenied();
+      } else {
+        // Timeout o no disponible
+        if (gpsEl)   gpsEl.textContent  = 'Sin señal GPS';
+        if (coordEl) coordEl.textContent = 'Buscando señal...';
+        showSToast('📡 Buscando señal GPS...');
+      }
+    };
+
+    // 1️⃣ Primero: obtén la ubicación UNA VEZ de inmediato
+    //    Esto dispara el popup de permiso del sistema operativo
+    navigator.geolocation.getCurrentPosition(onGpsSuccess, onGpsError, gpsOptions);
+
+    // 2️⃣ Luego: sigue monitoreando cambios de posición en tiempo real
+    navigator.geolocation.watchPosition(onGpsSuccess, onGpsError, gpsOptions);
+
   } else {
-    simulateGPS();
+    showSToast('❌ GPS no disponible en este dispositivo');
   }
 
   // ── Acelerómetro Real ─────────────────
   if (window.DeviceMotionEvent) {
-    window.addEventListener('devicemotion', handleMotion);
+    // iOS 13+ requiere permiso explícito
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      DeviceMotionEvent.requestPermission()
+        .then(state => {
+          if (state === 'granted') window.addEventListener('devicemotion', handleMotion);
+        }).catch(() => simulateAccel());
+    } else {
+      window.addEventListener('devicemotion', handleMotion);
+    }
   } else {
     simulateAccel();
   }
@@ -2066,22 +2113,42 @@ function startSensors() {
       sensorData.battery  = Math.round(battery.level * 100);
       sensorData.charging = battery.charging;
       updateBatteryUI();
-
-      battery.addEventListener('levelchange', () => {
-        sensorData.battery = Math.round(battery.level * 100);
-        updateBatteryUI();
-      });
-      battery.addEventListener('chargingchange', () => {
-        sensorData.charging = battery.charging;
-        updateBatteryUI();
-      });
+      battery.addEventListener('levelchange',  () => { sensorData.battery  = Math.round(battery.level * 100); updateBatteryUI(); });
+      battery.addEventListener('chargingchange',() => { sensorData.charging = battery.charging; updateBatteryUI(); });
     }).catch(() => simulateBattery());
   } else {
     simulateBattery();
   }
 
-  // Start sensor UI updates
-  sensorInterval = setInterval(updateSensorUI, 1500);
+  sensorInterval = setInterval(updateSensorUI, 2000);
+}
+
+// Carga el mini mapa con las coords GPS reales
+function loadMiniMap() {
+  if (sensorData.lat === null) return;
+  const miniIframe  = document.getElementById('gmap-mini');
+  const miniLoading = document.getElementById('mini-map-loading');
+  if (!miniIframe) return;
+
+  const url = buildMapUrl(sensorData.lat, sensorData.lng, 17);
+  miniIframe.src = url;
+  mapsInitialized = true;
+
+  miniIframe.onload = () => {
+    if (miniLoading) miniLoading.classList.add('hidden');
+  };
+
+  updateMapAccInfo(sensorData.accuracy);
+  updateFullMapCoords(sensorData.lat, sensorData.lng, sensorData.accuracy);
+}
+
+// Muestra mensaje si el permiso fue denegado
+function showMapPermissionDenied() {
+  const miniLoading = document.getElementById('mini-map-loading');
+  if (miniLoading) {
+    miniLoading.querySelector('.map-loading-text').textContent = '📍 Activa la ubicación en ajustes';
+    miniLoading.querySelector('.map-spinner').style.display = 'none';
+  }
 }
 
 // ── Real motion handler ───────────────
@@ -2100,15 +2167,17 @@ function handleMotion(e) {
   updateAccelUI();
 }
 
-// ── Simulate when sensors unavailable ─
+// Solo se usa si GPS completamente no disponible (no como fallback de permisos)
 function simulateGPS() {
+  // Usamos la última posición conocida o dejamos null
+  if (sensorData.lat === null) return; // No simular si nunca hubo GPS real
   setInterval(() => {
-    sensorData.lat += (Math.random() - 0.5) * 0.0002;
-    sensorData.lng += (Math.random() - 0.5) * 0.0002;
-    sensorData.accuracy = Math.floor(Math.random() * 10) + 4;
+    sensorData.lat += (Math.random() - 0.5) * 0.0001;
+    sensorData.lng += (Math.random() - 0.5) * 0.0001;
+    sensorData.accuracy = Math.floor(Math.random() * 15) + 5;
     updateGPSUI();
     updateMarkerPosition();
-  }, 3000);
+  }, 5000);
 }
 
 function simulateAccel() {
@@ -2132,10 +2201,15 @@ function simulateBattery() {
 
 // ── UI updates ────────────────────────
 function updateGPSUI() {
-  const acc  = document.getElementById('s-gps-acc');
-  const coord = document.getElementById('s-gps-coords');
-  if (acc)   acc.textContent = `±${sensorData.accuracy}m`;
-  if (coord) coord.textContent = `${sensorData.lat.toFixed(4)}, ${sensorData.lng.toFixed(4)}`;
+  const accEl   = document.getElementById('s-gps-acc');
+  const coordEl = document.getElementById('s-gps-coords');
+  if (sensorData.lat === null) {
+    if (accEl)   accEl.textContent   = 'Buscando...';
+    if (coordEl) coordEl.textContent = 'Esperando GPS';
+    return;
+  }
+  if (accEl)   accEl.textContent   = `±${sensorData.accuracy}m`;
+  if (coordEl) coordEl.textContent = `${sensorData.lat.toFixed(5)}, ${sensorData.lng.toFixed(5)}`;
 }
 
 function updateBatteryUI() {
