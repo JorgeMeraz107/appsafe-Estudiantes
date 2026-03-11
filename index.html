@@ -9,8 +9,6 @@
 <title>SchoolSafe — Alumno</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 
 /* ═══════════════════════════════════════
@@ -1046,19 +1044,41 @@ html, body {
   gap: 6px;
 }
 
-/* Leaflet overrides — OSM tiles claros dentro de UI oscura */
-.leaflet-container { background: #e8e0d8; font-family: 'DM Sans', sans-serif; }
-.leaflet-tile-pane { filter: none; }
-.leaflet-control-attribution { display: none !important; }
-.leaflet-popup-content-wrapper {
-  background: rgba(17,34,64,0.97) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
-  color: white !important;
+/* Google Maps iframe */
+.gmap-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
 }
-.leaflet-popup-tip { background: rgba(17,34,64,0.97) !important; }
-.leaflet-popup-content { color: white !important; font-size: 13px; font-weight: 600; margin: 10px 14px; }
+
+/* Mini map loading state */
+.map-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(10,18,32,0.85);
+  z-index: 5;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+.map-loading.hidden { opacity: 0; }
+.map-spinner {
+  width: 28px; height: 28px;
+  border: 3px solid rgba(255,255,255,0.15);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin-slow 0.8s linear infinite;
+}
+.map-loading-text {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 500;
+}
 
 /* Pulsing accuracy circle override */
 .accuracy-circle { transition: r 1s ease; }
@@ -1327,7 +1347,20 @@ html, body {
           </div>
           <button class="map-expand-btn" onclick="openFullMap()">Ver mapa completo →</button>
         </div>
-        <div id="student-mini-map"></div>
+        <div id="student-mini-map" style="position:relative;height:200px;overflow:hidden;">
+          <iframe
+            id="gmap-mini"
+            class="gmap-iframe"
+            referrerpolicy="no-referrer-when-downgrade"
+            allowfullscreen
+            loading="lazy"
+            src="about:blank">
+          </iframe>
+          <div class="map-loading" id="mini-map-loading">
+            <div class="map-spinner"></div>
+            <div class="map-loading-text">Esperando GPS...</div>
+          </div>
+        </div>
         <div class="map-accuracy-info" id="map-acc-info">
           📍 Precisión: ±6m
         </div>
@@ -1606,7 +1639,15 @@ html, body {
       </div>
     </div>
 
-    <div id="student-full-map"></div>
+    <iframe
+      id="gmap-full"
+      class="gmap-iframe"
+      style="flex:1;min-height:0;"
+      referrerpolicy="no-referrer-when-downgrade"
+      allowfullscreen
+      loading="lazy"
+      src="about:blank">
+    </iframe>
 
     <div class="fullmap-bottom">
       <div class="fullmap-coords">
@@ -1672,9 +1713,6 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
   currentScreen = id;
-  // Invalidate maps on show
-  if (id === 'home' && miniMap) setTimeout(() => miniMap.invalidateSize(), 150);
-  if (id === 'fullmap' && fullMap) setTimeout(() => fullMap.invalidateSize(), 150);
 }
 
 function studentTab(tab, btn) {
@@ -1768,8 +1806,6 @@ function vincular() {
     showScreen('home');
     startSensors();
     startDataTransmission();
-    // Init map after screen is visible
-    setTimeout(() => initMiniMap(), 300);
     showSToast('✅ ¡Vinculado con María García!');
   }, 1800);
 }
@@ -1888,186 +1924,90 @@ function confirmCancelSOS() {
 }
 
 /* ═══════════════════════════════════════
-   MAPS
+   MAPS — Google Maps iframe
+   El alumno no toca ni ve nada —
+   el src del iframe se actualiza solo
+   con las coords reales del GPS
 ═══════════════════════════════════════ */
-let miniMap = null;
-let fullMap = null;
-let studentMarker = null;
-let studentMarkerFull = null;
-let accuracyCircle = null;
-let accuracyCircleFull = null;
 let prevFullMapScreen = 'home';
+let mapsInitialized = false;
 
-function initMiniMap() {
-  if (miniMap) return;
-
-  const pos = [sensorData.lat, sensorData.lng];
-
-  miniMap = L.map('student-mini-map', {
-    center: pos,
-    zoom: 16,
-    zoomControl: false,
-    attributionControl: false,
-    dragging: false,
-    scrollWheelZoom: false,
-    doubleClickZoom: false,
-    boxZoom: false,
-    keyboard: false,
-    tap: false
-  });
-
-  // Dark-friendly tile
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
-  }).addTo(miniMap);
-
-  // Accuracy circle
-  accuracyCircle = L.circle(pos, {
-    radius: sensorData.accuracy,
-    color: '#2979FF',
-    fillColor: '#2979FF',
-    fillOpacity: 0.12,
-    weight: 1.5
-  }).addTo(miniMap);
-
-  // Student marker
-  studentMarker = L.marker(pos, { icon: makeStudentIcon() }).addTo(miniMap);
-
-  // Update accuracy info
-  updateMapAccInfo();
+// Builds the Google Maps embed URL from coordinates
+function buildMapUrl(lat, lng, zoom = 16) {
+  // Google Maps embed — muestra calles, nombres, negocios en español
+  return `https://maps.google.com/maps?q=${lat},${lng}&z=${zoom}&output=embed&hl=es`;
 }
 
-function initFullMap() {
-  if (fullMap) return;
+function updateGoogleMaps(lat, lng, accuracy) {
+  const url = buildMapUrl(lat, lng, 17);
 
-  const pos = [sensorData.lat, sensorData.lng];
+  // ─── Mini mapa ───────────────────────
+  const miniIframe = document.getElementById('gmap-mini');
+  const miniLoading = document.getElementById('mini-map-loading');
 
-  fullMap = L.map('student-full-map', {
-    center: pos,
-    zoom: 17,
-    zoomControl: false,
-    attributionControl: false
-  });
+  if (miniIframe) {
+    // Solo actualiza si las coords cambiaron más de ~5 metros
+    // (evita recargar el iframe en cada pequeño drift)
+    const currentSrc = miniIframe.src;
+    const newUrl = buildMapUrl(lat, lng, 17);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
-  }).addTo(fullMap);
+    if (!mapsInitialized || currentSrc === 'about:blank') {
+      miniIframe.src = newUrl;
+      mapsInitialized = true;
 
-  // Accuracy circle
-  accuracyCircleFull = L.circle(pos, {
-    radius: sensorData.accuracy,
-    color: '#2979FF',
-    fillColor: '#2979FF',
-    fillOpacity: 0.12,
-    weight: 1.5
-  }).addTo(fullMap);
-
-  // Student marker
-  studentMarkerFull = L.marker(pos, { icon: makeStudentIcon(true) })
-    .addTo(fullMap)
-    .bindPopup(`<b>📍 Estás aquí</b><br><span style="font-size:11px;opacity:0.7;">${pos[0].toFixed(5)}, ${pos[1].toFixed(5)}</span>`, { closeButton: false });
-
-  updateFullMapCoords();
-}
-
-function makeStudentIcon(large = false) {
-  const size = large ? 52 : 44;
-  return L.divIcon({
-    className: '',
-    html: `
-      <div style="position:relative;width:${size}px;height:${size}px;">
-        <!-- Pulse ring -->
-        <div style="
-          position:absolute; inset:-10px;
-          border-radius:50%;
-          border:2px solid rgba(41,121,255,0.45);
-          animation:sos-expand 2.5s ease-out infinite;
-          pointer-events:none;
-        "></div>
-        <!-- Shadow disc -->
-        <div style="
-          position:absolute; bottom:-6px; left:50%;
-          transform:translateX(-50%);
-          width:${size*0.7}px; height:8px;
-          border-radius:50%;
-          background:rgba(0,0,0,0.2);
-          filter:blur(4px);
-        "></div>
-        <!-- Main dot -->
-        <div style="
-          width:${size}px; height:${size}px;
-          border-radius:50%;
-          background: linear-gradient(135deg, #1565C0, #2979FF);
-          border: 3px solid white;
-          display:flex; align-items:center; justify-content:center;
-          font-family:'Sora',sans-serif;
-          font-weight:800;
-          color:white;
-          font-size:${large ? 17 : 14}px;
-          box-shadow: 0 4px 16px rgba(41,121,255,0.55);
-          position:relative;
-          z-index:2;
-        ">Yo</div>
-      </div>`,
-    iconSize: [size, size],
-    iconAnchor: [size/2, size/2]
-  });
-}
-
-function updateMarkerPosition() {
-  if (!miniMap && !fullMap) return;
-  const pos = [sensorData.lat, sensorData.lng];
-
-  // Update mini map
-  if (miniMap && studentMarker) {
-    studentMarker.setLatLng(pos);
-    if (accuracyCircle) {
-      accuracyCircle.setLatLng(pos);
-      accuracyCircle.setRadius(sensorData.accuracy);
+      // Oculta el spinner cuando el mapa cargó
+      miniIframe.onload = () => {
+        if (miniLoading) miniLoading.classList.add('hidden');
+      };
+    } else {
+      // Para actualizaciones frecuentes — solo recarga si se movió significativamente
+      const [prevLat, prevLng] = extractCoordsFromUrl(currentSrc);
+      const distMoved = Math.abs(lat - prevLat) + Math.abs(lng - prevLng);
+      if (distMoved > 0.0003) { // ~33 metros
+        miniIframe.src = newUrl;
+      }
     }
-    miniMap.panTo(pos, { animate: true, duration: 1 });
   }
 
-  // Update full map
-  if (fullMap && studentMarkerFull) {
-    studentMarkerFull.setLatLng(pos);
-    studentMarkerFull.setPopupContent(`<b>📍 Estás aquí</b><br><span style="font-size:11px;opacity:0.7;">${pos[0].toFixed(5)}, ${pos[1].toFixed(5)}</span>`);
-    if (accuracyCircleFull) {
-      accuracyCircleFull.setLatLng(pos);
-      accuracyCircleFull.setRadius(sensorData.accuracy);
-    }
-    fullMap.panTo(pos, { animate: true, duration: 1 });
-  }
-
-  updateMapAccInfo();
-  updateFullMapCoords();
+  // ─── Actualiza info panel ─────────────
+  updateMapAccInfo(accuracy);
+  updateFullMapCoords(lat, lng, accuracy);
 }
 
-function updateMapAccInfo() {
+function extractCoordsFromUrl(url) {
+  // Extrae lat,lng del src actual para comparar
+  try {
+    const match = url.match(/q=([-\d.]+),([-\d.]+)/);
+    if (match) return [parseFloat(match[1]), parseFloat(match[2])];
+  } catch(e) {}
+  return [0, 0];
+}
+
+function updateMapAccInfo(accuracy) {
   const el = document.getElementById('map-acc-info');
-  if (el) el.textContent = `📍 Precisión: ±${sensorData.accuracy}m`;
+  if (el) el.textContent = `📍 Precisión: ±${accuracy || sensorData.accuracy}m`;
 }
 
-function updateFullMapCoords() {
+function updateFullMapCoords(lat, lng, accuracy) {
   const latEl = document.getElementById('full-lat');
   const lngEl = document.getElementById('full-lng');
   const accEl = document.getElementById('full-acc');
-  if (latEl) latEl.textContent = sensorData.lat.toFixed(5);
-  if (lngEl) lngEl.textContent = sensorData.lng.toFixed(5);
-  if (accEl) accEl.textContent = `±${sensorData.accuracy}m`;
+  if (latEl) latEl.textContent = (lat || sensorData.lat).toFixed(5);
+  if (lngEl) lngEl.textContent = (lng || sensorData.lng).toFixed(5);
+  if (accEl) accEl.textContent = `±${accuracy || sensorData.accuracy}m`;
 }
 
 function openFullMap() {
   prevFullMapScreen = currentScreen;
+
+  // Carga el mapa completo con zoom más alto
+  const fullIframe = document.getElementById('gmap-full');
+  if (fullIframe) {
+    fullIframe.src = buildMapUrl(sensorData.lat, sensorData.lng, 18);
+  }
+
   showScreen('fullmap');
-  setTimeout(() => {
-    if (!fullMap) {
-      initFullMap();
-    } else {
-      fullMap.invalidateSize();
-      recenterFullMap();
-    }
-  }, 150);
+  updateFullMapCoords(sensorData.lat, sensorData.lng, sensorData.accuracy);
 }
 
 function closeFullMap() {
@@ -2075,10 +2015,19 @@ function closeFullMap() {
 }
 
 function recenterFullMap() {
-  if (fullMap) {
-    fullMap.setView([sensorData.lat, sensorData.lng], 17, { animate: true });
+  // Recarga iframe con coords actuales
+  const fullIframe = document.getElementById('gmap-full');
+  if (fullIframe) {
+    fullIframe.src = buildMapUrl(sensorData.lat, sensorData.lng, 18);
+    showSToast('📍 Centrado en tu posición actual');
   }
 }
+
+// Llamada desde GPS updates — reemplaza updateMarkerPosition()
+function updateMarkerPosition() {
+  updateGoogleMaps(sensorData.lat, sensorData.lng, sensorData.accuracy);
+}
+
 
 
 function startSensors() {
