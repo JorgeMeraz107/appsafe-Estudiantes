@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0A1628">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>SchoolSafe — Alumno</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+
+/* ═══════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════ */
+:root {
+  --navy:      #0A1628;
+  --navy-mid:  #112240;
+  --safe:      #0FBF7A;
+  --safe-bg:   rgba(15,191,122,0.12);
+  --warn:      #F5A623;
+  --warn-bg:   rgba(245,166,35,0.12);
+  --danger:    #E8364A;
+  --danger-bg: rgba(232,54,74,0.12);
+  --blue:      #2979FF;
+  --surface:   #FFFFFF;
+  --bg:        #F0F4FA;
+  --border:    #E2E8F2;
+  --text-1:    #0A1628;
+  --text-2:    #4A5568;
+  --text-3:    #94A3B8;
+  --radius:    20px;
+  --shadow:    0 4px 24px rgba(10,22,40,0.1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--navy);
+  color: white;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ═══════════════════════════════════════
+   SHELL
+═══════════════════════════════════════ */
+#shell {
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════ */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: opacity 0.3s cubic-bezier(.4,0,.2,1), transform 0.3s cubic-bezier(.4,0,.2,1);
+}
+.screen.active { opacity: 1; pointer-events: all; transform: translateY(0); }
+
+/* ═══════════════════════════════════════
+   SCREEN: VINCULAR (onboarding)
+═══════════════════════════════════════ */
+#screen-link {
+  background: var(--navy);
+  justify-content: center;
+  align-items: center;
+  padding: 32px 28px;
+  gap: 0;
+}
+
+.link-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% -5%, rgba(41,121,255,0.3) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 0% 80%, rgba(15,191,122,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.link-logo {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, var(--blue), #0D47A1);
+  border-radius: 22px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 32px rgba(41,121,255,0.4);
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.link-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: white;
+  text-align: center;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.link-sub {
+  font-size: 15px;
+  color: rgba(255,255,255,0.45);
+  text-align: center;
+  margin-bottom: 48px;
+  line-height: 1.5;
+  position: relative;
+}
+
+.code-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.code-inputs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.code-digit {
+  width: 48px; height: 60px;
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: white;
+  font-family: 'Sora', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  caret-color: var(--blue);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.code-digit:focus {
+  border-color: var(--blue);
+  background: rgba(41,121,255,0.1);
+  box-shadow: 0 0 0 4px rgba(41,121,255,0.15);
+}
+
+.code-digit.filled {
+  border-color: var(--safe);
+  background: rgba(15,191,122,0.1);
+}
+
+.btn-link {
+  width: 100%;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  font-family: 'Sora', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 4px 24px rgba(41,121,255,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-link:active { transform: scale(0.97); box-shadow: 0 2px 12px rgba(41,121,255,0.3); }
+
+.demo-hint {
+  margin-top: 20px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.25);
+  text-align: center;
+  position: relative;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN: PRINCIPAL DEL ALUMNO
+═══════════════════════════════════════ */
+#screen-home {
+  background: var(--navy);
+}
+
+/* Animated mesh background */
+.home-bg {
+  position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+}
+.home-bg::before {
+  content: '';
+  position: absolute;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(41,121,255,0.18) 0%, transparent 70%);
+  top: -80px; right: -60px;
+  animation: float-blob 8s ease-in-out infinite;
+}
+.home-bg::after {
+  content: '';
+  position: absolute;
+  width: 250px; height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(15,191,122,0.12) 0%, transparent 70%);
+  bottom: 100px; left: -80px;
+  animation: float-blob 10s ease-in-out infinite reverse;
+}
+
+@keyframes float-blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, -15px) scale(1.05); }
+  66% { transform: translate(-10px, 10px) scale(0.95); }
+}
+
+/* Top bar */
+.student-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 12px;
+  position: relative;
+  z-index: 10;
+}
+
+.student-greeting {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+}
+
+.student-name-top {
+  font-family: 'Sora', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.status-badge-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-badge-safe { background: rgba(15,191,122,0.15); color: var(--safe); border: 1px solid rgba(15,191,122,0.3); }
+.status-badge-sos  { background: rgba(232,54,74,0.2);  color: var(--danger); border: 1px solid rgba(232,54,74,0.4); animation: badge-pulse 1s infinite; }
+
+@keyframes badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232,54,74,0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(232,54,74,0); }
+}
+
+/* Main content scroll */
+.home-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 0 24px;
+  position: relative;
+  z-index: 10;
+}
+.home-scroll::-webkit-scrollbar { display: none; }
+
+/* ─── SOS BUTTON ─── */
+.sos-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 24px 28px;
+}
+
+.sos-outer {
+  width: 200px; height: 200px;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Rotating dashed ring */
+.sos-ring-rotate {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 2px dashed rgba(232,54,74,0.3);
+  animation: spin-slow 12s linear infinite;
+}
+
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+
+/* Pulse rings when SOS active */
+.sos-pulse {
+  position: absolute; inset: 8px;
+  border-radius: 50%;
+  border: 2px solid rgba(232,54,74,0.25);
+  opacity: 0;
+  animation: sos-expand 3s ease-out infinite;
+}
+.sos-pulse:nth-child(2) { animation-delay: 1s; }
+.sos-pulse:nth-child(3) { animation-delay: 2s; }
+
+@keyframes sos-expand {
+  0%   { transform: scale(0.85); opacity: 0.6; }
+  100% { transform: scale(1.3);  opacity: 0; }
+}
+
+/* The actual SOS button */
+.sos-btn {
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #C62535, #E8364A, #FF4D5E);
+  border: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  cursor: pointer;
+  box-shadow: 0 8px 40px rgba(232,54,74,0.55), 0 0 0 0 rgba(232,54,74,0.3);
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+  z-index: 2;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sos-btn:active {
+  transform: scale(0.94);
+  box-shadow: 0 4px 20px rgba(232,54,74,0.4);
+}
+
+.sos-btn.holding {
+  animation: sos-hold-pulse 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes sos-hold-pulse {
+  from { box-shadow: 0 8px 40px rgba(232,54,74,0.5), 0 0 0 0 rgba(232,54,74,0.4); transform: scale(1); }
+  to   { box-shadow: 0 12px 60px rgba(232,54,74,0.8), 0 0 0 20px rgba(232,54,74,0); transform: scale(1.04); }
+}
+
+.sos-btn-text {
+  font-family: 'Sora', sans-serif;
+  font-size: 36px;
+  font-weight: 800;
+  color: white;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.sos-btn-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* Hold progress ring */
+.sos-progress-ring {
+  position: absolute; inset: -6px;
+  border-radius: 50%;
+  background: conic-gradient(var(--danger) 0deg, transparent 0deg);
+  transition: background 0.1s;
+  z-index: 1;
+}
+
+/* SOS instruction text */
+.sos-hint {
+  font-size: 13px;
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.sos-hint strong {
+  color: rgba(255,255,255,0.6);
+  font-weight: 600;
+}
+
+/* ─── SENSOR CARDS ─── */
+.sensor-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 20px;
+  margin-top: 8px;
+}
+
+.s-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+
+.s-card::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 0 0 18px 18px;
+}
+
+.s-card.safe::before   { background: linear-gradient(90deg, var(--safe), transparent); }
+.s-card.warn::before   { background: linear-gradient(90deg, var(--warn), transparent); }
+.s-card.danger::before { background: linear-gradient(90deg, var(--danger), transparent); }
+.s-card.info::before   { background: linear-gradient(90deg, var(--blue), transparent); }
+
+.s-icon { font-size: 20px; margin-bottom: 2px; }
+
+.s-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.35);
+}
+
+.s-value {
+  font-family: 'Sora', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: white;
+  line-height: 1;
+}
+
+.s-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.3;
+}
+
+.live-dot-small {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--safe);
+  animation: live-pulse 1.5s infinite;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+@keyframes live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(15,191,122,0.5); }
+  50% { box-shadow: 0 0 0 5px rgba(15,191,122,0); }
+}
+
+/* Accel mini bars */
+.mini-bars {
+  display: flex;
+  gap: 2px;
+  align-items: flex-end;
+  height: 24px;
+  margin-top: 2px;
+}
+
+.mini-bar {
+  flex: 1;
+  border-radius: 2px;
+  background: var(--blue);
+  opacity: 0.8;
+  transition: height 0.35s ease;
+}
+
+/* ─── QUICK ACTIONS ─── */
+.quick-actions-row {
+  display: flex;
+  gap: 10px;
+  padding: 16px 20px 8px;
+}
+
+.q-btn {
+  flex: 1;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 14px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  transition: background 0.15s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.q-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
+.q-btn .q-icon { font-size: 22px; }
+
+/* ─── STATUS BAR (connection) ─── */
+.conn-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN: SOS ACTIVO
+═══════════════════════════════════════ */
+#screen-sos {
+  background: #1A0508;
+}
+
+.sos-active-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 70% at 50% 40%, rgba(232,54,74,0.35) 0%, transparent 70%);
+  animation: sos-bg-breathe 1.5s ease-in-out infinite;
+}
+
+@keyframes sos-bg-breathe {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.sos-active-header {
+  padding: 24px 24px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative; z-index: 10;
+}
+
+.sos-active-badge {
+  background: var(--danger);
+  color: white;
+  font-family: 'Sora', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  padding: 6px 14px;
+  border-radius: 100px;
+  animation: blink-badge 1s infinite;
+}
+
+@keyframes blink-badge {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.sos-active-timer {
+  font-family: 'Sora', sans-serif;
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  margin-left: auto;
+}
+
+.sos-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  position: relative; z-index: 10;
+  flex: 1;
+}
+
+.sos-big-ring {
+  width: 140px; height: 140px;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.sos-big-pulse {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(232,54,74,0.5);
+  animation: big-ring-expand 2s ease-out infinite;
+}
+.sos-big-pulse:nth-child(2) { animation-delay: 0.6s; }
+.sos-big-pulse:nth-child(3) { animation-delay: 1.2s; }
+
+@keyframes big-ring-expand {
+  0%   { transform: scale(0.8); opacity: 0.8; }
+  100% { transform: scale(2);   opacity: 0; }
+}
+
+.sos-big-icon {
+  width: 100px; height: 100px;
+  background: linear-gradient(145deg, #C62535, #E8364A);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 44px;
+  box-shadow: 0 0 40px rgba(232,54,74,0.6);
+  position: relative; z-index: 1;
+}
+
+.sos-active-msg {
+  font-family: 'Sora', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: white;
+  text-align: center;
+}
+
+.sos-active-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.45);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.sos-location-chip {
+  background: rgba(232,54,74,0.15);
+  border: 1px solid rgba(232,54,74,0.3);
+  border-radius: 100px;
+  padding: 8px 18px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  display: flex; align-items: center; gap: 8px;
+}
+
+.sos-cancel-btn {
+  width: calc(100% - 48px);
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.08);
+  border: 1.5px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.6);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  margin: 0 24px 32px;
+  position: relative; z-index: 10;
+}
+
+.sos-cancel-btn:active { background: rgba(255,255,255,0.15); }
+
+/* ═══════════════════════════════════════
+   SCREEN: HISTORIAL
+═══════════════════════════════════════ */
+#screen-history {
+  background: var(--navy);
+}
+
+.history-topbar {
+  padding: 24px 24px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.history-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  flex: 1;
+}
+
+.back-icon-btn {
+  width: 38px; height: 38px;
+  background: rgba(255,255,255,0.07);
+  border: none;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.history-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 0 32px;
+}
+.history-scroll::-webkit-scrollbar { display: none; }
+
+.h-item {
+  display: flex;
+  gap: 14px;
+  padding: 14px 24px;
+  position: relative;
+}
+
+.h-item::before {
+  content: '';
+  position: absolute;
+  left: 42px; top: 42px; bottom: -14px;
+  width: 1px;
+  background: rgba(255,255,255,0.06);
+}
+.h-item:last-child::before { display: none; }
+
+.h-dot {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+}
+
+.h-content { flex: 1; }
+
+.h-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+
+.h-meta {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  margin-top: 3px;
+}
+
+/* ═══════════════════════════════════════
+   SCREEN: PERFIL
+═══════════════════════════════════════ */
+#screen-profile {
+  background: var(--navy);
+  overflow-y: auto;
+}
+#screen-profile::-webkit-scrollbar { display: none; }
+
+.profile-hero {
+  background: linear-gradient(160deg, #112240, #0A1628);
+  padding: 32px 24px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.profile-avatar {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), #0D47A1);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Sora', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: white;
+  box-shadow: 0 8px 32px rgba(41,121,255,0.4);
+  border: 3px solid rgba(255,255,255,0.1);
+}
+
+.profile-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: white;
+}
+
+.profile-code {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 100px;
+  padding: 6px 18px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+}
+
+.profile-section {
+  padding: 20px 24px 0;
+}
+
+.profile-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.25);
+  margin-bottom: 12px;
+}
+
+.p-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.p-item:active { background: rgba(255,255,255,0.08); }
+
+.p-item-icon {
+  width: 38px; height: 38px;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.p-item-text { flex: 1; }
+.p-item-label { font-size: 14px; font-weight: 600; color: white; }
+.p-item-sub { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+/* Toggle dark for student app */
+.p-toggle {
+  width: 44px; height: 24px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.12);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.p-toggle.on { background: var(--safe); }
+.p-toggle-thumb {
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  transition: transform 0.2s cubic-bezier(.4,0,.2,1);
+}
+.p-toggle.on .p-toggle-thumb { transform: translateX(20px); }
+
+/* ═══════════════════════════════════════
+   BOTTOM NAV (alumno)
+═══════════════════════════════════════ */
+#student-nav {
+  height: 68px;
+  background: rgba(17,34,64,0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.s-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+.s-nav-item:active { opacity: 0.6; }
+
+.s-nav-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.3);
+  transition: color 0.2s;
+}
+
+.s-nav-item.active .s-nav-label { color: var(--safe); }
+.s-nav-item.active svg path,
+.s-nav-item.active svg circle { fill: var(--safe) !important; }
+
+/* ═══════════════════════════════════════
+   COUNTDOWN OVERLAY
+═══════════════════════════════════════ */
+.countdown-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10,6,8,0.85);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.countdown-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.countdown-number {
+  font-family: 'Sora', sans-serif;
+  font-size: 100px;
+  font-weight: 800;
+  color: var(--danger);
+  line-height: 1;
+  animation: countdown-pop 0.3s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes countdown-pop {
+  from { transform: scale(1.3); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.countdown-msg {
+  font-size: 16px;
+  color: rgba(255,255,255,0.6);
+  text-align: center;
+  padding: 0 40px;
+  line-height: 1.5;
+}
+
+.countdown-cancel {
+  padding: 14px 40px;
+  border-radius: 100px;
+  background: rgba(255,255,255,0.1);
+  border: 1.5px solid rgba(255,255,255,0.2);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+.s-toast {
+  position: fixed;
+  bottom: 88px;
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+  max-width: calc(100% - 48px);
+  text-align: center;
+}
+
+.s-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Anim helpers */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim { animation: fade-up 0.4s both; }
+.anim-1 { animation-delay: 0.05s; }
+.anim-2 { animation-delay: 0.12s; }
+.anim-3 { animation-delay: 0.19s; }
+.anim-4 { animation-delay: 0.26s; }
+.anim-5 { animation-delay: 0.33s; }
+
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="s-toast" id="s-toast"></div>
+
+<!-- COUNTDOWN OVERLAY -->
+<div class="countdown-overlay" id="countdown-overlay">
+  <div style="font-size:14px;color:rgba(255,255,255,0.5);font-weight:600;letter-spacing:0.1em;">ENVIANDO SOS EN...</div>
+  <div class="countdown-number" id="countdown-num">3</div>
+  <div class="countdown-msg">Mantén presionado para confirmar.<br>Suelta para cancelar.</div>
+  <button class="countdown-cancel" onclick="cancelSOS()">Cancelar</button>
+</div>
+
+<div id="shell">
+
+  <!-- ══════════════════════════════
+       SCREEN: VINCULAR
+  ══════════════════════════════ -->
+  <div class="screen active" id="screen-link">
+    <div class="link-bg"></div>
+
+    <div class="link-logo">
+      <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+        <path d="M19 3L5 9V19C5 27.3 11.2 35.1 19 37C26.8 35.1 33 27.3 33 19V9L19 3Z" fill="white" fill-opacity="0.9"/>
+        <path d="M13 19L17 23L25 15" stroke="#2979FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <div class="link-title">SchoolSafe</div>
+    <div class="link-sub">Ingresa el código de 6 dígitos<br>que te dio tu padre/madre</div>
+
+    <div class="code-label">Código de vinculación</div>
+
+    <div class="code-inputs" id="code-inputs">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d0">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d1">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d2">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d3">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d4">
+      <input class="code-digit" maxlength="1" type="text" inputmode="numeric" pattern="[0-9]" id="d5">
+    </div>
+
+    <button class="btn-link" id="btn-vincular" onclick="vincular()">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M10 2L3 5V10C3 14.4 6.08 18.4 10 20C13.92 18.4 17 14.4 17 10V5L10 2Z" fill="white" opacity="0.9"/>
+        <path d="M7 10L9 12L13 8" stroke="#2979FF" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      Vincularme
+    </button>
+
+    <div class="demo-hint">💡 Demo: escribe cualquier 6 dígitos para entrar</div>
+  </div>
+
+  <!-- ══════════════════════════════
+       SCREEN: HOME ALUMNO
+  ══════════════════════════════ -->
+  <div class="screen" id="screen-home">
+    <div class="home-bg"></div>
+
+    <!-- Top bar -->
+    <div class="student-topbar">
+      <div>
+        <div class="student-greeting">Hola,</div>
+        <div class="student-name-top" id="student-display-name">Carlos García</div>
+      </div>
+      <div class="status-badge-top status-badge-safe" id="status-badge-top">
+        <div style="width:7px;height:7px;border-radius:50%;background:currentColor;animation:live-pulse 1.5s infinite;"></div>
+        Seguro
+      </div>
+    </div>
+
+    <div class="home-scroll">
+
+      <!-- SOS Button -->
+      <div class="sos-section anim anim-1">
+        <div class="sos-outer">
+          <div class="sos-ring-rotate"></div>
+          <div class="sos-pulse"></div>
+          <div class="sos-pulse"></div>
+          <div class="sos-pulse"></div>
+          <div class="sos-progress-ring" id="sos-progress-ring"></div>
+          <button class="sos-btn" id="sos-btn"
+            onmousedown="startHoldSOS()"  ontouchstart="startHoldSOS()"
+            onmouseup="releaseHoldSOS()"  ontouchend="releaseHoldSOS()"
+            onmouseleave="releaseHoldSOS()">
+            <div class="sos-btn-text">SOS</div>
+            <div class="sos-btn-sub">Mantén 3 seg</div>
+          </button>
+        </div>
+        <div class="sos-hint">
+          <strong>Mantén presionado 3 segundos</strong> para<br>enviar alerta de emergencia a tus padres
+        </div>
+      </div>
+
+      <!-- Sensor cards -->
+      <div class="sensor-row">
+
+        <!-- GPS -->
+        <div class="s-card info anim anim-2">
+          <div class="s-icon">📍</div>
+          <div class="s-label">Ubicación GPS</div>
+          <div class="s-value" id="s-gps-acc">±6m</div>
+          <div class="s-sub" id="s-gps-status">
+            <span class="live-dot-small"></span>En vivo
+          </div>
+          <div class="s-sub" id="s-gps-coords" style="margin-top:2px;font-size:10px;">14.0817, -87.2068</div>
+        </div>
+
+        <!-- Movimiento -->
+        <div class="s-card safe anim anim-2">
+          <div class="s-icon">📳</div>
+          <div class="s-label">Movimiento</div>
+          <div class="mini-bars" id="s-accel-bars">
+            <div class="mini-bar" style="height:50%;"></div>
+            <div class="mini-bar" style="height:70%;"></div>
+            <div class="mini-bar" style="height:40%;"></div>
+            <div class="mini-bar" style="height:85%;"></div>
+            <div class="mini-bar" style="height:55%;"></div>
+            <div class="mini-bar" style="height:65%;"></div>
+          </div>
+          <div class="s-sub" id="s-motion-state" style="margin-top:4px;">Caminando</div>
+        </div>
+
+        <!-- Batería -->
+        <div class="s-card safe anim anim-3">
+          <div class="s-icon">🔋</div>
+          <div class="s-label">Batería</div>
+          <div class="s-value" id="s-battery-val" style="color:var(--safe);">82%</div>
+          <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:6px;overflow:hidden;">
+            <div id="s-battery-bar" style="height:100%;width:82%;background:var(--safe);border-radius:2px;transition:width 0.5s,background 0.5s;"></div>
+          </div>
+          <div class="s-sub" id="s-charging" style="margin-top:4px;">Cargando ⚡</div>
+        </div>
+
+        <!-- Velocidad -->
+        <div class="s-card info anim anim-3">
+          <div class="s-icon">🚶</div>
+          <div class="s-label">Velocidad</div>
+          <div class="s-value" id="s-speed">1.8</div>
+          <div class="s-sub">km/h</div>
+          <div class="s-sub" id="s-speed-state" style="margin-top:2px;">A pie</div>
+        </div>
+
+      </div>
+
+      <!-- Quick actions -->
+      <div class="quick-actions-row anim anim-4">
+        <button class="q-btn" onclick="goToHistory()">
+          <div class="q-icon">📋</div>
+          Historial
+        </button>
+        <button class="q-btn" onclick="showProfile()">
+          <div class="q-icon">👤</div>
+          Mi Perfil
+        </button>
+        <button class="q-btn" onclick="sendManualCheckin()">
+          <div class="q-icon">✅</div>
+          Check-in
+        </button>
+        <button class="q-btn" onclick="callParent()">
+          <div class="q-icon">📞</div>
+          Llamar
+        </button>
+      </div>
+
+      <!-- Connection status -->
+      <div class="conn-bar anim anim-5">
+        <span class="live-dot-small"></span>
+        <span id="conn-status">Conectado · Enviando datos cada 5s</span>
+      </div>
+
+    </div>
+
+    <!-- Nav bar -->
+    <nav id="student-nav">
+      <button class="s-nav-item active" data-tab="home" onclick="studentTab('home', this)">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M11 2L3 8V20H9V14H13V20H19V8L11 2Z" fill="rgba(255,255,255,0.3)"/>
+        </svg>
+        <span class="s-nav-label">Inicio</span>
+      </button>
+      <button class="s-nav-item" data-tab="history" onclick="goToHistory()">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="11" r="8" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/>
+          <path d="M11 7V11L14 13" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="s-nav-label">Historial</span>
+      </button>
+      <button class="s-nav-item" data-tab="profile" onclick="showProfile()">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="8" r="4" fill="rgba(255,255,255,0.3)"/>
+          <path d="M3 20C3 16.13 6.13 13 10 13H12C15.87 13 19 16.13 19 20" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        </svg>
+        <span class="s-nav-label">Perfil</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ══════════════════════════════
+       SCREEN: SOS ACTIVO
+  ══════════════════════════════ -->
+  <div class="screen" id="screen-sos">
+    <div class="sos-active-bg"></div>
+
+    <div class="sos-active-header">
+      <div class="sos-active-badge">🆘 SOS ACTIVO</div>
+      <div class="sos-active-timer" id="sos-timer">00:00</div>
+    </div>
+
+    <div class="sos-center">
+      <div class="sos-big-ring">
+        <div class="sos-big-pulse"></div>
+        <div class="sos-big-pulse"></div>
+        <div class="sos-big-pulse"></div>
+        <div class="sos-big-icon">🆘</div>
+      </div>
+
+      <div class="sos-active-msg">¡Alerta enviada!</div>
+      <div class="sos-active-sub">
+        Tus padres han sido notificados.<br>
+        Mantente en un lugar seguro.
+      </div>
+
+      <div class="sos-location-chip">
+        <span>📍</span>
+        <span id="sos-location-text">Obteniendo ubicación...</span>
+      </div>
+
+      <!-- Mini sensor recap -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+        <div style="background:rgba(232,54,74,0.15);border:1px solid rgba(232,54,74,0.25);border-radius:100px;padding:6px 14px;font-size:12px;color:rgba(255,255,255,0.6);">
+          🔋 <span id="sos-battery">82%</span> batería
+        </div>
+        <div style="background:rgba(232,54,74,0.15);border:1px solid rgba(232,54,74,0.25);border-radius:100px;padding:6px 14px;font-size:12px;color:rgba(255,255,255,0.6);">
+          📳 <span id="sos-motion">Movimiento detectado</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="sos-cancel-btn" onclick="confirmCancelSOS()">
+      Estoy a salvo — Cancelar SOS
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════
+       SCREEN: HISTORIAL
+  ══════════════════════════════ -->
+  <div class="screen" id="screen-history">
+    <div class="history-topbar">
+      <button class="back-icon-btn" onclick="studentTabBack()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4L7 9L11 14" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="history-title">Mi Historial</div>
+    </div>
+
+    <div class="history-scroll">
+      <div class="h-item">
+        <div class="h-dot" style="background:rgba(232,54,74,0.2);">🆘</div>
+        <div class="h-content">
+          <div class="h-title">SOS enviado</div>
+          <div class="h-meta">Hoy 08:47 AM · Av. Circunvalación, SPS</div>
+        </div>
+      </div>
+      <div class="h-item">
+        <div class="h-dot" style="background:rgba(15,191,122,0.2);">✅</div>
+        <div class="h-content">
+          <div class="h-title">Check-in · Llegué al colegio</div>
+          <div class="h-meta">Hoy 07:52 AM · Colegio Lincoln</div>
+        </div>
+      </div>
+      <div class="h-item">
+        <div class="h-dot" style="background:rgba(255,255,255,0.1);">🏠</div>
+        <div class="h-content">
+          <div class="h-title">Salí de casa</div>
+          <div class="h-meta">Hoy 07:40 AM · Col. Palmira</div>
+        </div>
+      </div>
+      <div class="h-item">
+        <div class="h-dot" style="background:rgba(15,191,122,0.2);">✅</div>
+        <div class="h-content">
+          <div class="h-title">Check-in · Llegué a casa</div>
+          <div class="h-meta">Ayer 3:42 PM · Col. Palmira</div>
+        </div>
+      </div>
+      <div class="h-item">
+        <div class="h-dot" style="background:rgba(245,166,35,0.2);">⚠️</div>
+        <div class="h-content">
+          <div class="h-title">Batería baja detectada</div>
+          <div class="h-meta">Ayer 2:15 PM · 8% de batería</div>
+        </div>
+      </div>
+      <div class="h-item">
+        <div class="h-dot" style="background:rgba(15,191,122,0.2);">✅</div>
+        <div class="h-content">
+          <div class="h-title">Check-in · Llegué al colegio</div>
+          <div class="h-meta">Ayer 7:55 AM · Colegio Lincoln</div>
+        </div>
+      </div>
+      <div class="h-item">
+        <div class="h-dot" style="background:rgba(255,255,255,0.1);">🏠</div>
+        <div class="h-content">
+          <div class="h-title">Salí de casa</div>
+          <div class="h-meta">Ayer 7:38 AM · Col. Palmira</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       SCREEN: PERFIL
+  ══════════════════════════════ -->
+  <div class="screen" id="screen-profile">
+    <div class="profile-hero">
+      <button class="back-icon-btn" style="position:absolute;top:20px;left:20px;" onclick="studentTabBack()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 4L7 9L11 14" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="profile-avatar" id="profile-avatar-letter">C</div>
+      <div class="profile-name" id="profile-name-display">Carlos García</div>
+      <div class="profile-code">Código: 847291</div>
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <div style="background:rgba(15,191,122,0.15);border:1px solid rgba(15,191,122,0.3);border-radius:100px;padding:5px 14px;font-size:12px;color:var(--safe);">
+          ✅ Vinculado
+        </div>
+        <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:100px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,0.5);">
+          9no Grado
+        </div>
+      </div>
+    </div>
+
+    <div style="padding-bottom:32px;">
+      <div class="profile-section">
+        <div class="profile-section-title">Dispositivo</div>
+        <div class="p-item" onclick="">
+          <div class="p-item-icon" style="background:rgba(15,191,122,0.1);">📍</div>
+          <div class="p-item-text">
+            <div class="p-item-label">Permiso de Ubicación</div>
+            <div class="p-item-sub" id="gps-perm-status">Verificando...</div>
+          </div>
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--safe);flex-shrink:0;" id="gps-perm-dot"></div>
+        </div>
+        <div class="p-item" onclick="">
+          <div class="p-item-icon" style="background:rgba(41,121,255,0.1);">📳</div>
+          <div class="p-item-text">
+            <div class="p-item-label">Sensores de Movimiento</div>
+            <div class="p-item-sub" id="motion-perm-status">Verificando...</div>
+          </div>
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--safe);flex-shrink:0;" id="motion-perm-dot"></div>
+        </div>
+        <div class="p-item" onclick="">
+          <div class="p-item-icon" style="background:rgba(245,166,35,0.1);">🔋</div>
+          <div class="p-item-text">
+            <div class="p-item-label">Estado de Batería</div>
+            <div class="p-item-sub" id="battery-perm-status">Verificando...</div>
+          </div>
+          <div style="width:10px;height:10px;border-radius:50%;background:var(--safe);flex-shrink:0;" id="battery-perm-dot"></div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">Preferencias</div>
+        <div class="p-item">
+          <div class="p-item-icon" style="background:rgba(255,255,255,0.06);">🔔</div>
+          <div class="p-item-text">
+            <div class="p-item-label">Vibración al enviar SOS</div>
+          </div>
+          <div class="p-toggle on" onclick="this.classList.toggle('on')"><div class="p-toggle-thumb"></div></div>
+        </div>
+        <div class="p-item">
+          <div class="p-item-icon" style="background:rgba(255,255,255,0.06);">📡</div>
+          <div class="p-item-text">
+            <div class="p-item-label">Envío en background</div>
+            <div class="p-item-sub">Sigue enviando con app cerrada</div>
+          </div>
+          <div class="p-toggle on" onclick="this.classList.toggle('on')"><div class="p-toggle-thumb"></div></div>
+        </div>
+        <div class="p-item">
+          <div class="p-item-icon" style="background:rgba(255,255,255,0.06);">⚡</div>
+          <div class="p-item-text">
+            <div class="p-item-label">Modo ahorro de batería</div>
+            <div class="p-item-sub">Envía cada 30s en vez de 5s</div>
+          </div>
+          <div class="p-toggle" onclick="this.classList.toggle('on')"><div class="p-toggle-thumb"></div></div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <div class="profile-section-title">Cuenta</div>
+        <div class="p-item" onclick="desvincular()">
+          <div class="p-item-icon" style="background:rgba(232,54,74,0.1);">🔓</div>
+          <div class="p-item-text">
+            <div class="p-item-label" style="color:var(--danger);">Desvincularme</div>
+            <div class="p-item-sub">Eliminar conexión con mis padres</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end shell -->
+
+<script>
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let currentScreen = 'link';
+let prevTab = 'home';
+let sosActive = false;
+let sosTimerInterval = null;
+let sosSeconds = 0;
+let holdInterval = null;
+let holdProgress = 0;
+let sensorInterval = null;
+let dataInterval = null;
+
+// Simulated student data — will come from real sensors
+let sensorData = {
+  lat: 14.0817, lng: -87.2068,
+  accuracy: 6,
+  battery: 82,
+  charging: true,
+  speed: 1.8,
+  motion: 'Caminando',
+  accel: { x: 0.2, y: 9.8, z: 0.1 }
+};
+
+/* ═══════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  currentScreen = id;
+}
+
+function studentTab(tab, btn) {
+  document.querySelectorAll('.s-nav-item').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  prevTab = tab;
+  showScreen(tab === 'home' ? 'home' : tab);
+}
+
+function studentTabBack() {
+  showScreen('home');
+  document.querySelectorAll('.s-nav-item').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === 'home');
+  });
+}
+
+function goToHistory() {
+  document.querySelectorAll('.s-nav-item').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === 'history');
+  });
+  showScreen('history');
+}
+
+function showProfile() {
+  document.querySelectorAll('.s-nav-item').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === 'profile');
+  });
+  checkPermissions();
+  showScreen('profile');
+}
+
+/* ═══════════════════════════════════════
+   ONBOARDING — VINCULAR
+═══════════════════════════════════════ */
+(function setupCodeInputs() {
+  const digits = document.querySelectorAll('.code-digit');
+  digits.forEach((input, i) => {
+    input.addEventListener('input', e => {
+      // Only allow numbers
+      input.value = input.value.replace(/[^0-9]/g, '');
+      if (input.value.length === 1) {
+        input.classList.add('filled');
+        if (i < digits.length - 1) digits[i + 1].focus();
+      } else {
+        input.classList.remove('filled');
+      }
+      checkCodeComplete();
+    });
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !input.value && i > 0) {
+        digits[i - 1].value = '';
+        digits[i - 1].classList.remove('filled');
+        digits[i - 1].focus();
+      }
+    });
+
+    // Handle paste
+    input.addEventListener('paste', e => {
+      e.preventDefault();
+      const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g,'').slice(0,6);
+      pasted.split('').forEach((ch, j) => {
+        if (digits[j]) { digits[j].value = ch; digits[j].classList.add('filled'); }
+      });
+      if (digits[Math.min(pasted.length, 5)]) digits[Math.min(pasted.length, 5)].focus();
+      checkCodeComplete();
+    });
+  });
+})();
+
+function checkCodeComplete() {
+  const digits = document.querySelectorAll('.code-digit');
+  const full = [...digits].every(d => d.value.length === 1);
+  const btn = document.getElementById('btn-vincular');
+  btn.style.opacity = full ? '1' : '0.5';
+}
+
+function vincular() {
+  const digits = document.querySelectorAll('.code-digit');
+  const code = [...digits].map(d => d.value).join('');
+  if (code.length < 6) { showSToast('⚠️ Ingresa los 6 dígitos'); return; }
+
+  const btn = document.getElementById('btn-vincular');
+  btn.textContent = '⏳ Verificando...';
+  btn.style.opacity = '0.7';
+
+  // Simulate API verification
+  setTimeout(() => {
+    // In production: verify code with Firestore
+    // For demo: any 6-digit code works
+    showScreen('home');
+    startSensors();
+    startDataTransmission();
+    showSToast('✅ ¡Vinculado con María García!');
+  }, 1800);
+}
+
+/* ═══════════════════════════════════════
+   SOS HOLD MECHANISM
+═══════════════════════════════════════ */
+let holdTimer = null;
+let countdownVal = 3;
+let countdownTimer = null;
+
+function startHoldSOS() {
+  if (sosActive) return;
+  const btn = document.getElementById('sos-btn');
+  btn.classList.add('holding');
+  countdownVal = 3;
+  showCountdown();
+}
+
+function showCountdown() {
+  const overlay = document.getElementById('countdown-overlay');
+  const numEl = document.getElementById('countdown-num');
+  overlay.classList.add('show');
+  numEl.textContent = countdownVal;
+
+  countdownTimer = setInterval(() => {
+    countdownVal--;
+    numEl.style.animation = 'none';
+    void numEl.offsetWidth;
+    numEl.style.animation = 'countdown-pop 0.3s cubic-bezier(.4,0,.2,1)';
+    numEl.textContent = countdownVal;
+
+    if (countdownVal <= 0) {
+      clearInterval(countdownTimer);
+      overlay.classList.remove('show');
+      triggerSOS();
+    }
+  }, 1000);
+}
+
+function releaseHoldSOS() {
+  if (countdownVal > 0 && !sosActive) {
+    cancelSOS();
+  }
+}
+
+function cancelSOS() {
+  clearInterval(countdownTimer);
+  countdownVal = 3;
+  const overlay = document.getElementById('countdown-overlay');
+  overlay.classList.remove('show');
+  const btn = document.getElementById('sos-btn');
+  if (btn) btn.classList.remove('holding');
+}
+
+function triggerSOS() {
+  sosActive = true;
+  sosSeconds = 0;
+
+  // Vibrate device
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]);
+
+  // Update status badge
+  const badge = document.getElementById('status-badge-top');
+  badge.className = 'status-badge-top status-badge-sos';
+  badge.innerHTML = `<div style="width:7px;height:7px;border-radius:50%;background:currentColor;animation:badge-pulse 1s infinite;"></div>SOS Activo`;
+
+  // Set location in SOS screen
+  const locText = document.getElementById('sos-location-text');
+  locText.textContent = `${sensorData.lat.toFixed(4)}, ${sensorData.lng.toFixed(4)}`;
+
+  // Set battery in SOS screen
+  document.getElementById('sos-battery').textContent = sensorData.battery + '%';
+  document.getElementById('sos-motion').textContent = sensorData.motion;
+
+  showScreen('sos');
+  startSOSTimer();
+
+  // In production: send to Firestore + trigger OneSignal push to parent
+  console.log('SOS triggered — sending to Firestore:', sensorData);
+  showSToast('🆘 SOS enviado a tus padres');
+}
+
+function startSOSTimer() {
+  stopSOSTimer();
+  const timerEl = document.getElementById('sos-timer');
+  sosTimerInterval = setInterval(() => {
+    sosSeconds++;
+    const m = String(Math.floor(sosSeconds/60)).padStart(2,'0');
+    const s = String(sosSeconds % 60).padStart(2,'0');
+    if (timerEl) timerEl.textContent = `${m}:${s}`;
+  }, 1000);
+}
+
+function stopSOSTimer() {
+  if (sosTimerInterval) { clearInterval(sosTimerInterval); sosTimerInterval = null; }
+}
+
+function confirmCancelSOS() {
+  // Confirm dialog via modal-like approach
+  const confirmed = true; // In real app: show confirmation sheet
+  if (confirmed) {
+    sosActive = false;
+    stopSOSTimer();
+
+    const badge = document.getElementById('status-badge-top');
+    badge.className = 'status-badge-top status-badge-safe';
+    badge.innerHTML = `<div style="width:7px;height:7px;border-radius:50%;background:currentColor;animation:live-pulse 1.5s infinite;"></div>Seguro`;
+
+    document.getElementById('sos-btn').classList.remove('holding');
+    showScreen('home');
+    showSToast('✅ SOS cancelado — Estás a salvo');
+
+    // In production: update Firestore status back to "safe"
+  }
+}
+
+/* ═══════════════════════════════════════
+   REAL SENSORS
+═══════════════════════════════════════ */
+function startSensors() {
+  // ── GPS Real ──────────────────────────
+  if ('geolocation' in navigator) {
+    navigator.geolocation.watchPosition(
+      (pos) => {
+        sensorData.lat      = pos.coords.latitude;
+        sensorData.lng      = pos.coords.longitude;
+        sensorData.accuracy = Math.round(pos.coords.accuracy);
+        sensorData.speed    = pos.coords.speed ? +(pos.coords.speed * 3.6).toFixed(1) : 0;
+        updateGPSUI();
+      },
+      (err) => {
+        // GPS not available — simulate
+        simulateGPS();
+        console.warn('GPS error:', err.message);
+      },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+    );
+  } else {
+    simulateGPS();
+  }
+
+  // ── Acelerómetro Real ─────────────────
+  if (window.DeviceMotionEvent) {
+    window.addEventListener('devicemotion', handleMotion);
+  } else {
+    simulateAccel();
+  }
+
+  // ── Batería Real ─────────────────────
+  if ('getBattery' in navigator) {
+    navigator.getBattery().then(battery => {
+      sensorData.battery  = Math.round(battery.level * 100);
+      sensorData.charging = battery.charging;
+      updateBatteryUI();
+
+      battery.addEventListener('levelchange', () => {
+        sensorData.battery = Math.round(battery.level * 100);
+        updateBatteryUI();
+      });
+      battery.addEventListener('chargingchange', () => {
+        sensorData.charging = battery.charging;
+        updateBatteryUI();
+      });
+    }).catch(() => simulateBattery());
+  } else {
+    simulateBattery();
+  }
+
+  // Start sensor UI updates
+  sensorInterval = setInterval(updateSensorUI, 1500);
+}
+
+// ── Real motion handler ───────────────
+function handleMotion(e) {
+  const acc = e.acceleration || e.accelerationIncludingGravity;
+  if (!acc) return;
+  sensorData.accel = { x: acc.x || 0, y: acc.y || 0, z: acc.z || 0 };
+  const magnitude = Math.sqrt(acc.x**2 + acc.y**2 + acc.z**2);
+  sensorData.motion = magnitude < 1 ? 'Quieto' : magnitude < 5 ? 'Caminando' : magnitude < 12 ? 'Corriendo' : 'Impacto';
+
+  // Auto-SOS on heavy impact
+  if (magnitude > 25 && !sosActive) {
+    showSToast('⚡ Impacto fuerte detectado');
+    // In production: trigger SOS automatically
+  }
+  updateAccelUI();
+}
+
+// ── Simulate when sensors unavailable ─
+function simulateGPS() {
+  setInterval(() => {
+    sensorData.lat += (Math.random() - 0.5) * 0.0002;
+    sensorData.lng += (Math.random() - 0.5) * 0.0002;
+    sensorData.accuracy = Math.floor(Math.random() * 10) + 4;
+    updateGPSUI();
+  }, 3000);
+}
+
+function simulateAccel() {
+  const states = ['Quieto', 'Caminando', 'Caminando', 'Corriendo', 'Quieto'];
+  setInterval(() => {
+    sensorData.motion = states[Math.floor(Math.random() * states.length)];
+    sensorData.accel = {
+      x: (Math.random() - 0.5) * 4,
+      y: 9.8 + (Math.random() - 0.5) * 2,
+      z: (Math.random() - 0.5) * 2
+    };
+    updateAccelUI();
+  }, 2000);
+}
+
+function simulateBattery() {
+  sensorData.battery  = Math.floor(Math.random() * 40) + 50;
+  sensorData.charging = Math.random() > 0.5;
+  updateBatteryUI();
+}
+
+// ── UI updates ────────────────────────
+function updateGPSUI() {
+  const acc  = document.getElementById('s-gps-acc');
+  const coord = document.getElementById('s-gps-coords');
+  if (acc)   acc.textContent = `±${sensorData.accuracy}m`;
+  if (coord) coord.textContent = `${sensorData.lat.toFixed(4)}, ${sensorData.lng.toFixed(4)}`;
+}
+
+function updateBatteryUI() {
+  const val     = document.getElementById('s-battery-val');
+  const bar     = document.getElementById('s-battery-bar');
+  const charge  = document.getElementById('s-charging');
+  const b = sensorData.battery;
+  const color = b > 50 ? 'var(--safe)' : b > 20 ? 'var(--warn)' : 'var(--danger)';
+
+  if (val)    { val.textContent = b + '%'; val.style.color = color; }
+  if (bar)    { bar.style.width = b + '%'; bar.style.background = color; }
+  if (charge) charge.textContent = sensorData.charging ? 'Cargando ⚡' : b < 20 ? '⚠️ Batería baja' : 'Sin cargador';
+
+  // Update profile battery status
+  const bpStatus = document.getElementById('battery-perm-status');
+  if (bpStatus) bpStatus.textContent = `${b}% · ${sensorData.charging ? 'Cargando' : 'Desconectado'}`;
+}
+
+function updateAccelUI() {
+  const bars = document.querySelectorAll('#s-accel-bars .mini-bar');
+  const mag  = Math.sqrt(sensorData.accel.x**2 + sensorData.accel.y**2 + sensorData.accel.z**2);
+  bars.forEach(bar => {
+    const h = Math.min(100, Math.max(15, (Math.random() * mag * 6) + 15));
+    bar.style.height = h + '%';
+  });
+
+  const motionEl = document.getElementById('s-motion-state');
+  if (motionEl) motionEl.textContent = sensorData.motion;
+}
+
+function updateSensorUI() {
+  updateGPSUI();
+  updateBatteryUI();
+  updateAccelUI();
+
+  // Speed
+  const speedEl = document.getElementById('s-speed');
+  const speedState = document.getElementById('s-speed-state');
+  if (speedEl)    speedEl.textContent = sensorData.speed.toFixed(1);
+  if (speedState) speedState.textContent = sensorData.speed > 10 ? 'En vehículo 🚗' : sensorData.speed > 4 ? 'Corriendo 🏃' : 'A pie 🚶';
+}
+
+// ── Data transmission to Firestore ────
+function startDataTransmission() {
+  dataInterval = setInterval(() => {
+    const payload = {
+      lat:      sensorData.lat,
+      lng:      sensorData.lng,
+      accuracy: sensorData.accuracy,
+      battery:  sensorData.battery,
+      charging: sensorData.charging,
+      speed:    sensorData.speed,
+      motion:   sensorData.motion,
+      accel:    sensorData.accel,
+      sos:      sosActive,
+      timestamp: new Date().toISOString()
+    };
+
+    // In production: db.collection('ubicaciones').doc('alumno_id').set(payload)
+    console.log('📡 Enviando a Firestore:', payload);
+
+    // Update connection status
+    const connEl = document.getElementById('conn-status');
+    if (connEl) {
+      connEl.textContent = `Conectado · Datos enviados ${new Date().toLocaleTimeString('es-HN', {hour:'2-digit', minute:'2-digit', second:'2-digit'})}`;
+    }
+  }, 5000);
+}
+
+/* ═══════════════════════════════════════
+   QUICK ACTIONS
+═══════════════════════════════════════ */
+function sendManualCheckin() {
+  if (navigator.vibrate) navigator.vibrate(100);
+  showSToast('✅ Check-in enviado a tus padres');
+  // In production: send checkin event to Firestore
+}
+
+function callParent() {
+  showSToast('📞 Llamando a Mamá...');
+  // In production: use phone number from Firestore parent profile
+  // window.location.href = 'tel:+50499998888';
+}
+
+function desvincular() {
+  showSToast('⚠️ Función disponible con cuenta real');
+}
+
+/* ═══════════════════════════════════════
+   PERMISSIONS CHECK
+═══════════════════════════════════════ */
+function checkPermissions() {
+  // GPS
+  const gpsStatus = document.getElementById('gps-perm-status');
+  const gpsDot    = document.getElementById('gps-perm-dot');
+  if ('geolocation' in navigator) {
+    navigator.permissions?.query({ name: 'geolocation' }).then(p => {
+      const ok = p.state === 'granted';
+      if (gpsStatus) gpsStatus.textContent = ok ? 'Activado ✅' : p.state === 'denied' ? 'Denegado ❌ — Actívalo en ajustes' : 'Pendiente de permiso';
+      if (gpsDot)    gpsDot.style.background = ok ? 'var(--safe)' : 'var(--danger)';
+    }).catch(() => {
+      if (gpsStatus) gpsStatus.textContent = 'GPS disponible';
+    });
+  } else {
+    if (gpsStatus) gpsStatus.textContent = 'No disponible en este dispositivo';
+    if (gpsDot)    gpsDot.style.background = 'var(--danger)';
+  }
+
+  // Motion
+  const motionStatus = document.getElementById('motion-perm-status');
+  const motionDot    = document.getElementById('motion-perm-dot');
+  const hasMotion = !!window.DeviceMotionEvent;
+  if (motionStatus) motionStatus.textContent = hasMotion ? 'Acelerómetro disponible ✅' : 'No disponible — Usando simulación';
+  if (motionDot)    motionDot.style.background = hasMotion ? 'var(--safe)' : 'var(--warn)';
+
+  // Battery
+  const battStatus = document.getElementById('battery-perm-status');
+  const battDot    = document.getElementById('battery-perm-dot');
+  if ('getBattery' in navigator) {
+    navigator.getBattery().then(b => {
+      if (battStatus) battStatus.textContent = `${Math.round(b.level*100)}% · ${b.charging ? 'Cargando ⚡' : 'Sin cargador'}`;
+      if (battDot)    battDot.style.background = 'var(--safe)';
+    }).catch(() => {
+      if (battStatus) battStatus.textContent = 'API disponible (simulada)';
+    });
+  } else {
+    if (battStatus) battStatus.textContent = 'No disponible — Usando simulación';
+    if (battDot)    battDot.style.background = 'var(--warn)';
+  }
+}
+
+/* ═══════════════════════════════════════
+   TOAST
+═══════════════════════════════════════ */
+let sToastTimeout = null;
+function showSToast(msg) {
+  const t = document.getElementById('s-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  if (sToastTimeout) clearTimeout(sToastTimeout);
+  sToastTimeout = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  showScreen('link');
+  checkCodeComplete();
+  document.getElementById('btn-vincular').style.opacity = '0.5';
+
+  // Focus first input
+  setTimeout(() => {
+    const first = document.getElementById('d0');
+    if (first) first.focus();
+  }, 400);
+
+  // Request motion permission on iOS 13+
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    document.getElementById('sos-btn').addEventListener('click', () => {
+      DeviceMotionEvent.requestPermission().catch(() => {});
+    }, { once: true });
+  }
+});
+</script>
+</body>
+</html>
