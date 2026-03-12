@@ -12,7 +12,7 @@
 <style>
 
 /* ═══════════════════════════════════════
-   TOKENS
+   TOKENS — MODO OSCURO (default)
 ═══════════════════════════════════════ */
 :root {
   --navy:      #0A1628;
@@ -24,14 +24,53 @@
   --danger:    #E8364A;
   --danger-bg: rgba(232,54,74,0.12);
   --blue:      #2979FF;
-  --surface:   #FFFFFF;
-  --bg:        #F0F4FA;
-  --border:    #E2E8F2;
-  --text-1:    #0A1628;
-  --text-2:    #4A5568;
-  --text-3:    #94A3B8;
+  --bg-app:    #0A1628;
+  --bg-card:   rgba(255,255,255,0.05);
+  --bg-item:   rgba(255,255,255,0.04);
+  --border-c:  rgba(255,255,255,0.08);
+  --text-h:    #FFFFFF;
+  --text-b:    rgba(255,255,255,0.65);
+  --text-s:    rgba(255,255,255,0.35);
+  --topbar-bg: rgba(17,34,64,0.95);
   --radius:    20px;
-  --shadow:    0 4px 24px rgba(10,22,40,0.1);
+}
+
+/* ═══════════════════════════════════════
+   TOKENS — MODO CLARO
+═══════════════════════════════════════ */
+html.light {
+  --navy:      #FFFFFF;
+  --navy-mid:  #F0F4FA;
+  --safe:      #0AAD6C;
+  --safe-bg:   rgba(10,173,108,0.1);
+  --warn:      #E0941A;
+  --warn-bg:   rgba(224,148,26,0.1);
+  --danger:    #D42B3E;
+  --danger-bg: rgba(212,43,62,0.1);
+  --blue:      #1A6FE8;
+  --bg-app:    #F0F4FA;
+  --bg-card:   #FFFFFF;
+  --bg-item:   #FFFFFF;
+  --border-c:  #E2E8F2;
+  --text-h:    #0A1628;
+  --text-b:    #4A5568;
+  --text-s:    #94A3B8;
+  --topbar-bg: rgba(255,255,255,0.95);
+}
+
+/* Transición suave solo en propiedades específicas */
+body, .screen, .s-card, .history-topbar,
+.h-item, .p-item, .profile-hero, .profile-section,
+.student-topbar, .fullmap-topbar, .fullmap-bottom,
+.coord-chip, .map-section, .map-section-header,
+.quick-actions-row, .q-btn, .conn-bar,
+#student-nav, .back-icon-btn, .fullmap-btn,
+.s-nav-item, .history-scroll, .home-scroll {
+  transition:
+    background-color 0.3s cubic-bezier(.4,0,.2,1),
+    border-color     0.3s cubic-bezier(.4,0,.2,1),
+    color            0.25s cubic-bezier(.4,0,.2,1),
+    box-shadow       0.3s cubic-bezier(.4,0,.2,1) !important;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,8 +78,8 @@
 html, body {
   height: 100%;
   font-family: 'DM Sans', sans-serif;
-  background: var(--navy);
-  color: white;
+  background: var(--bg-app);
+  color: var(--text-h);
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
   user-select: none;
@@ -401,8 +440,8 @@ html, body {
 }
 
 .s-card {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--border-c);
   border-radius: 18px;
   padding: 16px;
   display: flex;
@@ -410,7 +449,6 @@ html, body {
   gap: 6px;
   position: relative;
   overflow: hidden;
-  transition: background 0.3s;
 }
 
 .s-card::before {
@@ -433,20 +471,20 @@ html, body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.35);
+  color: var(--text-s);
 }
 
 .s-value {
   font-family: 'Sora', sans-serif;
   font-size: 22px;
   font-weight: 800;
-  color: white;
+  color: var(--text-h);
   line-height: 1;
 }
 
 .s-sub {
   font-size: 11px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-s);
   line-height: 1.3;
 }
 
@@ -491,8 +529,8 @@ html, body {
 
 .q-btn {
   flex: 1;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--border-c);
   border-radius: 16px;
   padding: 14px 8px;
   display: flex;
@@ -502,14 +540,13 @@ html, body {
   cursor: pointer;
   font-size: 11px;
   font-weight: 600;
-  color: rgba(255,255,255,0.6);
+  color: var(--text-b);
   transition: background 0.15s, transform 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
-.q-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
+.q-btn:active { transform: scale(0.95); background: var(--bg-item); }
 .q-btn .q-icon { font-size: 22px; }
 
-/* ─── STATUS BAR (connection) ─── */
 .conn-bar {
   display: flex;
   align-items: center;
@@ -517,7 +554,7 @@ html, body {
   gap: 8px;
   padding: 10px 20px;
   font-size: 12px;
-  color: rgba(255,255,255,0.35);
+  color: var(--text-s);
   font-weight: 500;
 }
 
@@ -659,7 +696,7 @@ html, body {
    SCREEN: HISTORIAL
 ═══════════════════════════════════════ */
 #screen-history {
-  background: var(--navy);
+  background: var(--bg-app);
 }
 
 .history-topbar {
@@ -667,21 +704,22 @@ html, body {
   display: flex;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid var(--border-c);
+  background: var(--bg-app);
 }
 
 .history-title {
   font-family: 'Sora', sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: white;
+  color: var(--text-h);
   flex: 1;
 }
 
 .back-icon-btn {
   width: 38px; height: 38px;
-  background: rgba(255,255,255,0.07);
-  border: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border-c);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
@@ -707,7 +745,7 @@ html, body {
   position: absolute;
   left: 42px; top: 42px; bottom: -14px;
   width: 1px;
-  background: rgba(255,255,255,0.06);
+  background: var(--border-c);
 }
 .h-item:last-child::before { display: none; }
 
@@ -725,12 +763,12 @@ html, body {
 .h-title {
   font-size: 14px;
   font-weight: 600;
-  color: white;
+  color: var(--text-h);
 }
 
 .h-meta {
   font-size: 12px;
-  color: rgba(255,255,255,0.35);
+  color: var(--text-s);
   margin-top: 3px;
 }
 
@@ -738,13 +776,13 @@ html, body {
    SCREEN: PERFIL
 ═══════════════════════════════════════ */
 #screen-profile {
-  background: var(--navy);
+  background: var(--bg-app);
   overflow-y: auto;
 }
 #screen-profile::-webkit-scrollbar { display: none; }
 
 .profile-hero {
-  background: linear-gradient(160deg, #112240, #0A1628);
+  background: linear-gradient(160deg, var(--navy-mid), var(--bg-app));
   padding: 32px 24px 40px;
   display: flex;
   flex-direction: column;
@@ -803,15 +841,14 @@ html, body {
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--bg-item);
+  border: 1px solid var(--border-c);
   border-radius: 14px;
   margin-bottom: 10px;
   cursor: pointer;
-  transition: background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
-.p-item:active { background: rgba(255,255,255,0.08); }
+.p-item:active { opacity: 0.75; }
 
 .p-item-icon {
   width: 38px; height: 38px;
@@ -822,8 +859,24 @@ html, body {
 }
 
 .p-item-text { flex: 1; }
-.p-item-label { font-size: 14px; font-weight: 600; color: white; }
-.p-item-sub { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+.p-item-label { font-size: 14px; font-weight: 600; color: var(--text-h); }
+.p-item-sub { font-size: 12px; color: var(--text-s); margin-top: 2px; }
+
+.profile-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-s);
+  margin-bottom: 12px;
+}
+
+.profile-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-h);
+}
 
 /* Toggle dark for student app */
 .p-toggle {
@@ -852,10 +905,10 @@ html, body {
 ═══════════════════════════════════════ */
 #student-nav {
   height: 68px;
-  background: rgba(17,34,64,0.95);
+  background: var(--topbar-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,0.07);
+  border-top: 1px solid var(--border-c);
   display: flex;
   position: absolute;
   bottom: 0; left: 0; right: 0;
@@ -881,7 +934,7 @@ html, body {
 .s-nav-label {
   font-size: 10px;
   font-weight: 600;
-  color: rgba(255,255,255,0.3);
+  color: var(--text-s);
   transition: color 0.2s;
 }
 
@@ -1476,58 +1529,10 @@ html, body {
         </svg>
       </button>
       <div class="history-title">Mi Historial</div>
+      <button onclick="clearHistory()" style="background:none;border:none;font-size:12px;color:var(--text-s);cursor:pointer;padding:6px 10px;font-family:'DM Sans',sans-serif;">Limpiar</button>
     </div>
-
-    <div class="history-scroll">
-      <div class="h-item">
-        <div class="h-dot" style="background:rgba(232,54,74,0.2);">🆘</div>
-        <div class="h-content">
-          <div class="h-title">SOS enviado</div>
-          <div class="h-meta">Hoy 08:47 AM · Av. Circunvalación, SPS</div>
-        </div>
-      </div>
-      <div class="h-item">
-        <div class="h-dot" style="background:rgba(15,191,122,0.2);">✅</div>
-        <div class="h-content">
-          <div class="h-title">Check-in · Llegué al colegio</div>
-          <div class="h-meta">Hoy 07:52 AM · Colegio Lincoln</div>
-        </div>
-      </div>
-      <div class="h-item">
-        <div class="h-dot" style="background:rgba(255,255,255,0.1);">🏠</div>
-        <div class="h-content">
-          <div class="h-title">Salí de casa</div>
-          <div class="h-meta">Hoy 07:40 AM · Col. Palmira</div>
-        </div>
-      </div>
-      <div class="h-item">
-        <div class="h-dot" style="background:rgba(15,191,122,0.2);">✅</div>
-        <div class="h-content">
-          <div class="h-title">Check-in · Llegué a casa</div>
-          <div class="h-meta">Ayer 3:42 PM · Col. Palmira</div>
-        </div>
-      </div>
-      <div class="h-item">
-        <div class="h-dot" style="background:rgba(245,166,35,0.2);">⚠️</div>
-        <div class="h-content">
-          <div class="h-title">Batería baja detectada</div>
-          <div class="h-meta">Ayer 2:15 PM · 8% de batería</div>
-        </div>
-      </div>
-      <div class="h-item">
-        <div class="h-dot" style="background:rgba(15,191,122,0.2);">✅</div>
-        <div class="h-content">
-          <div class="h-title">Check-in · Llegué al colegio</div>
-          <div class="h-meta">Ayer 7:55 AM · Colegio Lincoln</div>
-        </div>
-      </div>
-      <div class="h-item">
-        <div class="h-dot" style="background:rgba(255,255,255,0.1);">🏠</div>
-        <div class="h-content">
-          <div class="h-title">Salí de casa</div>
-          <div class="h-meta">Ayer 7:38 AM · Col. Palmira</div>
-        </div>
-      </div>
+    <div class="history-scroll" id="history-list">
+      <!-- Generado dinámicamente por JS -->
     </div>
   </div>
 
@@ -1585,6 +1590,14 @@ html, body {
 
       <div class="profile-section">
         <div class="profile-section-title">Preferencias</div>
+        <div class="p-item">
+          <div class="p-item-icon" style="background:rgba(255,255,255,0.06);">🌙</div>
+          <div class="p-item-text">
+            <div class="p-item-label">Modo oscuro</div>
+            <div class="p-item-sub" id="theme-label">Oscuro activado</div>
+          </div>
+          <div class="p-toggle on" id="theme-toggle" onclick="toggleTheme()"><div class="p-toggle-thumb"></div></div>
+        </div>
         <div class="p-item">
           <div class="p-item-icon" style="background:rgba(255,255,255,0.06);">🔔</div>
           <div class="p-item-text">
@@ -1733,6 +1746,7 @@ function goToHistory() {
   document.querySelectorAll('.s-nav-item').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === 'history');
   });
+  renderHistory();
   showScreen('history');
 }
 
@@ -1891,6 +1905,7 @@ function triggerSOS() {
   // In production: send to Firestore + trigger OneSignal push to parent
   console.log('SOS triggered — sending to Firestore:', sensorData);
   showSToast('🆘 SOS enviado a tus padres');
+  addHistoryEvent('sos', 'SOS enviado');
 }
 
 function startSOSTimer() {
@@ -1922,7 +1937,7 @@ function confirmCancelSOS() {
     document.getElementById('sos-btn').classList.remove('holding');
     showScreen('home');
     showSToast('✅ SOS cancelado — Estás a salvo');
-
+    addHistoryEvent('safe', 'SOS cancelado — Estás a salvo');
     // In production: update Firestore status back to "safe"
   }
 }
@@ -2057,6 +2072,7 @@ function startSensors() {
       // Primera vez que llegan coords reales → carga el mapa
       if (wasNull) {
         loadMiniMap();
+        addHistoryEvent('info', 'GPS conectado y ubicación activa');
       } else {
         updateMarkerPosition();
       }
@@ -2226,6 +2242,13 @@ function updateBatteryUI() {
   // Update profile battery status
   const bpStatus = document.getElementById('battery-perm-status');
   if (bpStatus) bpStatus.textContent = `${b}% · ${sensorData.charging ? 'Cargando' : 'Desconectado'}`;
+
+  // Registrar batería baja en historial (solo una vez por umbral)
+  if (b <= 15 && !updateBatteryUI._warnedLow) {
+    updateBatteryUI._warnedLow = true;
+    addHistoryEvent('warn', `Batería baja detectada — ${b}%`);
+  }
+  if (b > 20) updateBatteryUI._warnedLow = false; // reset cuando sube
 }
 
 function updateAccelUI() {
@@ -2285,7 +2308,7 @@ function startDataTransmission() {
 function sendManualCheckin() {
   if (navigator.vibrate) navigator.vibrate(100);
   showSToast('✅ Check-in enviado a tus padres');
-  // In production: send checkin event to Firestore
+  addHistoryEvent('checkin', 'Check-in manual enviado');
 }
 
 function callParent() {
@@ -2356,18 +2379,179 @@ function showSToast(msg) {
 /* ═══════════════════════════════════════
    INIT
 ═══════════════════════════════════════ */
+/* ═══════════════════════════════════════
+   HISTORIAL — localStorage
+   Cada evento se guarda con tipo, título,
+   coordenadas, batería y timestamp real
+═══════════════════════════════════════ */
+const HISTORY_KEY = 'ss_history_v1';
+const MAX_EVENTS  = 80; // máximo eventos guardados
+
+function getHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch { return []; }
+}
+
+function saveHistory(events) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(events));
+  } catch {}
+}
+
+// Agrega un evento al historial
+function addHistoryEvent(type, title, extra = {}) {
+  const events = getHistory();
+  const event = {
+    id:        Date.now(),
+    type,      // 'sos' | 'checkin' | 'safe' | 'warn' | 'info'
+    title,
+    lat:       sensorData.lat,
+    lng:       sensorData.lng,
+    battery:   sensorData.battery,
+    motion:    sensorData.motion,
+    timestamp: Date.now(),
+    ...extra
+  };
+  events.unshift(event); // más reciente primero
+  if (events.length > MAX_EVENTS) events.splice(MAX_EVENTS);
+  saveHistory(events);
+  renderHistory();
+}
+
+// Formatea el tiempo relativo: "Hoy 08:47 AM", "Ayer 3:12 PM", "Lun 7:55 AM"
+function formatEventTime(ts) {
+  const d     = new Date(ts);
+  const now   = new Date();
+  const days  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const hh    = d.getHours();
+  const mm    = String(d.getMinutes()).padStart(2,'0');
+  const ampm  = hh >= 12 ? 'PM' : 'AM';
+  const h12   = hh % 12 || 12;
+  const timeStr = `${h12}:${mm} ${ampm}`;
+
+  const todayStart = new Date(now); todayStart.setHours(0,0,0,0);
+  const yestStart  = new Date(todayStart); yestStart.setDate(todayStart.getDate()-1);
+
+  if (d >= todayStart)  return `Hoy ${timeStr}`;
+  if (d >= yestStart)   return `Ayer ${timeStr}`;
+  return `${days[d.getDay()]} ${timeStr}`;
+}
+
+// Construye la línea de meta bajo el título
+function buildMeta(event) {
+  const parts = [];
+  parts.push(formatEventTime(event.timestamp));
+  if (event.lat && event.lng) {
+    parts.push(`${event.lat.toFixed(4)}, ${event.lng.toFixed(4)}`);
+  }
+  if (event.battery) parts.push(`🔋${event.battery}%`);
+  return parts.join(' · ');
+}
+
+const TYPE_CONFIG = {
+  sos:     { emoji: '🆘', bg: 'rgba(232,54,74,0.18)'  },
+  checkin: { emoji: '✅', bg: 'rgba(15,191,122,0.18)' },
+  safe:    { emoji: '🏠', bg: 'rgba(15,191,122,0.12)' },
+  warn:    { emoji: '⚠️', bg: 'rgba(245,166,35,0.18)' },
+  info:    { emoji: 'ℹ️', bg: 'rgba(41,121,255,0.15)' },
+};
+
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  if (!list) return;
+  const events = getHistory();
+
+  if (events.length === 0) {
+    list.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                  gap:12px;padding:60px 24px;text-align:center;">
+        <div style="font-size:40px;opacity:0.4;">📋</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text-b);">Sin eventos aún</div>
+        <div style="font-size:13px;color:var(--text-s);max-width:240px;line-height:1.5;">
+          Los check-ins, alertas SOS y eventos de batería aparecerán aquí
+        </div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = events.map((ev, i) => {
+    const cfg = TYPE_CONFIG[ev.type] || TYPE_CONFIG.info;
+    return `
+      <div class="h-item" style="${i === events.length-1 ? '--last:1' : ''}">
+        <div class="h-dot" style="background:${cfg.bg};font-size:13px;">${cfg.emoji}</div>
+        <div class="h-content">
+          <div class="h-title">${ev.title}</div>
+          <div class="h-meta">${buildMeta(ev)}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function clearHistory() {
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+  showSToast('🗑️ Historial borrado');
+}
+
+/* ═══════════════════════════════════════
+   TEMA — Modo claro / oscuro
+   Se guarda en localStorage,
+   transición suave sin parpadeo
+═══════════════════════════════════════ */
+function initTheme() {
+  const saved = localStorage.getItem('ss_theme') || 'dark';
+  applyTheme(saved, false); // false = sin animación al inicio
+}
+
+function applyTheme(theme, animate = true) {
+  const html = document.documentElement;
+  if (!animate) html.style.transition = 'none';
+
+  if (theme === 'light') {
+    html.classList.add('light');
+  } else {
+    html.classList.remove('light');
+  }
+
+  localStorage.setItem('ss_theme', theme);
+
+  // Sincroniza el toggle en perfil
+  const toggle = document.getElementById('theme-toggle');
+  const label  = document.getElementById('theme-label');
+  if (toggle) toggle.classList.toggle('on', theme === 'dark');
+  if (label)  label.textContent = theme === 'dark' ? 'Oscuro activado' : 'Claro activado';
+
+  // theme-color del navegador
+  document.querySelector('meta[name="theme-color"]')
+    ?.setAttribute('content', theme === 'dark' ? '#0A1628' : '#F0F4FA');
+
+  if (!animate) {
+    requestAnimationFrame(() => { html.style.transition = ''; });
+  }
+}
+
+function toggleTheme() {
+  const isDark = !document.documentElement.classList.contains('light');
+  applyTheme(isDark ? 'light' : 'dark', true);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   showScreen('link');
   checkCodeComplete();
   document.getElementById('btn-vincular').style.opacity = '0.5';
 
-  // Focus first input
+  // Aplica tema guardado (sin transición para evitar flash)
+  initTheme();
+
+  // Renderiza historial al abrir la pantalla
+  renderHistory();
+
   setTimeout(() => {
     const first = document.getElementById('d0');
     if (first) first.focus();
   }, 400);
 
-  // Request motion permission on iOS 13+
   if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
     document.getElementById('sos-btn').addEventListener('click', () => {
       DeviceMotionEvent.requestPermission().catch(() => {});
