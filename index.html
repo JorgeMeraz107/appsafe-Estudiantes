@@ -736,40 +736,139 @@ html, body {
 .h-item {
   display: flex;
   gap: 14px;
-  padding: 14px 24px;
+  padding: 10px 20px;
   position: relative;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .h-item::before {
   content: '';
   position: absolute;
-  left: 42px; top: 42px; bottom: -14px;
-  width: 1px;
+  left: 38px; top: 48px; bottom: -10px;
+  width: 1.5px;
   background: var(--border-c);
 }
 .h-item:last-child::before { display: none; }
 
 .h-dot {
-  width: 18px; height: 18px;
+  width: 36px; height: 36px;
   border-radius: 50%;
   flex-shrink: 0;
-  margin-top: 2px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 9px;
+  font-size: 16px;
+  position: relative;
+  z-index: 1;
 }
 
-.h-content { flex: 1; }
+.h-body { flex: 1; min-width: 0; }
+
+.h-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0 4px;
+}
 
 .h-title {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-h);
+  line-height: 1.3;
+  flex: 1;
 }
 
-.h-meta {
-  font-size: 12px;
+.h-time {
+  font-size: 11px;
   color: var(--text-s);
+  white-space: nowrap;
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.h-summary {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.h-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-c);
+  border-radius: 100px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-b);
+}
+
+/* Expandable detail panel */
+.h-detail {
+  display: none;
+  margin: 4px 0 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-c);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.h-item.expanded .h-detail { display: block; }
+
+.h-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border-c);
+}
+
+.h-detail-cell {
+  background: var(--bg-card);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.h-detail-cell.full {
+  grid-column: 1 / -1;
+}
+
+.h-dc-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-s);
+}
+
+.h-dc-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+  word-break: break-all;
+}
+
+.h-expand-arrow {
+  font-size: 10px;
+  color: var(--text-s);
+  transition: transform 0.25s;
   margin-top: 3px;
+}
+.h-item.expanded .h-expand-arrow { transform: rotate(180deg); }
+
+/* Day separator */
+.h-day-sep {
+  padding: 16px 20px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-s);
 }
 
 /* ═══════════════════════════════════════
@@ -1820,6 +1919,7 @@ function vincular() {
     showScreen('home');
     startSensors();
     startDataTransmission();
+    startMovementMonitor();
     showSToast('✅ ¡Vinculado con María García!');
   }, 1800);
 }
@@ -2072,7 +2172,16 @@ function startSensors() {
       // Primera vez que llegan coords reales → carga el mapa
       if (wasNull) {
         loadMiniMap();
-        addHistoryEvent('info', 'GPS conectado y ubicación activa');
+        // Geocodifica y registra con nombre real del lugar
+        reverseGeocode(sensorData.lat, sensorData.lng).then(place => {
+          const title = place
+            ? `GPS activo · ${place}`
+            : 'GPS conectado y ubicación activa';
+          addHistoryEvent('gps', title);
+          lastKnownPlace = place;
+          lastKnownLat   = sensorData.lat;
+          lastKnownLng   = sensorData.lng;
+        });
       } else {
         updateMarkerPosition();
       }
@@ -2083,17 +2192,18 @@ function startSensors() {
       const gpsEl  = document.getElementById('s-gps-acc');
       const coordEl = document.getElementById('s-gps-coords');
       if (err.code === 1) {
-        // PERMISSION_DENIED
         if (gpsEl)   gpsEl.textContent  = 'Permiso denegado';
         if (coordEl) coordEl.textContent = 'Activa la ubicación en ajustes';
         showSToast('⚠️ Activa la ubicación en Ajustes del celular');
-        // Muestra mapa con aviso en lugar de coords falsas
         showMapPermissionDenied();
+        addHistoryEvent('offline', 'Permiso de ubicación denegado');
       } else {
-        // Timeout o no disponible
         if (gpsEl)   gpsEl.textContent  = 'Sin señal GPS';
         if (coordEl) coordEl.textContent = 'Buscando señal...';
         showSToast('📡 Buscando señal GPS...');
+        if (sensorData.lat !== null) {
+          addHistoryEvent('gps', 'Señal GPS perdida temporalmente');
+        }
       }
     };
 
@@ -2129,8 +2239,17 @@ function startSensors() {
       sensorData.battery  = Math.round(battery.level * 100);
       sensorData.charging = battery.charging;
       updateBatteryUI();
-      battery.addEventListener('levelchange',  () => { sensorData.battery  = Math.round(battery.level * 100); updateBatteryUI(); });
-      battery.addEventListener('chargingchange',() => { sensorData.charging = battery.charging; updateBatteryUI(); });
+      battery.addEventListener('levelchange',  () => {
+        sensorData.battery  = Math.round(battery.level * 100);
+        updateBatteryUI();
+      });
+      battery.addEventListener('chargingchange',() => {
+        sensorData.charging = battery.charging;
+        updateBatteryUI();
+        addHistoryEvent('charging',
+          battery.charging ? 'Cargador conectado ⚡' : 'Cargador desconectado'
+        );
+      });
     }).catch(() => simulateBattery());
   } else {
     simulateBattery();
@@ -2178,6 +2297,7 @@ function handleMotion(e) {
   // Auto-SOS on heavy impact
   if (magnitude > 25 && !sosActive) {
     showSToast('⚡ Impacto fuerte detectado');
+    addHistoryEvent('impact', `Impacto fuerte detectado — ${magnitude.toFixed(1)} m/s²`);
     // In production: trigger SOS automatically
   }
   updateAccelUI();
@@ -2384,79 +2504,342 @@ function showSToast(msg) {
    Cada evento se guarda con tipo, título,
    coordenadas, batería y timestamp real
 ═══════════════════════════════════════ */
+/* ═══════════════════════════════════════
+   HISTORIAL COMPLETO — localStorage
+   Guarda TODOS los sensores en cada evento
+   Los items son expandibles al tocarlos
+═══════════════════════════════════════ */
 const HISTORY_KEY = 'ss_history_v1';
-const MAX_EVENTS  = 80; // máximo eventos guardados
+const MAX_EVENTS  = 150;
 
 function getHistory() {
-  try {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-  } catch { return []; }
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
+  catch { return []; }
 }
 
 function saveHistory(events) {
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(events));
-  } catch {}
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(events)); }
+  catch(e) { console.warn('localStorage lleno:', e); }
 }
 
-// Agrega un evento al historial
-function addHistoryEvent(type, title, extra = {}) {
-  const events = getHistory();
-  const event = {
-    id:        Date.now(),
-    type,      // 'sos' | 'checkin' | 'safe' | 'warn' | 'info'
-    title,
+// Captura snapshot completo de todos los sensores en el momento del evento
+/* ═══════════════════════════════════════
+   GEOCODIFICACIÓN INVERSA
+   Convierte coordenadas → nombre de lugar
+   Usa Nominatim (OpenStreetMap) — gratis,
+   sin API key, funciona en Honduras
+═══════════════════════════════════════ */
+
+// Cache para no repetir llamadas con las mismas coords
+const geoCache = {};
+// Última ubicación conocida para detectar movimientos
+let lastKnownPlace = null;
+let lastKnownLat   = null;
+let lastKnownLng   = null;
+
+async function reverseGeocode(lat, lng) {
+  if (lat === null || lng === null) return null;
+
+  // Redondea a 4 decimales para cache (~11m de precisión)
+  const key = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+  if (geoCache[key]) return geoCache[key];
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=es&addressdetails=1`;
+    const res  = await fetch(url, {
+      headers: { 'Accept-Language': 'es' }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+
+    // Construye nombre descriptivo en español
+    const a    = data.address || {};
+    const name = buildPlaceName(a, data.display_name);
+    geoCache[key] = name;
+    return name;
+  } catch {
+    return null; // Sin internet o error — no bloquea nada
+  }
+}
+
+// Construye un nombre natural del lugar
+// Ejemplo: "Colegio Lincoln · Col. Palmira, San Pedro Sula"
+function buildPlaceName(addr, displayName) {
+  const parts = [];
+
+  // Lugar específico (edificio, negocio, escuela)
+  const poi = addr.amenity || addr.building || addr.shop ||
+              addr.leisure || addr.tourism  || addr.office;
+  if (poi) parts.push(poi);
+
+  // Calle
+  const street = addr.road || addr.pedestrian || addr.path;
+  if (street) parts.push(street);
+
+  // Colonia / barrio
+  const hood = addr.neighbourhood || addr.suburb || addr.quarter || addr.residential;
+  if (hood) parts.push(`Col. ${hood}`);
+
+  // Ciudad
+  const city = addr.city || addr.town || addr.village || addr.municipality;
+  if (city) parts.push(city);
+
+  if (parts.length > 0) return parts.join(', ');
+
+  // Fallback: primeras 2 partes del display_name
+  return displayName?.split(',').slice(0,2).join(',').trim() || null;
+}
+
+// Detecta si el alumno se movió significativamente (~100m)
+function detectMovement(lat, lng, placeName) {
+  if (lastKnownLat === null) {
+    lastKnownLat   = lat;
+    lastKnownLng   = lng;
+    lastKnownPlace = placeName;
+    return null; // primera vez, no hay movimiento previo
+  }
+
+  const dist = haversineMeters(lastKnownLat, lastKnownLng, lat, lng);
+
+  if (dist > 100 && placeName && placeName !== lastKnownPlace) {
+    const prev = lastKnownPlace;
+    lastKnownLat   = lat;
+    lastKnownLng   = lng;
+    lastKnownPlace = placeName;
+    return { dist: Math.round(dist), from: prev, to: placeName };
+  }
+  return null;
+}
+
+// Distancia en metros entre dos coords (fórmula Haversine)
+function haversineMeters(lat1, lng1, lat2, lng2) {
+  const R  = 6371000;
+  const dL = (lat2 - lat1) * Math.PI / 180;
+  const dG = (lng2 - lng1) * Math.PI / 180;
+  const a  = Math.sin(dL/2)**2 +
+             Math.cos(lat1 * Math.PI/180) *
+             Math.cos(lat2 * Math.PI/180) *
+             Math.sin(dG/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+/* ── Snapshot de sensores ────────────── */
+function captureSensors(extra = {}) {
+  return {
     lat:       sensorData.lat,
     lng:       sensorData.lng,
+    accuracy:  sensorData.accuracy,
+    speed:     sensorData.speed,
     battery:   sensorData.battery,
+    charging:  sensorData.charging,
     motion:    sensorData.motion,
+    accel_x:   sensorData.accel?.x?.toFixed(2) ?? null,
+    accel_y:   sensorData.accel?.y?.toFixed(2) ?? null,
+    accel_z:   sensorData.accel?.z?.toFixed(2) ?? null,
+    network:   navigator.onLine
+                 ? (navigator.connection?.effectiveType || 'online')
+                 : 'sin conexión',
+    placeName: null,   // se llena async después
     timestamp: Date.now(),
     ...extra
   };
-  events.unshift(event); // más reciente primero
-  if (events.length > MAX_EVENTS) events.splice(MAX_EVENTS);
-  saveHistory(events);
-  renderHistory();
 }
 
-// Formatea el tiempo relativo: "Hoy 08:47 AM", "Ayer 3:12 PM", "Lun 7:55 AM"
+// Agrega evento con geocodificación async —
+// guarda inmediato y actualiza el nombre cuando llega
+async function addHistoryEvent(type, title, extra = {}) {
+  const events = getHistory();
+  const ev = { id: Date.now(), type, title, ...captureSensors(extra) };
+  events.unshift(ev);
+  if (events.length > MAX_EVENTS) events.splice(MAX_EVENTS);
+  saveHistory(events);
+  if (currentScreen === 'history') renderHistory();
+
+  // Geocodifica en background y actualiza el evento
+  if (ev.lat !== null) {
+    const place = await reverseGeocode(ev.lat, ev.lng);
+    if (place) {
+      // Actualiza el evento guardado con el nombre
+      const stored = getHistory();
+      const idx    = stored.findIndex(e => e.id === ev.id);
+      if (idx !== -1) {
+        stored[idx].placeName = place;
+        saveHistory(stored);
+        if (currentScreen === 'history') renderHistory();
+      }
+    }
+  }
+}
+
+// Monitorea movimiento del alumno cada 30s y registra si se movió
+let movementCheckInterval = null;
+function startMovementMonitor() {
+  movementCheckInterval = setInterval(async () => {
+    if (sensorData.lat === null) return;
+    const place = await reverseGeocode(sensorData.lat, sensorData.lng);
+    if (!place) return;
+
+    const mv = detectMovement(sensorData.lat, sensorData.lng, place);
+    if (mv) {
+      const title = mv.from
+        ? `Se movió a ${mv.to}`
+        : `Ubicado en ${mv.to}`;
+      addHistoryEvent('gps', title, { movement_dist: mv.dist });
+    }
+  }, 30000); // cada 30 segundos
+}
+
+
+
+/* ── Formateo de tiempo ─────────────── */
 function formatEventTime(ts) {
-  const d     = new Date(ts);
-  const now   = new Date();
-  const days  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-  const hh    = d.getHours();
-  const mm    = String(d.getMinutes()).padStart(2,'0');
-  const ampm  = hh >= 12 ? 'PM' : 'AM';
-  const h12   = hh % 12 || 12;
-  const timeStr = `${h12}:${mm} ${ampm}`;
+  const d    = new Date(ts);
+  const now  = new Date();
+  const days = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const hh   = d.getHours();
+  const mm   = String(d.getMinutes()).padStart(2,'0');
+  const ss   = String(d.getSeconds()).padStart(2,'0');
+  const ampm = hh >= 12 ? 'PM' : 'AM';
+  const h12  = hh % 12 || 12;
+  const t    = `${h12}:${mm} ${ampm}`;
 
   const todayStart = new Date(now); todayStart.setHours(0,0,0,0);
   const yestStart  = new Date(todayStart); yestStart.setDate(todayStart.getDate()-1);
 
-  if (d >= todayStart)  return `Hoy ${timeStr}`;
-  if (d >= yestStart)   return `Ayer ${timeStr}`;
-  return `${days[d.getDay()]} ${timeStr}`;
+  if (d >= todayStart) return { short: `Hoy ${t}`, full: `Hoy ${t}:${ss}`, day: 'Hoy' };
+  if (d >= yestStart)  return { short: `Ayer ${t}`, full: `Ayer ${t}:${ss}`, day: 'Ayer' };
+  return { short: `${days[d.getDay()]} ${t}`, full: `${d.toLocaleDateString('es-HN')} ${t}:${ss}`, day: days[d.getDay()] };
 }
 
-// Construye la línea de meta bajo el título
-function buildMeta(event) {
-  const parts = [];
-  parts.push(formatEventTime(event.timestamp));
-  if (event.lat && event.lng) {
-    parts.push(`${event.lat.toFixed(4)}, ${event.lng.toFixed(4)}`);
-  }
-  if (event.battery) parts.push(`🔋${event.battery}%`);
-  return parts.join(' · ');
-}
-
-const TYPE_CONFIG = {
-  sos:     { emoji: '🆘', bg: 'rgba(232,54,74,0.18)'  },
-  checkin: { emoji: '✅', bg: 'rgba(15,191,122,0.18)' },
-  safe:    { emoji: '🏠', bg: 'rgba(15,191,122,0.12)' },
-  warn:    { emoji: '⚠️', bg: 'rgba(245,166,35,0.18)' },
-  info:    { emoji: 'ℹ️', bg: 'rgba(41,121,255,0.15)' },
+/* ── Configuración visual por tipo ──── */
+const TYPE_CFG = {
+  sos:      { emoji:'🆘', bg:'rgba(232,54,74,0.18)',   label:'Emergencia'  },
+  safe:     { emoji:'✅', bg:'rgba(15,191,122,0.18)',  label:'A salvo'     },
+  checkin:  { emoji:'📍', bg:'rgba(41,121,255,0.18)',  label:'Check-in'    },
+  warn:     { emoji:'⚠️', bg:'rgba(245,166,35,0.18)', label:'Advertencia' },
+  impact:   { emoji:'💥', bg:'rgba(232,54,74,0.12)',   label:'Impacto'     },
+  battery:  { emoji:'🔋', bg:'rgba(245,166,35,0.12)', label:'Batería'     },
+  charging: { emoji:'⚡', bg:'rgba(15,191,122,0.12)', label:'Carga'       },
+  gps:      { emoji:'🛰️', bg:'rgba(41,121,255,0.12)', label:'GPS'         },
+  offline:  { emoji:'📵', bg:'rgba(148,163,184,0.15)',label:'Sin señal'   },
+  app:      { emoji:'📱', bg:'rgba(255,255,255,0.08)', label:'App'         },
+  info:     { emoji:'ℹ️', bg:'rgba(41,121,255,0.12)', label:'Info'        },
 };
 
+/* ── Chips de resumen rápido ─────────── */
+function buildChips(ev) {
+  const chips = [];
+
+  // Lugar — nombre real si está disponible, coords si no
+  if (ev.placeName) {
+    chips.push(`📍 ${ev.placeName.split(',')[0]}`); // solo primera parte para chip corto
+  } else if (ev.lat) {
+    chips.push(`📍 Obteniendo lugar...`);
+  }
+
+  // Batería
+  if (ev.battery != null) {
+    const icon = ev.battery > 50 ? '🟢' : ev.battery > 20 ? '🟡' : '🔴';
+    chips.push(`${icon} ${ev.battery}%${ev.charging ? ' ⚡' : ''}`);
+  }
+
+  // Movimiento
+  if (ev.motion) chips.push(`🏃 ${ev.motion}`);
+
+  // Velocidad si > 0
+  if (ev.speed > 0) chips.push(`💨 ${ev.speed} km/h`);
+
+  return chips;
+}
+
+/* ── Panel de detalle expandido ─────── */
+function buildDetailGrid(ev) {
+  const rows = [];
+
+  // ── UBICACIÓN ──────────────────────────
+  if (ev.lat) {
+    // Nombre del lugar — destacado y grande
+    rows.push(`
+      <div class="h-detail-cell full" style="background:var(--safe-bg);border-bottom:1px solid var(--border-c);">
+        <div class="h-dc-label">📍 Ubicación</div>
+        <div class="h-dc-value" style="font-size:15px;color:var(--safe);line-height:1.4;">
+          ${ev.placeName || '<span style="color:var(--text-s);font-size:13px;">Resolviendo nombre del lugar...</span>'}
+        </div>
+      </div>`);
+
+    // Coords exactas (secundario)
+    rows.push(`
+      <div class="h-detail-cell">
+        <div class="h-dc-label">🌐 Coordenadas</div>
+        <div class="h-dc-value" style="font-size:11px;">${ev.lat.toFixed(6)}, ${ev.lng.toFixed(6)}</div>
+      </div>
+      <div class="h-detail-cell">
+        <div class="h-dc-label">🎯 Precisión</div>
+        <div class="h-dc-value">±${ev.accuracy ?? '?'}m</div>
+      </div>`);
+
+    rows.push(`
+      <div class="h-detail-cell">
+        <div class="h-dc-label">💨 Velocidad</div>
+        <div class="h-dc-value">${ev.speed ?? 0} km/h</div>
+      </div>
+      <div class="h-detail-cell">
+        <div class="h-dc-label">🏃 Estado</div>
+        <div class="h-dc-value">${ev.motion ?? 'Desconocido'}</div>
+      </div>`);
+
+    // Distancia recorrida si aplica
+    if (ev.movement_dist) {
+      rows.push(`
+        <div class="h-detail-cell full">
+          <div class="h-dc-label">📏 Distancia recorrida</div>
+          <div class="h-dc-value">${ev.movement_dist} metros desde el lugar anterior</div>
+        </div>`);
+    }
+  } else {
+    rows.push(`
+      <div class="h-detail-cell full">
+        <div class="h-dc-label">📍 Ubicación</div>
+        <div class="h-dc-value" style="color:var(--text-s);">Sin ubicación GPS disponible</div>
+      </div>`);
+  }
+
+  // ── BATERÍA ────────────────────────────
+  const battColor = (ev.battery ?? 100) > 50 ? 'var(--safe)' : (ev.battery ?? 100) > 20 ? 'var(--warn)' : 'var(--danger)';
+  rows.push(`
+    <div class="h-detail-cell">
+      <div class="h-dc-label">🔋 Batería</div>
+      <div class="h-dc-value" style="color:${battColor}">${ev.battery ?? '?'}%</div>
+    </div>
+    <div class="h-detail-cell">
+      <div class="h-dc-label">⚡ Cargador</div>
+      <div class="h-dc-value">${ev.charging ? 'Conectado ⚡' : 'Desconectado'}</div>
+    </div>`);
+
+  // ── ACELERÓMETRO ───────────────────────
+  if (ev.accel_x != null) {
+    rows.push(`
+      <div class="h-detail-cell full">
+        <div class="h-dc-label">📳 Acelerómetro (X / Y / Z)</div>
+        <div class="h-dc-value">${ev.accel_x} / ${ev.accel_y} / ${ev.accel_z} m/s²</div>
+      </div>`);
+  }
+
+  // ── RED ───────────────────────────────
+  rows.push(`
+    <div class="h-detail-cell">
+      <div class="h-dc-label">📡 Red</div>
+      <div class="h-dc-value">${ev.network ?? 'Desconocida'}</div>
+    </div>
+    <div class="h-detail-cell">
+      <div class="h-dc-label">🕐 Hora exacta</div>
+      <div class="h-dc-value" style="font-size:12px;">${formatEventTime(ev.timestamp).full}</div>
+    </div>`);
+
+  return rows.join('');
+}
+
+/* ── Renderiza el historial ─────────── */
 function renderHistory() {
   const list = document.getElementById('history-list');
   if (!list) return;
@@ -2464,28 +2847,63 @@ function renderHistory() {
 
   if (events.length === 0) {
     list.innerHTML = `
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
-                  gap:12px;padding:60px 24px;text-align:center;">
-        <div style="font-size:40px;opacity:0.4;">📋</div>
-        <div style="font-size:15px;font-weight:600;color:var(--text-b);">Sin eventos aún</div>
-        <div style="font-size:13px;color:var(--text-s);max-width:240px;line-height:1.5;">
-          Los check-ins, alertas SOS y eventos de batería aparecerán aquí
+      <div style="display:flex;flex-direction:column;align-items:center;
+                  justify-content:center;gap:14px;padding:70px 24px;text-align:center;">
+        <div style="font-size:48px;opacity:0.3;">📋</div>
+        <div style="font-size:16px;font-weight:700;color:var(--text-b);">Sin eventos aún</div>
+        <div style="font-size:13px;color:var(--text-s);max-width:260px;line-height:1.6;">
+          Cada check-in, SOS, cambio de batería y movimiento del celular aparecerá aquí automáticamente
         </div>
       </div>`;
     return;
   }
 
-  list.innerHTML = events.map((ev, i) => {
-    const cfg = TYPE_CONFIG[ev.type] || TYPE_CONFIG.info;
-    return `
-      <div class="h-item" style="${i === events.length-1 ? '--last:1' : ''}">
-        <div class="h-dot" style="background:${cfg.bg};font-size:13px;">${cfg.emoji}</div>
-        <div class="h-content">
-          <div class="h-title">${ev.title}</div>
-          <div class="h-meta">${buildMeta(ev)}</div>
+  // Agrupa por día para separadores
+  let lastDay = null;
+  const html = events.map((ev, i) => {
+    const cfg   = TYPE_CFG[ev.type] || TYPE_CFG.info;
+    const tf    = formatEventTime(ev.timestamp);
+    const chips = buildChips(ev);
+    const grid  = buildDetailGrid(ev);
+
+    let sep = '';
+    if (tf.day !== lastDay) {
+      sep = `<div class="h-day-sep">${tf.day}</div>`;
+      lastDay = tf.day;
+    }
+
+    return `${sep}
+      <div class="h-item" id="hev-${ev.id}" onclick="toggleHistoryItem('hev-${ev.id}')">
+        <div class="h-dot" style="background:${cfg.bg}">${cfg.emoji}</div>
+        <div class="h-body">
+          <div class="h-header">
+            <div class="h-title">${ev.title}</div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+              <div class="h-time">${tf.short.replace(/^(Hoy|Ayer|[A-Za-záéíóúÁÉÍÓÚ]+) /,'')}</div>
+              <div class="h-expand-arrow">▼</div>
+            </div>
+          </div>
+          <div class="h-summary">
+            ${chips.map(c => `<span class="h-chip">${c}</span>`).join('')}
+          </div>
+          <div class="h-detail">
+            <div class="h-detail-grid">${grid}</div>
+          </div>
         </div>
       </div>`;
   }).join('');
+
+  list.innerHTML = html;
+}
+
+function toggleHistoryItem(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const wasOpen = el.classList.contains('expanded');
+  // Cierra todos primero
+  document.querySelectorAll('.h-item.expanded').forEach(e => e.classList.remove('expanded'));
+  // Abre este si estaba cerrado
+  if (!wasOpen) el.classList.add('expanded');
 }
 
 function clearHistory() {
@@ -2546,6 +2964,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Renderiza historial al abrir la pantalla
   renderHistory();
+
+  // Evento: app abierta
+  addHistoryEvent('app', 'App abierta');
+
+  // Evento: cambio de red
+  window.addEventListener('online',  () => {
+    addHistoryEvent('info', 'Conexión restaurada — En línea');
+    showSToast('📶 Conexión restaurada');
+  });
+  window.addEventListener('offline', () => {
+    addHistoryEvent('offline', 'Sin conexión a internet');
+    showSToast('📵 Sin conexión');
+  });
 
   setTimeout(() => {
     const first = document.getElementById('d0');
