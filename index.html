@@ -148,7 +148,7 @@ html, body {
   font-family: 'Sora', sans-serif;
   font-size: 28px;
   font-weight: 800;
-  color: white;
+  color: var(--text-h);
   text-align: center;
   margin-bottom: 8px;
   position: relative;
@@ -156,7 +156,7 @@ html, body {
 
 .link-sub {
   font-size: 15px;
-  color: rgba(255,255,255,0.45);
+  color: var(--text-s);
   text-align: center;
   margin-bottom: 48px;
   line-height: 1.5;
@@ -168,7 +168,7 @@ html, body {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-s);
   margin-bottom: 16px;
   position: relative;
 }
@@ -183,9 +183,9 @@ html, body {
 .code-digit {
   width: 48px; height: 60px;
   border-radius: 14px;
-  border: 2px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.06);
-  color: white;
+  border: 2px solid var(--border-c);
+  background: var(--bg-card);
+  color: var(--text-h);
   font-family: 'Sora', sans-serif;
   font-size: 24px;
   font-weight: 700;
@@ -212,7 +212,7 @@ html, body {
   height: 56px;
   border-radius: 16px;
   background: var(--blue);
-  color: white;
+  color: var(--text-h);
   border: none;
   font-family: 'Sora', sans-serif;
   font-size: 16px;
@@ -230,7 +230,7 @@ html, body {
 .demo-hint {
   margin-top: 20px;
   font-size: 12px;
-  color: rgba(255,255,255,0.25);
+  color: var(--text-s);
   text-align: center;
   position: relative;
 }
@@ -239,7 +239,7 @@ html, body {
    SCREEN: PRINCIPAL DEL ALUMNO
 ═══════════════════════════════════════ */
 #screen-home {
-  background: var(--navy);
+  background: var(--bg-app);
 }
 
 /* Animated mesh background */
@@ -283,14 +283,14 @@ html, body {
 
 .student-greeting {
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-s);
 }
 
 .student-name-top {
   font-family: 'Sora', sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: white;
+  color: var(--text-h);
 }
 
 .status-badge-top {
@@ -396,14 +396,14 @@ html, body {
   font-family: 'Sora', sans-serif;
   font-size: 36px;
   font-weight: 800;
-  color: white;
+  color: var(--text-h);
   letter-spacing: 2px;
   line-height: 1;
 }
 
 .sos-btn-sub {
   font-size: 11px;
-  color: rgba(255,255,255,0.7);
+  color: var(--text-b);
   font-weight: 600;
   letter-spacing: 0.05em;
 }
@@ -420,13 +420,13 @@ html, body {
 /* SOS instruction text */
 .sos-hint {
   font-size: 13px;
-  color: rgba(255,255,255,0.35);
+  color: var(--text-s);
   text-align: center;
   line-height: 1.5;
 }
 
 .sos-hint strong {
-  color: rgba(255,255,255,0.6);
+  color: var(--text-b);
   font-weight: 600;
 }
 
@@ -586,7 +586,7 @@ html, body {
 
 .sos-active-badge {
   background: var(--danger);
-  color: white;
+  color: var(--text-h);
   font-family: 'Sora', sans-serif;
   font-size: 11px;
   font-weight: 800;
@@ -604,7 +604,7 @@ html, body {
 .sos-active-timer {
   font-family: 'Sora', sans-serif;
   font-size: 13px;
-  color: rgba(255,255,255,0.4);
+  color: var(--text-s);
   margin-left: auto;
 }
 
@@ -652,13 +652,13 @@ html, body {
   font-family: 'Sora', sans-serif;
   font-size: 22px;
   font-weight: 800;
-  color: white;
+  color: var(--text-h);
   text-align: center;
 }
 
 .sos-active-sub {
   font-size: 14px;
-  color: rgba(255,255,255,0.45);
+  color: var(--text-s);
   text-align: center;
   line-height: 1.5;
 }
@@ -669,7 +669,7 @@ html, body {
   border-radius: 100px;
   padding: 8px 18px;
   font-size: 13px;
-  color: rgba(255,255,255,0.7);
+  color: var(--text-b);
   display: flex; align-items: center; gap: 8px;
 }
 
@@ -677,9 +677,9 @@ html, body {
   width: calc(100% - 48px);
   height: 56px;
   border-radius: 16px;
-  background: rgba(255,255,255,0.08);
-  border: 1.5px solid rgba(255,255,255,0.15);
-  color: rgba(255,255,255,0.6);
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-c);
+  color: var(--text-b);
   font-family: 'DM Sans', sans-serif;
   font-size: 15px;
   font-weight: 600;
@@ -690,7 +690,7 @@ html, body {
   position: relative; z-index: 10;
 }
 
-.sos-cancel-btn:active { background: rgba(255,255,255,0.15); }
+.sos-cancel-btn:active { background: var(--bg-item); }
 
 /* ═══════════════════════════════════════
    SCREEN: HISTORIAL
@@ -898,25 +898,25 @@ html, body {
   font-family: 'Sora', sans-serif;
   font-size: 32px;
   font-weight: 800;
-  color: white;
+  color: var(--text-h);
   box-shadow: 0 8px 32px rgba(41,121,255,0.4);
-  border: 3px solid rgba(255,255,255,0.1);
+  border: 3px solid var(--border-c);
 }
 
 .profile-name {
   font-family: 'Sora', sans-serif;
   font-size: 22px;
   font-weight: 800;
-  color: white;
+  color: var(--text-h);
 }
 
 .profile-code {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: var(--bg-card);
+  border: 1px solid var(--border-c);
   border-radius: 100px;
   padding: 6px 18px;
   font-size: 13px;
-  color: rgba(255,255,255,0.5);
+  color: var(--text-b);
   font-family: 'Sora', sans-serif;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -931,7 +931,7 @@ html, body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: rgba(255,255,255,0.25);
+  color: var(--text-s);
   margin-bottom: 12px;
 }
 
@@ -1081,7 +1081,7 @@ html, body {
 
 .countdown-msg {
   font-size: 16px;
-  color: rgba(255,255,255,0.6);
+  color: var(--text-b);
   text-align: center;
   padding: 0 40px;
   line-height: 1.5;
@@ -1090,9 +1090,9 @@ html, body {
 .countdown-cancel {
   padding: 14px 40px;
   border-radius: 100px;
-  background: rgba(255,255,255,0.1);
-  border: 1.5px solid rgba(255,255,255,0.2);
-  color: white;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-c);
+  color: var(--text-h);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -1106,10 +1106,10 @@ html, body {
   position: fixed;
   bottom: 88px;
   left: 50%; transform: translateX(-50%) translateY(20px);
-  background: rgba(255,255,255,0.12);
+  background: var(--topbar-bg);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: white;
+  border: 1px solid var(--border-c);
+  color: var(--text-h);
   padding: 12px 20px;
   border-radius: 100px;
   font-size: 13px;
@@ -1136,8 +1136,8 @@ html, body {
   border-radius: 20px;
   overflow: hidden;
   position: relative;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-item);
+  border: 1px solid var(--border-c);
 }
 
 .map-section-header {
@@ -1150,25 +1150,25 @@ html, body {
 .map-section-title {
   font-size: 13px;
   font-weight: 700;
-  color: rgba(255,255,255,0.7);
+  color: var(--text-b);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .map-expand-btn {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--bg-card);
+  border: 1px solid var(--border-c);
   border-radius: 100px;
   padding: 5px 12px;
   font-size: 11px;
   font-weight: 600;
-  color: rgba(255,255,255,0.5);
+  color: var(--text-b);
   cursor: pointer;
   transition: background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
-.map-expand-btn:active { background: rgba(255,255,255,0.15); }
+.map-expand-btn:active { background: var(--bg-item); }
 
 #student-mini-map {
   height: 200px;
@@ -1181,13 +1181,13 @@ html, body {
   position: absolute;
   bottom: 10px;
   left: 10px;
-  background: rgba(10,22,40,0.75);
+  background: var(--topbar-bg);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--border-c);
   border-radius: 100px;
   padding: 5px 12px;
   font-size: 11px;
-  color: rgba(255,255,255,0.7);
+  color: var(--text-b);
   font-weight: 600;
   z-index: 10;
   pointer-events: none;
@@ -1213,7 +1213,7 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: rgba(10,18,32,0.85);
+  background: var(--topbar-bg);
   z-index: 5;
   pointer-events: none;
   transition: opacity 0.4s;
@@ -1221,14 +1221,14 @@ html, body {
 .map-loading.hidden { opacity: 0; }
 .map-spinner {
   width: 28px; height: 28px;
-  border: 3px solid rgba(255,255,255,0.15);
+  border: 3px solid var(--border-c);
   border-top-color: var(--blue);
   border-radius: 50%;
   animation: spin-slow 0.8s linear infinite;
 }
 .map-loading-text {
   font-size: 12px;
-  color: rgba(255,255,255,0.5);
+  color: var(--text-b);
   font-weight: 500;
 }
 
@@ -1254,7 +1254,7 @@ html, body {
   font-family: 'Sora', sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: white;
+  color: var(--text-h);
   flex: 1;
 }
 
@@ -1267,7 +1267,7 @@ html, body {
 .fullmap-bottom {
   background: rgba(17,34,64,0.95);
   backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,0.07);
+  border-top: 1px solid var(--border-c);
   padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
@@ -1283,8 +1283,8 @@ html, body {
 
 .coord-chip {
   flex: 1;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--bg-card);
+  border: 1px solid var(--border-c);
   border-radius: 12px;
   padding: 10px 14px;
   display: flex;
@@ -1297,14 +1297,14 @@ html, body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(255,255,255,0.3);
+  color: var(--text-s);
 }
 
 .coord-value {
   font-family: 'Sora', sans-serif;
   font-size: 14px;
   font-weight: 700;
-  color: white;
+  color: var(--text-h);
 }
 
 .fullmap-actions {
@@ -1328,8 +1328,8 @@ html, body {
   transition: transform 0.15s, opacity 0.15s;
 }
 .fullmap-btn:active { transform: scale(0.96); opacity: 0.85; }
-.fullmap-btn-primary { background: var(--blue); color: white; }
-.fullmap-btn-ghost { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+.fullmap-btn-primary { background: var(--blue); color: var(--text-h); }
+.fullmap-btn-ghost { background: var(--bg-card); border: 1px solid var(--border-c); color: var(--text-b); }
 
 /* Anim helpers */
 @keyframes fade-up {
@@ -1352,7 +1352,7 @@ html, body {
 
 <!-- COUNTDOWN OVERLAY -->
 <div class="countdown-overlay" id="countdown-overlay">
-  <div style="font-size:14px;color:rgba(255,255,255,0.5);font-weight:600;letter-spacing:0.1em;">ENVIANDO SOS EN...</div>
+  <div style="font-size:14px;color: var(--text-b);font-weight:600;letter-spacing:0.1em;">ENVIANDO SOS EN...</div>
   <div class="countdown-number" id="countdown-num">3</div>
   <div class="countdown-msg">Mantén presionado para confirmar.<br>Suelta para cancelar.</div>
   <button class="countdown-cancel" onclick="cancelSOS()">Cancelar</button>
@@ -1368,7 +1368,7 @@ html, body {
 
     <div class="link-logo">
       <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-        <path d="M19 3L5 9V19C5 27.3 11.2 35.1 19 37C26.8 35.1 33 27.3 33 19V9L19 3Z" fill="white" fill-opacity="0.9"/>
+        <path d="M19 3L5 9V19C5 27.3 11.2 35.1 19 37C26.8 35.1 33 27.3 33 19V9L19 3Z" fill="var(--text-h)" fill-opacity="0.9"/>
         <path d="M13 19L17 23L25 15" stroke="#2979FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
@@ -1389,7 +1389,7 @@ html, body {
 
     <button class="btn-link" id="btn-vincular" onclick="vincular()">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <path d="M10 2L3 5V10C3 14.4 6.08 18.4 10 20C13.92 18.4 17 14.4 17 10V5L10 2Z" fill="white" opacity="0.9"/>
+        <path d="M10 2L3 5V10C3 14.4 6.08 18.4 10 20C13.92 18.4 17 14.4 17 10V5L10 2Z" fill="var(--text-h)" opacity="0.9"/>
         <path d="M7 10L9 12L13 8" stroke="#2979FF" stroke-width="2" stroke-linecap="round"/>
       </svg>
       Vincularme
@@ -1473,7 +1473,7 @@ html, body {
           <div class="s-icon">🔋</div>
           <div class="s-label">Batería</div>
           <div class="s-value" id="s-battery-val" style="color:var(--safe);">82%</div>
-          <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:2px;margin-top:6px;overflow:hidden;">
+          <div style="height:4px;background:var(--bg-card);border-radius:2px;margin-top:6px;overflow:hidden;">
             <div id="s-battery-bar" style="height:100%;width:82%;background:var(--safe);border-radius:2px;transition:width 0.5s,background 0.5s;"></div>
           </div>
           <div class="s-sub" id="s-charging" style="margin-top:4px;">Cargando ⚡</div>
@@ -1550,21 +1550,21 @@ html, body {
     <nav id="student-nav">
       <button class="s-nav-item active" data-tab="home" onclick="studentTab('home', this)">
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <path d="M11 2L3 8V20H9V14H13V20H19V8L11 2Z" fill="rgba(255,255,255,0.3)"/>
+          <path d="M11 2L3 8V20H9V14H13V20H19V8L11 2Z" fill="var(--text-s)"/>
         </svg>
         <span class="s-nav-label">Inicio</span>
       </button>
       <button class="s-nav-item" data-tab="history" onclick="goToHistory()">
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <circle cx="11" cy="11" r="8" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" fill="none"/>
-          <path d="M11 7V11L14 13" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="11" cy="11" r="8" stroke="var(--text-s)" stroke-width="1.5" fill="none"/>
+          <path d="M11 7V11L14 13" stroke="var(--text-s)" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
         <span class="s-nav-label">Historial</span>
       </button>
       <button class="s-nav-item" data-tab="profile" onclick="showProfile()">
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <circle cx="11" cy="8" r="4" fill="rgba(255,255,255,0.3)"/>
-          <path d="M3 20C3 16.13 6.13 13 10 13H12C15.87 13 19 16.13 19 20" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <circle cx="11" cy="8" r="4" fill="var(--text-s)"/>
+          <path d="M3 20C3 16.13 6.13 13 10 13H12C15.87 13 19 16.13 19 20" stroke="var(--text-s)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
         </svg>
         <span class="s-nav-label">Perfil</span>
       </button>
@@ -1603,10 +1603,10 @@ html, body {
 
       <!-- Mini sensor recap -->
       <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-        <div style="background:rgba(232,54,74,0.15);border:1px solid rgba(232,54,74,0.25);border-radius:100px;padding:6px 14px;font-size:12px;color:rgba(255,255,255,0.6);">
+        <div style="background:rgba(232,54,74,0.15);border:1px solid rgba(232,54,74,0.25);border-radius:100px;padding:6px 14px;font-size:12px;color: var(--text-b);">
           🔋 <span id="sos-battery">82%</span> batería
         </div>
-        <div style="background:rgba(232,54,74,0.15);border:1px solid rgba(232,54,74,0.25);border-radius:100px;padding:6px 14px;font-size:12px;color:rgba(255,255,255,0.6);">
+        <div style="background:rgba(232,54,74,0.15);border:1px solid rgba(232,54,74,0.25);border-radius:100px;padding:6px 14px;font-size:12px;color: var(--text-b);">
           📳 <span id="sos-motion">Movimiento detectado</span>
         </div>
       </div>
@@ -1624,7 +1624,7 @@ html, body {
     <div class="history-topbar">
       <button class="back-icon-btn" onclick="studentTabBack()">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M11 4L7 9L11 14" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M11 4L7 9L11 14" stroke="var(--text-b)" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
       <div class="history-title">Mi Historial</div>
@@ -1642,7 +1642,7 @@ html, body {
     <div class="profile-hero">
       <button class="back-icon-btn" style="position:absolute;top:20px;left:20px;" onclick="studentTabBack()">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M11 4L7 9L11 14" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M11 4L7 9L11 14" stroke="var(--text-b)" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
       <div class="profile-avatar" id="profile-avatar-letter">C</div>
@@ -1652,7 +1652,7 @@ html, body {
         <div style="background:rgba(15,191,122,0.15);border:1px solid rgba(15,191,122,0.3);border-radius:100px;padding:5px 14px;font-size:12px;color:var(--safe);">
           ✅ Vinculado
         </div>
-        <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:100px;padding:5px 14px;font-size:12px;color:rgba(255,255,255,0.5);">
+        <div style="background: var(--bg-card);border: 1px solid var(--border-c);border-radius:100px;padding:5px 14px;font-size:12px;color: var(--text-b);">
           9no Grado
         </div>
       </div>
@@ -1690,7 +1690,7 @@ html, body {
       <div class="profile-section">
         <div class="profile-section-title">Preferencias</div>
         <div class="p-item">
-          <div class="p-item-icon" style="background:rgba(255,255,255,0.06);">🌙</div>
+          <div class="p-item-icon" style="background: var(--bg-card);">🌙</div>
           <div class="p-item-text">
             <div class="p-item-label">Modo oscuro</div>
             <div class="p-item-sub" id="theme-label">Oscuro activado</div>
@@ -1698,14 +1698,14 @@ html, body {
           <div class="p-toggle on" id="theme-toggle" onclick="toggleTheme()"><div class="p-toggle-thumb"></div></div>
         </div>
         <div class="p-item">
-          <div class="p-item-icon" style="background:rgba(255,255,255,0.06);">🔔</div>
+          <div class="p-item-icon" style="background: var(--bg-card);">🔔</div>
           <div class="p-item-text">
             <div class="p-item-label">Vibración al enviar SOS</div>
           </div>
           <div class="p-toggle on" onclick="this.classList.toggle('on')"><div class="p-toggle-thumb"></div></div>
         </div>
         <div class="p-item">
-          <div class="p-item-icon" style="background:rgba(255,255,255,0.06);">📡</div>
+          <div class="p-item-icon" style="background: var(--bg-card);">📡</div>
           <div class="p-item-text">
             <div class="p-item-label">Envío en background</div>
             <div class="p-item-sub">Sigue enviando con app cerrada</div>
@@ -1713,7 +1713,7 @@ html, body {
           <div class="p-toggle on" onclick="this.classList.toggle('on')"><div class="p-toggle-thumb"></div></div>
         </div>
         <div class="p-item">
-          <div class="p-item-icon" style="background:rgba(255,255,255,0.06);">⚡</div>
+          <div class="p-item-icon" style="background: var(--bg-card);">⚡</div>
           <div class="p-item-text">
             <div class="p-item-label">Modo ahorro de batería</div>
             <div class="p-item-sub">Envía cada 30s en vez de 5s</div>
@@ -1742,7 +1742,7 @@ html, body {
     <div class="fullmap-topbar">
       <button class="back-icon-btn" onclick="closeFullMap()">
         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <path d="M11 4L7 9L11 14" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M11 4L7 9L11 14" stroke="var(--text-b)" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
       <div class="fullmap-title">Mi Ubicación</div>
@@ -1779,8 +1779,8 @@ html, body {
       <div class="fullmap-actions">
         <button class="fullmap-btn fullmap-btn-primary" onclick="recenterFullMap()">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="8" cy="8" r="3" stroke="white" stroke-width="1.5" fill="none"/>
-            <path d="M8 2V4M8 12V14M2 8H4M12 8H14" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="8" cy="8" r="3" stroke="var(--text-h)" stroke-width="1.5" fill="none"/>
+            <path d="M8 2V4M8 12V14M2 8H4M12 8H14" stroke="var(--text-h)" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
           Centrar
         </button>
@@ -2722,7 +2722,7 @@ const TYPE_CFG = {
   charging: { emoji:'⚡', bg:'rgba(15,191,122,0.12)', label:'Carga'       },
   gps:      { emoji:'🛰️', bg:'rgba(41,121,255,0.12)', label:'GPS'         },
   offline:  { emoji:'📵', bg:'rgba(148,163,184,0.15)',label:'Sin señal'   },
-  app:      { emoji:'📱', bg:'rgba(255,255,255,0.08)', label:'App'         },
+  app:      { emoji:'📱', bg:'var(--bg-card)', label:'App'         },
   info:     { emoji:'ℹ️', bg:'rgba(41,121,255,0.12)', label:'Info'        },
 };
 
