@@ -236,56 +236,6 @@ html, body {
 }
 
 /* ═══════════════════════════════════════
-   SCREEN: PERMISOS
-═══════════════════════════════════════ */
-#screen-perms {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: flex-start;
-  padding: 0 24px 40px;
-  overflow-y: auto;
-  background: var(--bg);
-}
-.perm-hero   { width:100%; text-align:center; padding: 48px 0 24px; }
-.perm-shield {
-  width:72px; height:72px;
-  background: linear-gradient(135deg, var(--blue-acc), #5B4FD9);
-  border-radius:22px; display:flex; align-items:center; justify-content:center;
-  margin:0 auto 16px; box-shadow:0 8px 32px rgba(41,121,255,0.35);
-}
-.perm-title  { font-family:'Sora',sans-serif; font-size:22px; font-weight:700; color:var(--text-h); margin-bottom:8px; }
-.perm-sub    { font-size:14px; color:var(--text-3); line-height:1.5; max-width:300px; margin:0 auto; }
-.perm-card   { width:100%; background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden; margin-bottom:12px; }
-.perm-row    { display:flex; align-items:center; gap:14px; padding:16px; border-bottom:1px solid var(--border); }
-.perm-row:last-child { border-bottom:none; }
-.perm-icon   { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
-.perm-info   { flex:1; min-width:0; }
-.perm-label  { font-size:14px; font-weight:700; color:var(--text-h); margin-bottom:2px; }
-.perm-desc   { font-size:12px; color:var(--text-3); line-height:1.4; }
-.perm-state  { font-size:11px; font-weight:700; padding:4px 10px; border-radius:100px; white-space:nowrap; flex-shrink:0; }
-.perm-state.granted { color:var(--safe);   background:var(--safe-bg); }
-.perm-state.denied  { color:var(--danger); background:var(--danger-bg); }
-.perm-state.pending { color:var(--warn);   background:var(--warn-bg); }
-.perm-state.na      { color:var(--text-3); background:var(--border); }
-.perm-activate-btn {
-  width:100%; height:52px; background:var(--blue-acc); border:none; border-radius:14px;
-  color:white; font-size:16px; font-weight:700; cursor:pointer;
-  font-family:'DM Sans',sans-serif; margin-bottom:10px;
-  box-shadow:0 4px 20px rgba(41,121,255,0.4); transition:opacity 0.15s;
-}
-.perm-activate-btn:active { opacity:0.8; }
-.perm-skip-btn {
-  width:100%; height:44px; background:transparent; border:1px solid var(--border);
-  border-radius:12px; color:var(--text-3); font-size:14px;
-  cursor:pointer; font-family:'DM Sans',sans-serif;
-}
-.https-warning {
-  background:rgba(232,54,74,0.08); border:1px solid rgba(232,54,74,0.25);
-  border-radius:12px; padding:12px 14px; font-size:12px; color:var(--text-2);
-  line-height:1.5; margin-bottom:14px; width:100%; display:none;
-}
-.https-warning.show { display:block; }
-
-/* ═══════════════════════════════════════
    SCREEN: PRINCIPAL DEL ALUMNO
 ═══════════════════════════════════════ */
 #screen-home {
@@ -1665,90 +1615,6 @@ html, body {
        Aparece justo después de vincular,
        antes del home. Pide GPS y explica por qué.
   ══════════════════════════════ -->
-  <div class="screen" id="screen-perms">
-
-    <div class="perm-hero">
-      <div class="perm-shield">
-        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
-          <path d="M17 3L4 8V17C4 24.7 9.8 31.7 17 34C24.2 31.7 30 24.7 30 17V8L17 3Z" fill="white" fill-opacity="0.15"/>
-          <path d="M11 17L15 21L23 13" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="perm-title">Activar permisos</div>
-      <div class="perm-sub">SchoolSafe necesita acceso a tu ubicación para que tus padres sepan que estás seguro/a.</div>
-    </div>
-
-    <!-- Advertencia HTTPS (solo aparece si es file://) -->
-    <div class="https-warning" id="https-warning">
-      ⚠️ <strong>Importante:</strong> Estás abriendo la app desde un archivo local (<code>file://</code>). El GPS <strong>solo funciona cuando la app está en un servidor web (https://)</strong>. Para probar en tu celular, sube el archivo a un hosting o usa un servidor local con HTTPS.
-    </div>
-
-    <!-- Permiso GPS -->
-    <div class="perm-card">
-      <div class="perm-row">
-        <div class="perm-icon" style="background:rgba(41,121,255,0.12);">📍</div>
-        <div class="perm-info">
-          <div class="perm-label">Ubicación / GPS</div>
-          <div class="perm-desc">Necesario para enviar tu posición a tus padres en tiempo real y activar el SOS.</div>
-        </div>
-        <div class="perm-state pending" id="perm-gps-state">Pendiente</div>
-      </div>
-      <div class="perm-row" style="background:rgba(41,121,255,0.04);">
-        <div style="flex:1;font-size:12px;color:var(--text-3);line-height:1.5;">
-          Cuando presiones el botón de abajo, tu celular te preguntará si das permiso. Toca <strong style="color:var(--text-2);">"Permitir mientras se usa la app"</strong> o <strong style="color:var(--text-2);">"Siempre"</strong>.
-        </div>
-      </div>
-    </div>
-
-    <!-- Permiso Movimiento (iOS) -->
-    <div class="perm-card" id="perm-motion-card">
-      <div class="perm-row">
-        <div class="perm-icon" style="background:rgba(245,166,35,0.12);">📳</div>
-        <div class="perm-info">
-          <div class="perm-label">Movimiento y orientación</div>
-          <div class="perm-desc">Detecta caídas o movimientos bruscos para alertar a tus padres.</div>
-        </div>
-        <div class="perm-state pending" id="perm-motion-state">Pendiente</div>
-      </div>
-    </div>
-
-    <!-- Info: qué no necesita permiso -->
-    <div class="perm-card">
-      <div class="perm-row">
-        <div class="perm-icon" style="background:rgba(15,191,122,0.12);">🔋</div>
-        <div class="perm-info">
-          <div class="perm-label">Nivel de batería</div>
-          <div class="perm-desc">Se lee automáticamente, no requiere permiso especial.</div>
-        </div>
-        <div class="perm-state granted">Automático ✓</div>
-      </div>
-      <div class="perm-row">
-        <div class="perm-icon" style="background:rgba(15,191,122,0.12);">🆘</div>
-        <div class="perm-info">
-          <div class="perm-label">Botón SOS</div>
-          <div class="perm-desc">Funciona siempre, incluso sin GPS. Envía una alerta de emergencia.</div>
-        </div>
-        <div class="perm-state granted">Siempre activo ✓</div>
-      </div>
-    </div>
-
-    <!-- Nota si GPS está denegado -->
-    <div id="perm-denied-msg" style="display:none;background:rgba(232,54,74,0.07);border:1px solid rgba(232,54,74,0.2);border-radius:12px;padding:14px;font-size:12px;color:var(--text-2);line-height:1.6;margin-bottom:12px;width:100%;">
-      ❌ <strong>Permiso de ubicación denegado.</strong><br>
-      Para activarlo ve a:<br>
-      <strong style="color:var(--text-h);">Ajustes del celular → Aplicaciones → Navegador → Permisos → Ubicación → Permitir</strong><br>
-      <span style="color:var(--text-3);">O en iOS: Ajustes → Privacidad → Localización → Safari → Mientras se usa</span>
-    </div>
-
-    <button class="perm-activate-btn" id="perm-activate-btn" onclick="requestGPSPermission()">
-      📍 Activar Ubicación y continuar
-    </button>
-    <button class="perm-skip-btn" onclick="skipPermissions()">
-      Continuar sin GPS (funcionalidad limitada)
-    </button>
-
-  </div>
-
   <!-- ══════════════════════════════
        SCREEN: HOME ALUMNO
   ══════════════════════════════ -->
@@ -2595,132 +2461,10 @@ function vincular() {
   btn.style.opacity = '0.7';
 
   setTimeout(() => {
-    // En producción: verificar con Firestore
-    // Demo: cualquier 6 dígitos funciona
-    showScreen('perms');
-    initPermsScreen();
+    showScreen('home');
+    startSensors(); // arranca GPS (popup nativo del navegador), acelerómetro y batería
+    showSToast('✅ ¡Vinculado con María García!');
   }, 1200);
-}
-
-/* ═══════════════════════════════════════
-   PANTALLA DE PERMISOS
-═══════════════════════════════════════ */
-function initPermsScreen() {
-  // Detectar file:// → GPS no funcionará
-  const isFile = location.protocol === 'file:';
-  const httpsWarn = document.getElementById('https-warning');
-  if (isFile && httpsWarn) httpsWarn.classList.add('show');
-
-  // Detectar si DeviceMotion necesita permiso explícito (iOS 13+)
-  const motionCard = document.getElementById('perm-motion-card');
-  const needsMotionPerm = typeof DeviceMotionEvent?.requestPermission === 'function';
-  if (motionCard) motionCard.style.display = needsMotionPerm ? 'block' : 'none';
-
-  // Consultar estado actual del permiso GPS (sin pedirlo aún)
-  if (navigator.permissions) {
-    navigator.permissions.query({ name: 'geolocation' }).then(result => {
-      updateGPSPermState(result.state);
-      result.onchange = () => updateGPSPermState(result.state);
-
-      // Si ya está concedido, cambia el botón a "Continuar" pero NO salta solo —
-      // el alumno sigue tocando el botón para que startSensors se ejecute correctamente.
-      if (result.state === 'granted') {
-        const btn = document.getElementById('perm-activate-btn');
-        if (btn) {
-          btn.textContent = '✅ Ubicación activa — Continuar';
-          btn.style.background = 'var(--safe)';
-          // El onclick sigue siendo requestGPSPermission que NO guarda coords
-          // y llama goToHome → startSensors → startGPSFull → watchPosition ✅
-        }
-      }
-    }).catch(() => {
-      // navigator.permissions no disponible (algunos Android): el botón funciona normal
-    });
-  }
-}
-
-function updateGPSPermState(state) {
-  const el  = document.getElementById('perm-gps-state');
-  const btn = document.getElementById('perm-activate-btn');
-  const deniedMsg = document.getElementById('perm-denied-msg');
-  if (!el) return;
-
-  if (state === 'granted') {
-    el.textContent = 'Activado ✅';
-    el.className   = 'perm-state granted';
-    if (btn) { btn.textContent = '✅ Ubicación activa — Continuar'; btn.style.background = 'var(--safe)'; }
-    if (deniedMsg) deniedMsg.style.display = 'none';
-  } else if (state === 'denied') {
-    el.textContent = 'Denegado ❌';
-    el.className   = 'perm-state denied';
-    if (btn) { btn.textContent = '⚙️ Abrir Ajustes del celular'; btn.style.background = 'var(--danger)'; btn.onclick = openSystemSettings; }
-    if (deniedMsg) deniedMsg.style.display = 'block';
-  } else {
-    el.textContent = 'Pendiente';
-    el.className   = 'perm-state pending';
-  }
-}
-
-function requestGPSPermission() {
-  if (!('geolocation' in navigator)) {
-    showSToast('⚠️ Tu navegador no soporta GPS');
-    skipPermissions();
-    return;
-  }
-
-  const btn = document.getElementById('perm-activate-btn');
-  if (btn) { btn.textContent = '⏳ Esperando permiso...'; btn.style.opacity = '0.7'; }
-
-  // Usamos getCurrentPosition SOLO para disparar el popup nativo del OS.
-  // NO guardamos las coords aquí — eso lo hace onGpsSuccess vía startGPSFull.
-  navigator.geolocation.getCurrentPosition(
-    () => {
-      // Permiso concedido ✅
-      updateGPSPermState('granted');
-      if (btn) btn.style.opacity = '1';
-
-      // iOS 13+: pedir también DeviceMotion (requiere gesto de usuario)
-      if (typeof DeviceMotionEvent?.requestPermission === 'function') {
-        DeviceMotionEvent.requestPermission()
-          .then(state => {
-            const el = document.getElementById('perm-motion-state');
-            if (el) {
-              el.textContent = state === 'granted' ? 'Activado ✅' : 'Denegado';
-              el.className   = `perm-state ${state === 'granted' ? 'granted' : 'denied'}`;
-            }
-          }).catch(() => {});
-      }
-
-      // Delay visual para que el alumno vea el check verde, luego home
-      setTimeout(goToHome, 800);
-    },
-    (err) => {
-      if (btn) { btn.textContent = '📍 Activar Ubicación y continuar'; btn.style.opacity = '1'; }
-      if (err.code === 1) {
-        updateGPSPermState('denied');
-      } else {
-        showSToast('⚠️ No se pudo obtener ubicación. Intenta de nuevo.');
-      }
-    },
-    { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
-  );
-}
-
-function openSystemSettings() {
-  // No existe API para abrir los ajustes del sistema desde el navegador
-  // Lo mejor es guiar al usuario con un toast claro
-  showSToast('Ajustes → Navegador → Permisos → Ubicación');
-}
-
-function skipPermissions() {
-  showSToast('⚠️ Sin GPS — el SOS y mapa no mostrarán ubicación real');
-  goToHome();
-}
-
-function goToHome() {
-  showScreen('home');
-  startSensors(); // inicia acelerómetro + batería + motor de horario (que arranca GPS)
-  showSToast('✅ ¡Vinculado con María García!');
 }
 
 /* ═══════════════════════════════════════
@@ -3015,7 +2759,7 @@ function startSensors() {
 
 /* ── Callbacks GPS globales (usados por startGPSFull y startGPSLow) ── */
 function onGpsSuccess(pos) {
-  const isFirstFix = sensorData.lat === null || !mapsInitialized;
+  const wasNull = sensorData.lat === null;
 
   sensorData.lat      = pos.coords.latitude;
   sensorData.lng      = pos.coords.longitude;
@@ -3025,8 +2769,8 @@ function onGpsSuccess(pos) {
   updateGPSUI();
   writeStudentSnapshot();
 
-  if (isFirstFix) {
-    // Primera posición real — carga el mapa y registra en historial
+  if (wasNull) {
+    // Primera posición — carga el mapa y registra en historial
     loadMiniMap();
     reverseGeocode(sensorData.lat, sensorData.lng).then(place => {
       const title = place ? `GPS activo · ${place}` : 'GPS conectado y ubicación activa';
@@ -3036,7 +2780,6 @@ function onGpsSuccess(pos) {
       lastKnownLng   = sensorData.lng;
     });
   } else {
-    // Actualizaciones posteriores — mueve el mapa solo si hay movimiento real
     updateMarkerPosition();
   }
 }
