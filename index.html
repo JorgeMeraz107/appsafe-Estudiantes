@@ -1628,6 +1628,17 @@ html, body {
       </div>
     </div>
 
+    <!-- Banner de estado de monitoreo — actualizado por el motor de horario -->
+    <div id="monitoring-banner" style="
+      display:none; align-items:center; gap:8px;
+      margin:10px 16px 0;
+      padding:9px 14px;
+      border-radius:12px;
+      border:1px solid rgba(15,191,122,0.25);
+      background:rgba(15,191,122,0.10);
+      font-size:12px; font-family:'DM Sans',sans-serif;">
+    </div>
+
     <div class="home-scroll">
 
       <!-- SOS Button -->
@@ -2070,10 +2081,14 @@ let holdInterval = null;
 let holdProgress = 0;
 let sensorInterval = null;
 let dataInterval = null;
+let scheduleCheckInterval = null;  // revisa el horario cada minuto
+let gpsWatchId = null;             // ID del watchPosition para poder pausarlo
+let motionListener = null;         // referencia al listener para poder removerlo
+let monitoringMode = 'full';       // 'full' | 'low' | 'off'  — estado actual
 
 // Simulated student data — lat/lng null until real GPS arrives
 let sensorData = {
-  lat: null, lng: null,   // ← null hasta que el GPS real responda
+  lat: null, lng: null,
   accuracy: null,
   battery: 82,
   charging: true,
@@ -2081,6 +2096,270 @@ let sensorData = {
   motion: 'Quieto',
   accel: { x: 0.2, y: 9.8, z: 0.1 }
 };
+
+/* ═══════════════════════════════════════
+   CLAVE COMPARTIDA CON APP DEL PADRE
+═══════════════════════════════════════ */
+const LS_SCHEDULE = 'ss_schedule_v1';
+const LS_STUDENT  = 'ss_student_v1';
+
+/* ═══════════════════════════════════════
+   MOTOR DE HORARIO INTELIGENTE
+   ─────────────────────────────────────
+   3 modos:
+   • full  → GPS alta precisión c/5s, todos los sensores
+   • low   → GPS bajo consumo c/5min, solo impactos y SOS
+   • off   → GPS pausado, solo SOS siempre activo
+
+   Reglas (en orden de prioridad):
+   1. SOS activo           → siempre full, sin importar nada
+   2. Batería < 10%        → forzar low para no apagar el cel
+   3. Fuera de horario     → low (nunca off — puede haber emergencias)
+   4. Movimiento detectado fuera de horario → auto-reactiva full 30min
+   5. Dentro de horario    → full
+═══════════════════════════════════════ */
+
+function getSchedule() {
+  try {
+    const linkedId = localStorage.getItem('ss_linked_student_id');
+    if (linkedId) {
+      const byId = localStorage.getItem(`ss_schedule_${linkedId}`);
+      if (byId) return JSON.parse(byId);
+    }
+    const raw = localStorage.getItem(LS_SCHEDULE);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function isWithinSchedule() {
+  const s = getSchedule();
+  if (!s || !s.enabled) return true; // sin horario → siempre activo
+
+  const now    = new Date();
+  const day    = now.getDay(); // 0=Dom 1=Lun … 6=Sáb
+  const active = s.days || [1,2,3,4,5]; // Lun–Vie por defecto
+
+  if (!active.includes(day)) return false;
+
+  const [startH, startM] = (s.start || '06:00').split(':').map(Number);
+  const [endH,   endM]   = (s.end   || '16:00').split(':').map(Number);
+  const nowMins  = now.getHours() * 60 + now.getMinutes();
+  const startMin = startH * 60 + startM;
+  const endMin   = endH   * 60 + endM;
+
+  return nowMins >= startMin && nowMins <= endMin;
+}
+
+// Segundos restantes de la reactivación automática por movimiento
+let autoReactivateUntil = 0;
+
+function isAutoReactivated() {
+  return Date.now() < autoReactivateUntil;
+}
+
+function triggerAutoReactivate(reason) {
+  const wasActive = isAutoReactivated();
+  autoReactivateUntil = Date.now() + 30 * 60 * 1000; // 30 minutos
+  if (!wasActive) {
+    addHistoryEvent('warn', `⚡ Monitoreo reactivado automáticamente — ${reason}`);
+    showSToast(`⚡ Monitoreo reactivado — ${reason}`);
+  }
+}
+
+/* ── Decide qué modo aplicar ahora ─── */
+function resolveMonitoringMode() {
+  // Regla 1: SOS activo siempre es full
+  if (sosActive) return 'full';
+
+  // Regla 2: batería crítica — low para no apagar cel
+  if (sensorData.battery != null && sensorData.battery < 10) return 'low';
+
+  // Regla 3: dentro del horario → full
+  if (isWithinSchedule()) return 'full';
+
+  // Regla 4: movimiento detectado fuera de horario → full temporal
+  if (isAutoReactivated()) return 'full';
+
+  // Regla 5: fuera de horario → low (nunca off)
+  return 'low';
+}
+
+/* ── Aplica el modo detectado ──────── */
+function applyMonitoringMode(newMode) {
+  if (newMode === monitoringMode) return; // nada cambió
+
+  const prev = monitoringMode;
+  monitoringMode = newMode;
+
+  console.log(`🔄 Monitoreo: ${prev} → ${newMode}`);
+
+  if (newMode === 'full') {
+    // Reactiva GPS alta precisión
+    startGPSFull();
+    // Reactiva dataInterval c/5s
+    if (!dataInterval) startDataTransmission();
+    // Reactiva movementMonitor
+    if (!movementCheckInterval) startMovementMonitor();
+    // Actualiza UI
+    updateMonitoringBanner('full');
+
+  } else if (newMode === 'low') {
+    // Pausa GPS alta precisión → GPS bajo consumo c/5min
+    pauseGPSFull();
+    startGPSLow();
+    // Pausa dataInterval — solo escribe eventos importantes
+    if (dataInterval) { clearInterval(dataInterval); dataInterval = null; }
+    if (movementCheckInterval) { clearInterval(movementCheckInterval); movementCheckInterval = null; }
+    // Escribe un snapshot de bajo consumo cada 5 minutos
+    if (!dataInterval) startDataTransmissionLow();
+    // Actualiza UI
+    updateMonitoringBanner('low');
+    addHistoryEvent('info', 'Monitoreo en modo bajo consumo — fuera de horario');
+  }
+}
+
+/* ── GPS alta precisión (modo full) ─── */
+function startGPSFull() {
+  if (gpsWatchId !== null) return; // ya activo
+  if (!('geolocation' in navigator)) return;
+
+  const opts = { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 };
+
+  navigator.geolocation.getCurrentPosition(onGpsSuccess, onGpsError, opts);
+  gpsWatchId = navigator.geolocation.watchPosition(onGpsSuccess, onGpsError, opts);
+}
+
+/* ── GPS bajo consumo (modo low) ────── */
+let gpsLowInterval = null;
+function startGPSLow() {
+  if (gpsLowInterval) return;
+  gpsLowInterval = setInterval(() => {
+    if (!('geolocation' in navigator)) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const prevLat = sensorData.lat;
+        const prevLng = sensorData.lng;
+        sensorData.lat      = pos.coords.latitude;
+        sensorData.lng      = pos.coords.longitude;
+        sensorData.accuracy = Math.round(pos.coords.accuracy);
+        sensorData.speed    = pos.coords.speed ? +(pos.coords.speed * 3.6).toFixed(1) : 0;
+
+        // Si se movió más de 200m fuera de horario → auto-reactivar
+        if (prevLat !== null) {
+          const dist = haversineStudent(prevLat, prevLng, sensorData.lat, sensorData.lng);
+          if (dist > 200) {
+            triggerAutoReactivate('Movimiento detectado');
+            evaluateSchedule(); // reevalúa inmediatamente
+          }
+        }
+        // Escribe snapshot mínimo
+        writeStudentSnapshot();
+      },
+      () => {}, // silencia errores en modo low
+      { enableHighAccuracy: false, maximumAge: 60000, timeout: 10000 }
+    );
+  }, 5 * 60 * 1000); // cada 5 minutos
+}
+
+/* ── Pausa GPS alta precisión ────────── */
+function pauseGPSFull() {
+  if (gpsWatchId !== null) {
+    navigator.geolocation.clearWatch(gpsWatchId);
+    gpsWatchId = null;
+  }
+  if (gpsLowInterval) { clearInterval(gpsLowInterval); gpsLowInterval = null; }
+}
+
+/* ── Transmisión bajo consumo c/5min ── */
+function startDataTransmissionLow() {
+  if (dataInterval) return;
+  dataInterval = setInterval(() => {
+    writeStudentSnapshot();
+  }, 5 * 60 * 1000);
+}
+
+/* ── Escribe snapshot a localStorage ── */
+function writeStudentSnapshot() {
+  try {
+    const payload = {
+      lat:       sensorData.lat,
+      lng:       sensorData.lng,
+      accuracy:  sensorData.accuracy,
+      battery:   sensorData.battery != null ? sensorData.battery / 100 : null,
+      charging:  sensorData.charging,
+      speed:     sensorData.speed,
+      motion:    sensorData.motion,
+      accel_x:   sensorData.accel.x,
+      accel_y:   sensorData.accel.y,
+      accel_z:   sensorData.accel.z,
+      sos:       sosActive,
+      mode:      monitoringMode,
+      ts:        Date.now()
+    };
+    localStorage.setItem(LS_STUDENT, JSON.stringify(payload));
+    const connEl = document.getElementById('conn-status');
+    if (connEl) connEl.textContent = `Conectado · ${new Date().toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`;
+  } catch {}
+}
+
+/* ── Evalúa y aplica el modo correcto ─ */
+function evaluateSchedule() {
+  const newMode = resolveMonitoringMode();
+  applyMonitoringMode(newMode);
+  updateMonitoringBanner(newMode);
+}
+
+/* ── Banner de estado de monitoreo ──── */
+function updateMonitoringBanner(mode) {
+  const banner = document.getElementById('monitoring-banner');
+  if (!banner) return;
+
+  const s = getSchedule();
+  const schedule = s && s.enabled;
+
+  if (mode === 'full') {
+    const inHours = isWithinSchedule() || !schedule;
+    banner.style.display = 'flex';
+    banner.style.background = 'rgba(15,191,122,0.12)';
+    banner.style.borderColor = 'rgba(15,191,122,0.25)';
+    banner.innerHTML = `
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--safe);animation:pulse-dot 1.5s infinite;flex-shrink:0;"></div>
+      <span style="color:var(--safe);font-weight:700;font-size:12px;">Monitoreo activo</span>
+      <span style="color:var(--text-s);font-size:11px;margin-left:auto;">
+        ${schedule && inHours ? `hasta ${s.end}` : isAutoReactivated() ? '⚡ Auto-reactivado' : 'Sin horario'}
+      </span>`;
+  } else {
+    // low — muestra horario de próxima activación
+    const next = schedule ? `Activa a las ${s.start}` : '';
+    banner.style.display = 'flex';
+    banner.style.background = 'rgba(245,166,35,0.10)';
+    banner.style.borderColor = 'rgba(245,166,35,0.2)';
+    banner.innerHTML = `
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--warn);flex-shrink:0;"></div>
+      <span style="color:var(--warn);font-weight:700;font-size:12px;">Bajo consumo</span>
+      <span style="color:var(--text-s);font-size:11px;margin-left:auto;">${next} · SOS siempre activo 🛡️</span>`;
+  }
+}
+
+/* ── Inicia el chequeo periódico del horario ─ */
+function startScheduleEngine() {
+  evaluateSchedule(); // evaluación inmediata
+  // Revisa cada 60 segundos si cambió el modo
+  scheduleCheckInterval = setInterval(evaluateSchedule, 60 * 1000);
+  // También revisa cuando la app vuelve al frente
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) evaluateSchedule();
+  });
+}
+
+/* ── Haversine local para el alumno ─── */
+function haversineStudent(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
 
 /* ═══════════════════════════════════════
    NAVIGATION
@@ -2181,9 +2460,7 @@ function vincular() {
     // In production: verify code with Firestore
     // For demo: any 6-digit code works
     showScreen('home');
-    startSensors();
-    startDataTransmission();
-    startMovementMonitor();
+    startSensors(); // inicia acelerómetro + batería + motor de horario (que arranca GPS)
     showSToast('✅ ¡Vinculado con María García!');
   }, 1800);
 }
@@ -2243,6 +2520,9 @@ function triggerSOS() {
   sosActive = true;
   sosSeconds = 0;
 
+  // SOS fuerza modo full sin importar horario — regla #1 del motor
+  evaluateSchedule();
+
   // Vibrate device
   if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]);
 
@@ -2260,14 +2540,16 @@ function triggerSOS() {
   }
 
   // Set battery in SOS screen
-  document.getElementById('sos-battery').textContent = sensorData.battery + '%';
-  document.getElementById('sos-motion').textContent = sensorData.motion;
+  const sosBattEl  = document.getElementById('sos-battery');
+  const sosMotEl   = document.getElementById('sos-motion');
+  if (sosBattEl) sosBattEl.textContent = (sensorData.battery ?? '—') + '%';
+  if (sosMotEl)  sosMotEl.textContent  = sensorData.motion || 'Desconocido';
 
   showScreen('sos');
   startSOSTimer();
 
-  // In production: send to Firestore + trigger OneSignal push to parent
-  console.log('SOS triggered — sending to Firestore:', sensorData);
+  writeStudentSnapshot(); // snapshot inmediato con sos:true
+  console.log('🆘 SOS triggered — sending to Firestore:', sensorData);
   showSToast('🆘 SOS enviado a tus padres');
   addHistoryEvent('sos', 'SOS enviado');
 }
@@ -2293,12 +2575,15 @@ function confirmCancelSOS() {
   if (confirmed) {
     sosActive = false;
     stopSOSTimer();
+    evaluateSchedule(); // re-evalúa el modo ahora que SOS está inactivo
 
     const badge = document.getElementById('status-badge-top');
-    badge.className = 'status-badge-top status-badge-safe';
-    badge.innerHTML = `<div style="width:7px;height:7px;border-radius:50%;background:currentColor;animation:live-pulse 1.5s infinite;"></div>Seguro`;
+    if (badge) {
+      badge.className = 'status-badge-top status-badge-safe';
+      badge.innerHTML = `<div style="width:7px;height:7px;border-radius:50%;background:currentColor;animation:live-pulse 1.5s infinite;"></div>Seguro`;
+    }
 
-    document.getElementById('sos-btn').classList.remove('holding');
+    document.getElementById('sos-btn')?.classList.remove('holding');
     showScreen('home');
     showSToast('✅ SOS cancelado — Estás a salvo');
     addHistoryEvent('safe', 'SOS cancelado — Estás a salvo');
@@ -2413,78 +2698,16 @@ function updateMarkerPosition() {
 
 
 
+/* ═══════════════════════════════════════
+   startSensors — ahora delega el GPS al motor de horario.
+   Solo inicia acelerómetro y batería (siempre activos).
+   El GPS lo maneja applyMonitoringMode().
+═══════════════════════════════════════ */
 function startSensors() {
 
-  // ── GPS Real — pide permiso y obtiene ubicación real ──
-  if ('geolocation' in navigator) {
-
-    const gpsOptions = {
-      enableHighAccuracy: true,  // ← usa GPS satelital, no solo WiFi/torres
-      maximumAge: 0,             // ← no usar cache, siempre coords frescas
-      timeout: 15000
-    };
-
-    const onGpsSuccess = (pos) => {
-      const wasNull = sensorData.lat === null;
-      sensorData.lat      = pos.coords.latitude;
-      sensorData.lng      = pos.coords.longitude;
-      sensorData.accuracy = Math.round(pos.coords.accuracy);
-      sensorData.speed    = pos.coords.speed ? +(pos.coords.speed * 3.6).toFixed(1) : 0;
-
-      updateGPSUI();
-
-      // Primera vez que llegan coords reales → carga el mapa
-      if (wasNull) {
-        loadMiniMap();
-        // Geocodifica y registra con nombre real del lugar
-        reverseGeocode(sensorData.lat, sensorData.lng).then(place => {
-          const title = place
-            ? `GPS activo · ${place}`
-            : 'GPS conectado y ubicación activa';
-          addHistoryEvent('gps', title);
-          lastKnownPlace = place;
-          lastKnownLat   = sensorData.lat;
-          lastKnownLng   = sensorData.lng;
-        });
-      } else {
-        updateMarkerPosition();
-      }
-    };
-
-    const onGpsError = (err) => {
-      console.warn('GPS error:', err.code, err.message);
-      const gpsEl  = document.getElementById('s-gps-acc');
-      const coordEl = document.getElementById('s-gps-coords');
-      if (err.code === 1) {
-        if (gpsEl)   gpsEl.textContent  = 'Permiso denegado';
-        if (coordEl) coordEl.textContent = 'Activa la ubicación en ajustes';
-        showSToast('⚠️ Activa la ubicación en Ajustes del celular');
-        showMapPermissionDenied();
-        addHistoryEvent('offline', 'Permiso de ubicación denegado');
-      } else {
-        if (gpsEl)   gpsEl.textContent  = 'Sin señal GPS';
-        if (coordEl) coordEl.textContent = 'Buscando señal...';
-        showSToast('📡 Buscando señal GPS...');
-        if (sensorData.lat !== null) {
-          addHistoryEvent('gps', 'Señal GPS perdida temporalmente');
-        }
-      }
-    };
-
-    // 1️⃣ Primero: obtén la ubicación UNA VEZ de inmediato
-    //    Esto dispara el popup de permiso del sistema operativo
-    navigator.geolocation.getCurrentPosition(onGpsSuccess, onGpsError, gpsOptions);
-
-    // 2️⃣ Luego: sigue monitoreando cambios de posición en tiempo real
-    navigator.geolocation.watchPosition(onGpsSuccess, onGpsError, gpsOptions);
-
-  } else {
-    showSToast('❌ GPS no disponible en este dispositivo');
-  }
-
   // ── Acelerómetro Real ─────────────────
+  // Siempre activo — detecta impactos incluso fuera del horario
   if (window.DeviceMotionEvent) {
-    // iOS 13+ requiere permiso explícito
     if (typeof DeviceMotionEvent.requestPermission === 'function') {
       DeviceMotionEvent.requestPermission()
         .then(state => {
@@ -2498,21 +2721,27 @@ function startSensors() {
   }
 
   // ── Batería Real ─────────────────────
+  // Siempre activa — alerta de batería baja cambia el modo automáticamente
   if ('getBattery' in navigator) {
     navigator.getBattery().then(battery => {
       sensorData.battery  = Math.round(battery.level * 100);
       sensorData.charging = battery.charging;
       updateBatteryUI();
-      battery.addEventListener('levelchange',  () => {
-        sensorData.battery  = Math.round(battery.level * 100);
+      battery.addEventListener('levelchange', () => {
+        sensorData.battery = Math.round(battery.level * 100);
         updateBatteryUI();
+        // Batería baja → re-evalúa modo (puede forzar low para sobrevivir más tiempo)
+        evaluateSchedule();
+        if (sensorData.battery <= 15) {
+          addHistoryEvent('battery', `Batería baja — ${sensorData.battery}%`);
+          writeStudentSnapshot();
+        }
       });
-      battery.addEventListener('chargingchange',() => {
+      battery.addEventListener('chargingchange', () => {
         sensorData.charging = battery.charging;
         updateBatteryUI();
-        addHistoryEvent('charging',
-          battery.charging ? 'Cargador conectado ⚡' : 'Cargador desconectado'
-        );
+        addHistoryEvent('charging', battery.charging ? 'Cargador conectado ⚡' : 'Cargador desconectado');
+        writeStudentSnapshot();
       });
     }).catch(() => simulateBattery());
   } else {
@@ -2520,6 +2749,52 @@ function startSensors() {
   }
 
   sensorInterval = setInterval(updateSensorUI, 2000);
+
+  // ── GPS lo maneja el motor de horario ─
+  // startScheduleEngine() decide si arranca GPS full o low según el horario
+  startScheduleEngine();
+}
+
+/* ── Callbacks GPS globales (usados por startGPSFull y startGPSLow) ── */
+function onGpsSuccess(pos) {
+  const wasNull = sensorData.lat === null;
+  sensorData.lat      = pos.coords.latitude;
+  sensorData.lng      = pos.coords.longitude;
+  sensorData.accuracy = Math.round(pos.coords.accuracy);
+  sensorData.speed    = pos.coords.speed ? +(pos.coords.speed * 3.6).toFixed(1) : 0;
+
+  updateGPSUI();
+  writeStudentSnapshot(); // siempre escribe al localStorage cuando hay GPS nuevo
+
+  if (wasNull) {
+    loadMiniMap();
+    reverseGeocode(sensorData.lat, sensorData.lng).then(place => {
+      const title = place ? `GPS activo · ${place}` : 'GPS conectado y ubicación activa';
+      addHistoryEvent('gps', title);
+      lastKnownPlace = place;
+      lastKnownLat   = sensorData.lat;
+      lastKnownLng   = sensorData.lng;
+    });
+  } else {
+    updateMarkerPosition();
+  }
+}
+
+function onGpsError(err) {
+  console.warn('GPS error:', err.code, err.message);
+  const gpsEl   = document.getElementById('s-gps-acc');
+  const coordEl = document.getElementById('s-gps-coords');
+  if (err.code === 1) {
+    if (gpsEl)   gpsEl.textContent   = 'Permiso denegado';
+    if (coordEl) coordEl.textContent = 'Activa la ubicación en ajustes';
+    showSToast('⚠️ Activa la ubicación en Ajustes del celular');
+    showMapPermissionDenied();
+    addHistoryEvent('offline', 'Permiso de ubicación denegado');
+  } else {
+    if (gpsEl)   gpsEl.textContent   = 'Sin señal GPS';
+    if (coordEl) coordEl.textContent = 'Buscando señal...';
+    if (sensorData.lat !== null) addHistoryEvent('gps', 'Señal GPS perdida temporalmente');
+  }
 }
 
 // Carga el mini mapa con las coords GPS reales
@@ -2660,29 +2935,12 @@ function updateSensorUI() {
 }
 
 // ── Data transmission to Firestore ────
+// startDataTransmission — en modo full escribe cada 5s vía writeStudentSnapshot
+// En modo low escribe cada 5min (manejado por startDataTransmissionLow)
 function startDataTransmission() {
+  if (dataInterval) { clearInterval(dataInterval); dataInterval = null; }
   dataInterval = setInterval(() => {
-    const payload = {
-      lat:      sensorData.lat,
-      lng:      sensorData.lng,
-      accuracy: sensorData.accuracy,
-      battery:  sensorData.battery,
-      charging: sensorData.charging,
-      speed:    sensorData.speed,
-      motion:   sensorData.motion,
-      accel:    sensorData.accel,
-      sos:      sosActive,
-      timestamp: new Date().toISOString()
-    };
-
-    // In production: db.collection('ubicaciones').doc('alumno_id').set(payload)
-    console.log('📡 Enviando a Firestore:', payload);
-
-    // Update connection status
-    const connEl = document.getElementById('conn-status');
-    if (connEl) {
-      connEl.textContent = `Conectado · Datos enviados ${new Date().toLocaleTimeString('es-HN', {hour:'2-digit', minute:'2-digit', second:'2-digit'})}`;
-    }
+    writeStudentSnapshot();
   }, 5000);
 }
 
@@ -2741,6 +2999,13 @@ const CONTACTS_KEY = 'ss_contacts_v1';
 
 function getContacts() {
   try {
+    // Intenta primero la clave por ID del alumno vinculado
+    const linkedId = localStorage.getItem('ss_linked_student_id');
+    if (linkedId) {
+      const byId = localStorage.getItem(`ss_contacts_${linkedId}`);
+      if (byId) return JSON.parse(byId);
+    }
+    // Fallback a la clave compartida genérica
     const saved = localStorage.getItem(CONTACTS_KEY);
     return saved ? JSON.parse(saved) : DEFAULT_CONTACTS;
   } catch { return DEFAULT_CONTACTS; }
@@ -2799,7 +3064,8 @@ function selectContact(id) {
   pendingContact = contact;
 
   // Rellena la pantalla de confirmación
-  document.getElementById('confirm-avatar').innerHTML =
+  const confirmAvatar = document.getElementById('confirm-avatar');
+  if (confirmAvatar) confirmAvatar.innerHTML =
     `<div style="width:80px;height:80px;border-radius:50%;
                  background:${contact.color};
                  display:flex;align-items:center;justify-content:center;
@@ -2807,8 +3073,10 @@ function selectContact(id) {
        ${contact.emoji}
      </div>`;
 
-  document.getElementById('confirm-name').textContent   = contact.name;
-  document.getElementById('confirm-number').textContent = formatPhoneDisplay(contact.number);
+  const confirmName   = document.getElementById('confirm-name');
+  const confirmNumber = document.getElementById('confirm-number');
+  if (confirmName)   confirmName.textContent   = contact.name;
+  if (confirmNumber) confirmNumber.textContent = formatPhoneDisplay(contact.number);
 
   // Cambia texto del botón para 911
   const callBtn = document.getElementById('confirm-call-btn');
@@ -2845,13 +3113,17 @@ function confirmCall() {
 
 /* ── Vistas del sheet ───────────────── */
 function showCallListView() {
-  document.getElementById('call-list-view').style.display = 'block';
-  document.getElementById('call-confirm-view').classList.remove('show');
+  const listV    = document.getElementById('call-list-view');
+  const confirmV = document.getElementById('call-confirm-view');
+  if (listV)    listV.style.display = 'block';
+  if (confirmV) confirmV.classList.remove('show');
 }
 
 function showCallConfirmView() {
-  document.getElementById('call-list-view').style.display = 'none';
-  document.getElementById('call-confirm-view').classList.add('show');
+  const listV    = document.getElementById('call-list-view');
+  const confirmV = document.getElementById('call-confirm-view');
+  if (listV)    listV.style.display = 'none';
+  if (confirmV) confirmV.classList.add('show');
 }
 
 function backToCallList() {
@@ -3412,7 +3684,9 @@ function toggleTheme() {
 document.addEventListener('DOMContentLoaded', () => {
   showScreen('link');
   checkCodeComplete();
-  document.getElementById('btn-vincular').style.opacity = '0.5';
+
+  const btnVincular = document.getElementById('btn-vincular');
+  if (btnVincular) btnVincular.style.opacity = '0.5';
 
   // Aplica tema guardado (sin transición para evitar flash)
   initTheme();
@@ -3439,7 +3713,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 400);
 
   if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-    document.getElementById('sos-btn').addEventListener('click', () => {
+    document.getElementById('sos-btn')?.addEventListener('click', () => {
       DeviceMotionEvent.requestPermission().catch(() => {});
     }, { once: true });
   }
