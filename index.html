@@ -2238,6 +2238,26 @@ function startGPSFull() {
 let gpsLowInterval = null;
 function startGPSLow() {
   if (gpsLowInterval) return;
+
+  // Pide posición inmediata al entrar en modo low
+  // (para no dejar el mapa sin actualizar hasta el próximo intervalo)
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const prevLat = sensorData.lat;
+      const prevLng = sensorData.lng;
+      sensorData.lat      = pos.coords.latitude;
+      sensorData.lng      = pos.coords.longitude;
+      sensorData.accuracy = Math.round(pos.coords.accuracy);
+      sensorData.speed    = pos.coords.speed ? +(pos.coords.speed * 3.6).toFixed(1) : 0;
+      updateGPSUI();
+      if (prevLat === null) loadMiniMap(); // primera posición
+      else updateMarkerPosition();
+      writeStudentSnapshot();
+    },
+    () => {},
+    { enableHighAccuracy: false, maximumAge: 30000, timeout: 10000 }
+  );
+
   gpsLowInterval = setInterval(() => {
     if (!('geolocation' in navigator)) return;
     navigator.geolocation.getCurrentPosition(
@@ -2254,13 +2274,12 @@ function startGPSLow() {
           const dist = haversineStudent(prevLat, prevLng, sensorData.lat, sensorData.lng);
           if (dist > 200) {
             triggerAutoReactivate('Movimiento detectado');
-            evaluateSchedule(); // reevalúa inmediatamente
+            evaluateSchedule();
           }
         }
-        // Escribe snapshot mínimo
         writeStudentSnapshot();
       },
-      () => {}, // silencia errores en modo low
+      () => {},
       { enableHighAccuracy: false, maximumAge: 60000, timeout: 10000 }
     );
   }, 5 * 60 * 1000); // cada 5 minutos
@@ -2752,9 +2771,17 @@ function startSensors() {
 
   sensorInterval = setInterval(updateSensorUI, 2000);
 
-  // ── GPS lo maneja el motor de horario ─
-  // startScheduleEngine() decide si arranca GPS full o low según el horario
-  startScheduleEngine();
+  // ── GPS: arranca SIEMPRE en modo full primero ──────────────────────
+  // Esto garantiza que el popup de permisos aparezca de inmediato y que
+  // el mapa cargue con la primera posición real del alumno.
+  // Luego el motor de horario puede bajar a modo 'low' si corresponde,
+  // pero NUNCA antes de haber obtenido al menos una posición GPS.
+  startGPSFull();
+
+  // ── Motor de horario (evalúa después de tener GPS) ─────────────────
+  // Espera 3 segundos para darle tiempo al GPS de obtener la primera posición
+  // antes de que el motor decida si baja a modo 'low'.
+  setTimeout(startScheduleEngine, 3000);
 }
 
 /* ── Callbacks GPS globales (usados por startGPSFull y startGPSLow) ── */
