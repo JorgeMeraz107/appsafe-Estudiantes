@@ -2899,12 +2899,19 @@
           if (avatarEl) avatarEl.textContent = (student.name || 'A').charAt(0).toUpperCase();
 
           showScreen('home');
+
+          // Guardar objeto completo para carga instantánea offline
+          saveLocalConfig(student);
+          studentConfig = student;
+          updateUIFromConfig();
+
           startApp(student.id);
 
           // Suscribirse a cambios en configuración
           if (unsubConfig) unsubConfig();
           unsubConfig = subscribeStudentConfig(student.id, (config) => {
             studentConfig = config;
+            saveLocalConfig(config); // Actualizar cache local
             updateUIFromConfig();
           });
 
@@ -3643,6 +3650,7 @@
 
         localStorage.removeItem('ss_student_id');
         localStorage.removeItem('ss_student_name');
+        localStorage.removeItem('ss_student_config'); // Clear cached config
 
         showScreen('link');
         showSToast('Dispositivo desvinculado');
@@ -4172,6 +4180,21 @@
       applyTheme(isDark ? 'light' : 'dark', true);
     }
 
+    /**
+ * Persistencia local de configuración para carga instantánea
+ */
+    function saveLocalConfig(config) {
+      if (!config) return;
+      localStorage.setItem('ss_student_config', JSON.stringify(config));
+    }
+
+    function getLocalConfig() {
+      try {
+        const saved = localStorage.getItem('ss_student_config');
+        return saved ? JSON.parse(saved) : null;
+      } catch (e) { return null; }
+    }
+
     function startApp(studentId) {
       localStorage.setItem('ss_student_id', studentId);
       startSensors();
@@ -4187,9 +4210,20 @@
       // Si ya estaba vinculado, arranca automáticamente
       const savedId = localStorage.getItem('ss_student_id');
       if (savedId) {
+        // 1. Cargar instantáneamente desde cache local (Offline-first)
+        const cached = getLocalConfig();
+        if (cached) {
+          studentConfig = cached;
+          updateUIFromConfig(); // UI lista en milisegundos
+        }
+
+        // 2. Iniciar servicios (geolocalización, sensores)
         startApp(savedId);
+
+        // 3. Sincronizar con Firestore en segundo plano
         unsubConfig = subscribeStudentConfig(savedId, (config) => {
           studentConfig = config;
+          saveLocalConfig(config); // Actualizar cache con lo más nuevo
           updateUIFromConfig();
         });
       }
