@@ -1873,15 +1873,15 @@ html, body {
           <path d="M11 4L7 9L11 14" stroke="var(--text-b)" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
-      <div class="profile-avatar" id="profile-avatar-letter">C</div>
-      <div class="profile-name" id="profile-name-display">Carlos García</div>
-      <div class="profile-code">Código: 847291</div>
+      <div class="profile-avatar" id="profile-avatar-letter">-</div>
+      <div class="profile-name" id="profile-name-display">Cargando...</div>
+      <div class="profile-code" id="profile-link-code">Código: ------</div>
       <div style="display:flex;gap:10px;margin-top:4px;">
         <div style="background:rgba(15,191,122,0.15);border:1px solid rgba(15,191,122,0.3);border-radius:100px;padding:5px 14px;font-size:12px;color:var(--safe);">
           ✅ Vinculado
         </div>
-        <div style="background: var(--bg-card);border: 1px solid var(--border-c);border-radius:100px;padding:5px 14px;font-size:12px;color: var(--text-b);">
-          9no Grado
+        <div id="profile-grade-badge" style="background: var(--bg-card);border: 1px solid var(--border-c);border-radius:100px;padding:5px 14px;font-size:12px;color: var(--text-b);">
+          -
         </div>
       </div>
     </div>
@@ -2074,7 +2074,7 @@ html, body {
 </div><!-- end shell -->
 
 <script type="module">
-import { verifyLinkCode, markStudentLinked, writeLiveData } from './firebase-student.js';
+import { verifyLinkCode, markStudentLinked, writeLiveData, getStudentData, addHistoryEventFS } from './firebase-student.js';
 
 /* ═══════════════════════════════════════
    STATE
@@ -2429,11 +2429,27 @@ function goToHistory() {
   showScreen('history');
 }
 
-function showProfile() {
+async function showProfile() {
   document.querySelectorAll('.s-nav-item').forEach(b => {
     b.classList.toggle('active', b.dataset.tab === 'profile');
   });
   checkPermissions();
+  
+  const studentId = localStorage.getItem('ss_student_id');
+  if (studentId) {
+    try {
+      const data = await getStudentData(studentId);
+      if (data) {
+        document.getElementById('profile-name-display').textContent = data.name || 'Alumno';
+        document.getElementById('profile-avatar-letter').textContent = (data.name || 'A').charAt(0).toUpperCase();
+        document.getElementById('profile-link-code').textContent = `Código: ${data.linkCode || '------'}`;
+        document.getElementById('profile-grade-badge').textContent = data.grade || 'Sin grado';
+      }
+    } catch (e) {
+      console.error("Error cargando perfil:", e);
+    }
+  }
+
   showScreen('profile');
 }
 
@@ -2499,15 +2515,20 @@ async function vincular() {
       // Guardar info del alumno localmente
       localStorage.setItem('ss_student_id', student.id);
       localStorage.setItem('ss_student_name', student.name);
+      localStorage.setItem('ss_student_grade', student.grade || '');
       
       // Marcar como vinculado en Firestore
       await markStudentLinked(student.id);
 
       const displayNameEl = document.getElementById('student-display-name');
       if (displayNameEl) displayNameEl.textContent = student.name || 'Alumno';
+      
+      // También actualizar el avatar en home si existe
+      const avatarEl = document.getElementById('home-avatar-letter');
+      if (avatarEl) avatarEl.textContent = (student.name || 'A').charAt(0).toUpperCase();
 
       showScreen('home');
-      startSensors(); // arranca GPS, acelerómetro y batería
+      startSensors(); 
       showSToast(`✅ ¡Vinculado con éxito!`);
     } else {
       showSToast('❌ Código incorrecto o no encontrado');
@@ -3468,6 +3489,16 @@ async function addHistoryEvent(type, title, extra = {}) {
   if (events.length > MAX_EVENTS) events.splice(MAX_EVENTS);
   saveHistory(events);
   if (currentScreen === 'history') renderHistory();
+
+  // Enviar a Firestore si está vinculado
+  const studentId = localStorage.getItem('ss_student_id');
+  if (studentId) {
+    try {
+      await addHistoryEventFS(studentId, ev);
+    } catch (e) {
+      console.error("Error enviando evento a Firestore:", e);
+    }
+  }
 
   // Geocodifica en background y actualiza el evento
   if (ev.lat !== null) {

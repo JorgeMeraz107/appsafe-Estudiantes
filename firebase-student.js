@@ -15,6 +15,7 @@ import {
     query,
     where,
     getDocs,
+    addDoc,
     serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
@@ -30,6 +31,15 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Importar y configurar Auth para evitar bloqueos por reglas de seguridad
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+const auth = getAuth(app);
+
+// Iniciar sesión de forma anónima silenciosamente (necesario si Firestore Rules exigen autenticación)
+signInAnonymously(auth).catch((error) => {
+    console.error("Error al autenticar anónimamente:", error);
+});
 
 /* ═══════════════════════════════════════════════════════════════
    VINCULACIÓN — Verifica el código de 6 dígitos
@@ -63,6 +73,14 @@ export async function markStudentLinked(studentId) {
     }, { merge: true });
 }
 
+/**
+ * Obtiene los datos completos de un alumno.
+ */
+export async function getStudentData(studentId) {
+    const snap = await getDoc(doc(db, "students", studentId));
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+}
+
 /* ═══════════════════════════════════════════════════════════════
    DATOS EN VIVO — Escribe en student_live/{studentId}
    La app del PADRE lee esta colección en tiempo real.
@@ -90,4 +108,16 @@ export async function writeLiveData(studentId, data) {
     }, { merge: true });
 }
 
-export { db };
+/**
+ * Agrega un evento al historial del alumno en Firestore.
+ * Se guarda en /students/{studentId}/history
+ */
+export async function addHistoryEventFS(studentId, event) {
+    const historyRef = collection(db, "students", studentId, "history");
+    await addDoc(historyRef, {
+        ...event,
+        serverTs: serverTimestamp()
+    });
+}
+
+export { db, auth };
