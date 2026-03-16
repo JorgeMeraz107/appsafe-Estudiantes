@@ -120,4 +120,17 @@ export async function addHistoryEventFS(studentId, event) {
     });
 }
 
+/**
+ * Suscribe en tiempo real a los datos del documento del estudiante.
+ * Se usa para sincronizar Contactos y Horario desde el Padre.
+ */
+import { onSnapshot } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+export function subscribeStudentConfig(studentId, onChange) {
+    const ref = doc(db, "students", studentId);
+    return onSnapshot(ref, snap => {
+        onChange(snap.exists() ? { id: snap.id, ...snap.data() } : null);
+    });
+}
+
 export { db, auth };
