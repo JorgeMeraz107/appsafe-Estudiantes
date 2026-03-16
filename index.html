@@ -2073,7 +2073,9 @@ html, body {
 
 </div><!-- end shell -->
 
-<script>
+<script type="module">
+import { verifyLinkCode, markStudentLinked, writeLiveData } from './firebase-student.js';
+
 /* ═══════════════════════════════════════
    STATE
 ═══════════════════════════════════════ */
@@ -2302,8 +2304,8 @@ function startDataTransmissionLow() {
   }, 5 * 60 * 1000);
 }
 
-/* ── Escribe snapshot a localStorage ── */
-function writeStudentSnapshot() {
+/* ── Escribe snapshot a Firestore y localStorage ── */
+async function writeStudentSnapshot() {
   try {
     const payload = {
       lat:       sensorData.lat,
@@ -2320,10 +2322,21 @@ function writeStudentSnapshot() {
       mode:      monitoringMode,
       ts:        Date.now()
     };
+    
+    // Guardar en LS para uso sin conexión (opcional)
     localStorage.setItem(LS_STUDENT, JSON.stringify(payload));
+    
+    // Cargar en Firestore a los Padres
+    const studentId = localStorage.getItem('ss_student_id');
+    if (studentId) {
+      await writeLiveData(studentId, payload);
+    }
+
     const connEl = document.getElementById('conn-status');
     if (connEl) connEl.textContent = `Conectado · ${new Date().toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}`;
-  } catch {}
+  } catch (e) {
+    console.error("Error transmitiendo datos a Firestore", e);
+  }
 }
 
 /* ── Evalúa y aplica el modo correcto ─ */
@@ -2470,7 +2483,7 @@ function checkCodeComplete() {
   btn.style.opacity = full ? '1' : '0.5';
 }
 
-function vincular() {
+async function vincular() {
   const digits = document.querySelectorAll('.code-digit');
   const code = [...digits].map(d => d.value).join('');
   if (code.length < 6) { showSToast('⚠️ Ingresa los 6 dígitos'); return; }
@@ -2479,11 +2492,34 @@ function vincular() {
   btn.textContent = '⏳ Verificando...';
   btn.style.opacity = '0.7';
 
-  setTimeout(() => {
-    showScreen('home');
-    startSensors(); // arranca GPS (popup nativo del navegador), acelerómetro y batería
-    showSToast('✅ ¡Vinculado con María García!');
-  }, 1200);
+  try {
+    const student = await verifyLinkCode(code);
+    
+    if (student) {
+      // Guardar info del alumno localmente
+      localStorage.setItem('ss_student_id', student.id);
+      localStorage.setItem('ss_student_name', student.name);
+      
+      // Marcar como vinculado en Firestore
+      await markStudentLinked(student.id);
+
+      const displayNameEl = document.getElementById('student-display-name');
+      if (displayNameEl) displayNameEl.textContent = student.name || 'Alumno';
+
+      showScreen('home');
+      startSensors(); // arranca GPS, acelerómetro y batería
+      showSToast(`✅ ¡Vinculado con éxito!`);
+    } else {
+      showSToast('❌ Código incorrecto o no encontrado');
+      btn.textContent = 'Vincularme';
+      btn.style.opacity = '1';
+    }
+  } catch (e) {
+    console.error(e);
+    showSToast('⚠️ Error de conexión');
+    btn.textContent = 'Vincularme';
+    btn.style.opacity = '1';
+  }
 }
 
 /* ═══════════════════════════════════════
@@ -3196,15 +3232,27 @@ function formatPhoneDisplay(number) {
 
 
 function desvincular() {
-  // Reset estado GPS y mapa para que al re-vincular funcione desde cero
-  sensorData.lat = null;
-  sensorData.lng = null;
-  mapsInitialized = false;
-  if (gpsWatchId !== null) {
-    navigator.geolocation.clearWatch(gpsWatchId);
-    gpsWatchId = null;
+  const c = confirm('¿Seguro que deseas desvincular este dispositivo? Ya no se enviará ubicación ni alertas a tus padres.');
+  if (c) {
+    // Reset estado GPS y mapa para que al re-vincular funcione desde cero
+    sensorData.lat = null;
+    sensorData.lng = null;
+    mapsInitialized = false;
+    
+    if (gpsWatchId !== null) {
+      navigator.geolocation.clearWatch(gpsWatchId);
+      gpsWatchId = null;
+    }
+    if (dataInterval) clearInterval(dataInterval);
+    if (gpsLowInterval) clearInterval(gpsLowInterval);
+    if (scheduleCheckInterval) clearInterval(scheduleCheckInterval);
+
+    localStorage.removeItem('ss_student_id');
+    localStorage.removeItem('ss_student_name');
+    
+    showScreen('link');
+    showSToast('Dispositivo desvinculado');
   }
-  showSToast('⚠️ Función disponible con cuenta real');
 }
 
 /* ═══════════════════════════════════════
@@ -3757,6 +3805,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { once: true });
   }
 });
+
+// Registrar funciones globales
+window.vincular = vincular;
+window.desvincular = desvincular;
+window.startHoldSOS = startHoldSOS;
+window.releaseHoldSOS = releaseHoldSOS;
+window.cancelSOS = cancelSOS;
+window.studentTab = studentTab;
+window.studentTabBack = studentTabBack;
+window.goToHistory = goToHistory;
+window.showProfile = showProfile;
+window.callParent = callParent;
+window.selectContact = selectContact;
+window.closeCallSheet = closeCallSheet;
+window.confirmCall = confirmCall;
+window.backToCallList = backToCallList;
+window.handleCallOverlayTap = handleCallOverlayTap;
+window.clearHistory = clearHistory;
+window.toggleTheme = toggleTheme;
+window.toggleHistoryItem = toggleHistoryItem;
+
 </script>
 </body>
 </html>
