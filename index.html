@@ -4210,18 +4210,22 @@
       // Si ya estaba vinculado, arranca automáticamente
       const savedId = localStorage.getItem('ss_student_id');
       if (savedId) {
-        // 1. Cargar instantáneamente desde cache local (Offline-first)
+        // 1. Mostrar pantalla principal de inmediato
+        showScreen('home');
+
+        // 2. Cargar instantáneamente desde cache local (Offline-first)
         const cached = getLocalConfig();
         if (cached) {
           studentConfig = cached;
           updateUIFromConfig(); // UI lista en milisegundos
         }
 
-        // 2. Iniciar servicios (geolocalización, sensores)
+        // 3. Iniciar servicios (geolocalización, sensores)
         startApp(savedId);
 
-        // 3. Sincronizar con Firestore en segundo plano
+        // 4. Sincronizar con Firestore en segundo plano
         unsubConfig = subscribeStudentConfig(savedId, (config) => {
+          if (!config) return;
           studentConfig = config;
           saveLocalConfig(config); // Actualizar cache con lo más nuevo
           updateUIFromConfig();
