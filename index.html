@@ -1901,6 +1901,26 @@
 </head>
 
 <body>
+  <script>
+    // Chequeo inmediato de sesión para evitar "flash" de pantalla de vinculación
+    (function initStartup() {
+      const savedId = localStorage.getItem('ss_student_id');
+      const root = document.documentElement;
+
+      // Aplicar tema guardado inmediatamente
+      const theme = localStorage.getItem('ss_theme') || 'dark';
+      if (theme === 'light') root.classList.add('light');
+
+      // Decidir pantalla inicial antes de renderizar
+      window.initialScreen = savedId ? 'home' : 'link';
+
+      // Esperar a que el DOM esté listo para marcar la pantalla activa
+      document.addEventListener('DOMContentLoaded', () => {
+        const screen = document.getElementById('screen-' + window.initialScreen);
+        if (screen) screen.classList.add('active');
+      });
+    })();
+  </script>
 
   <!-- TOAST -->
   <div class="s-toast" id="s-toast"></div>
@@ -1918,7 +1938,7 @@
     <!-- ══════════════════════════════
        SCREEN: VINCULAR
   ══════════════════════════════ -->
-    <div class="screen active" id="screen-link">
+    <div class="screen" id="screen-link">
       <div class="link-bg"></div>
 
       <div class="link-logo">
@@ -4201,33 +4221,31 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      showScreen('link');
+      // La pantalla inicial ya fue decidida por initStartup() para evitar flash.
+      // Aquí solo activamos las utilidades necesarias.
       checkCodeComplete();
 
       const btnVincular = document.getElementById('btn-vincular');
       if (btnVincular) btnVincular.style.opacity = '0.5';
 
-      // Si ya estaba vinculado, arranca automáticamente
+      // Si ya iniciamos sesión (decidido en initStartup), arrancar servicios
       const savedId = localStorage.getItem('ss_student_id');
       if (savedId) {
-        // 1. Mostrar pantalla principal de inmediato
-        showScreen('home');
-
-        // 2. Cargar instantáneamente desde cache local (Offline-first)
+        // Cargar instantáneamente desde cache local (Offline-first)
         const cached = getLocalConfig();
         if (cached) {
           studentConfig = cached;
-          updateUIFromConfig(); // UI lista en milisegundos
+          updateUIFromConfig();
         }
 
-        // 3. Iniciar servicios (geolocalización, sensores)
+        // Iniciar servicios
         startApp(savedId);
 
-        // 4. Sincronizar con Firestore en segundo plano
+        // Sincronizar en segundo plano
         unsubConfig = subscribeStudentConfig(savedId, (config) => {
           if (!config) return;
           studentConfig = config;
-          saveLocalConfig(config); // Actualizar cache con lo más nuevo
+          saveLocalConfig(config);
           updateUIFromConfig();
         });
       }
