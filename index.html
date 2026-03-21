@@ -1509,6 +1509,57 @@
       transition: r 1s ease;
     }
 
+    /* Offline map overlay */
+    .map-offline-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 22, 40, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      /* hidden by default */
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 20;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .map-offline-overlay.show {
+      display: flex;
+    }
+
+    .map-offline-icon {
+      font-size: 32px;
+      filter: grayscale(1);
+      opacity: 0.7;
+    }
+
+    .map-offline-msg {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-h);
+    }
+
+    .map-offline-sub {
+      font-size: 11px;
+      color: var(--text-s);
+      max-width: 180px;
+      line-height: 1.4;
+    }
+
+    /* Connection status bar indicator */
+    .conn-bar.offline {
+      background: rgba(232, 54, 74, 0.15);
+      border-color: rgba(232, 54, 74, 0.25);
+    }
+
+    .conn-bar.offline .live-dot-small {
+      background: var(--danger);
+      animation: none;
+    }
+
     /* Full map screen */
     #screen-fullmap {
       background: var(--navy);
@@ -2130,6 +2181,12 @@
               <div class="map-spinner"></div>
               <div class="map-loading-text">Esperando GPS...</div>
             </div>
+            <!-- Overlay Offline -->
+            <div class="map-offline-overlay" id="mini-map-offline">
+              <div class="map-offline-icon">📡</div>
+              <div class="map-offline-msg">Modo Offline</div>
+              <div class="map-offline-sub">Mostrando última ubicación conocida. Conéctate para actualizar el mapa.</div>
+            </div>
           </div>
           <div class="map-accuracy-info" id="map-acc-info">
             📍 Precisión: ±6m
@@ -2157,9 +2214,9 @@
         </div>
 
         <!-- Connection status -->
-        <div class="conn-bar anim anim-5">
+        <div class="conn-bar anim anim-5" id="conn-bar">
           <span class="live-dot-small"></span>
-          <span id="conn-status">Conectado · Enviando datos cada 5s</span>
+          <span id="conn-status">Conectado · Sincronizando datos...</span>
         </div>
 
       </div>
@@ -2386,9 +2443,18 @@
         </div>
       </div>
 
-      <iframe id="gmap-full" class="gmap-iframe" style="flex:1;min-height:0;"
-        referrerpolicy="no-referrer-when-downgrade" allowfullscreen loading="lazy" src="about:blank">
-      </iframe>
+      <div style="position:relative; flex:1; display:flex; flex-direction:column;">
+        <iframe id="gmap-full" class="gmap-iframe" style="flex:1;min-height:0;"
+          referrerpolicy="no-referrer-when-downgrade" allowfullscreen loading="lazy" src="about:blank">
+        </iframe>
+        <!-- Overlay Offline -->
+        <div class="map-offline-overlay" id="full-map-offline">
+          <div class="map-offline-icon">📵</div>
+          <div class="map-offline-msg">Mapa no disponible offline</div>
+          <div class="map-offline-sub">Se requiere conexión a internet para cargar los detalles del mapa interactivo.
+          </div>
+        </div>
+      </div>
 
       <div class="fullmap-bottom">
         <div class="fullmap-coords">
@@ -4336,6 +4402,28 @@
       startSensors();
     }
 
+    /**
+     * Actualiza la UI según el estado de la conexión
+     */
+    function updateConnectionUI(onLine) {
+      const bar = document.getElementById('conn-bar');
+      const status = document.getElementById('conn-status');
+      const miniOffline = document.getElementById('mini-map-offline');
+      const fullOffline = document.getElementById('full-map-offline');
+
+      if (onLine) {
+        if (bar) bar.classList.remove('offline');
+        if (status) status.textContent = 'Conectado · Sincronizando datos...';
+        if (miniOffline) miniOffline.classList.remove('show');
+        if (fullOffline) fullOffline.classList.remove('show');
+      } else {
+        if (bar) bar.classList.add('offline');
+        if (status) status.textContent = 'Modo Offline · Los datos se enviarán al volver';
+        if (miniOffline) miniOffline.classList.add('show');
+        if (fullOffline) fullOffline.classList.add('show');
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       // La pantalla inicial ya fue decidida por initStartup() para evitar flash.
       // Aquí solo activamos las utilidades necesarias.
@@ -4376,13 +4464,18 @@
 
       // Evento: cambio de red
       window.addEventListener('online', () => {
+        updateConnectionUI(true);
         addHistoryEvent('info', 'Conexión restaurada — En línea');
         showSToast('📶 Conexión restaurada');
       });
       window.addEventListener('offline', () => {
+        updateConnectionUI(false);
         addHistoryEvent('offline', 'Sin conexión a internet');
         showSToast('📵 Sin conexión');
       });
+
+      // Estado inicial de conexión
+      updateConnectionUI(navigator.onLine);
 
       setTimeout(() => {
         const first = document.getElementById('d0');
