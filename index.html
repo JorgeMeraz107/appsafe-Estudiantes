@@ -2411,10 +2411,16 @@
             <path d="M11 4L7 9L11 14" stroke="var(--text-b)" stroke-width="2" stroke-linecap="round" />
           </svg>
         </button>
-        <div class="profile-avatar" id="profile-avatar-view"
-          style="width:100px;height:100px;background:var(--bg-item);border-radius:30px;border:3px solid var(--border-c);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px;box-shadow:0 12px 32px rgba(0,0,0,0.1);">
+        <div class="profile-avatar" id="profile-avatar-view" onclick="openAvatarPicker()"
+          style="width:100px;height:100px;background:var(--bg-item);border-radius:30px;border:3px solid var(--border-c);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px;box-shadow:0 12px 32px rgba(0,0,0,0.1);cursor:pointer;position:relative;">
           <img src="" id="profile-avatar-img" style="width:100%;height:100%;object-fit:cover;display:none;">
           <span id="profile-avatar-initial" style="font-size:36px;font-weight:800;color:var(--text-h);">?</span>
+          <div class="student-avatar-edit-icon">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </div>
         </div>
         <div class="profile-name" id="profile-name-display">Cargando...</div>
         <div class="profile-code" id="profile-link-code">Código: ------</div>
@@ -4577,6 +4583,159 @@
       startSensors();
     }
 
+    // ── AVATAR PICKER LOGIC ────────────────
+    const AVATAR_OPTIONS = [
+      'https://res.cloudinary.com/duuporwnz/image/upload/v1774118146/flash_zm4ed8.png',
+      'https://res.cloudinary.com/duuporwnz/image/upload/v1774118376/nova_pfzrln.png',
+      'https://res.cloudinary.com/duuporwnz/image/upload/v1774118485/Rocky_oaiv4k.png',
+      'https://res.cloudinary.com/duuporwnz/image/upload/v1774118634/zara_j2ojjx.png',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Oliver',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Luna',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Leo',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Mia',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Max',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=NovaPlaceholder',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Rex',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Zoe'
+    ];
+
+    let selectedAvatarUrl = null;
+
+    function openAvatarPicker() {
+      const modal = document.getElementById('avatar-picker-modal');
+      const grid = document.getElementById('avatar-grid-options');
+      if (!modal || !grid) return;
+      selectedAvatarUrl = studentConfig.photoURL || null;
+      grid.innerHTML = AVATAR_OPTIONS.map(url => `
+        <div class="avatar-option ${url === selectedAvatarUrl ? 'selected' : ''}" 
+             onclick="selectAvatarOption('${url}')">
+          <img src="${url}" alt="Avatar">
+        </div>
+      `).join('');
+      modal.classList.add('active');
+    }
+
+    function closeAvatarPicker() {
+      document.getElementById('avatar-picker-modal')?.classList.remove('active');
+    }
+
+    function selectAvatarOption(url) {
+      selectedAvatarUrl = url;
+      document.querySelectorAll('.avatar-option').forEach(opt => {
+        opt.classList.toggle('selected', opt.querySelector('img').src === url);
+      });
+    }
+
+    function saveAvatarSelection() {
+      if (!selectedAvatarUrl) return;
+      const btn = document.getElementById('btn-save-avatar');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+      studentConfig.photoURL = selectedAvatarUrl;
+      updateUIFromConfig();
+      saveLocalConfig(studentConfig);
+      const sid = localStorage.getItem('ss_student_id');
+      if (sid) {
+        updateStudentAvatarFS(sid, selectedAvatarUrl)
+          .then(() => { showSToast('✅ Avatar actualizado'); closeAvatarPicker(); })
+          .catch(err => { console.error(err); showSToast('❌ Error al guardar'); })
+          .finally(() => { btn.disabled = false; btn.textContent = originalText; });
+      } else { closeAvatarPicker(); }
+    }
+
+    // Actualizar función existente para manejar avatar
+    const originalUpdateUI = window.updateUIFromConfig || function () { };
+    window.updateUIFromConfig = function () {
+      // Intentar llamar a la lógica original si existe (o replicarla si es corta)
+      // En este caso, la lógica original está definida arriba, así que la extenderemos.
+
+      const nameEl = document.getElementById('student-display-name');
+      if (nameEl && studentConfig.name) nameEl.textContent = studentConfig.name;
+
+      const avatarImg = document.getElementById('student-avatar-img');
+      const avatarInit = document.getElementById('student-avatar-initial');
+
+      // Otros elementos de avatar
+      const sosImg = document.getElementById('sos-avatar-img');
+      const sosInit = document.getElementById('sos-avatar-initial');
+      const profImg = document.getElementById('profile-avatar-img');
+      const profInit = document.getElementById('profile-avatar-initial');
+
+      const nameInitial = studentConfig.name ? studentConfig.name[0].toUpperCase() : '?';
+      const defaultAvatar = AVATAR_OPTIONS[0]; // Usar el primero (Flash) como default visual
+
+      if (studentConfig.photoURL || defaultAvatar) {
+        const urlToUse = studentConfig.photoURL || defaultAvatar;
+        [avatarImg, sosImg, profImg].forEach(img => {
+          if (img) {
+            img.src = urlToUse;
+            img.style.display = 'block';
+          }
+        });
+        [avatarInit, sosInit, profInit].forEach(span => {
+          if (span) {
+            span.style.display = 'none';
+          }
+        });
+      } else {
+        [avatarImg, sosImg, profImg].forEach(img => {
+          if (img) img.style.display = 'none';
+        });
+        [avatarInit, sosInit, profInit].forEach(span => {
+          if (span) {
+            span.textContent = nameInitial;
+            span.style.display = 'block';
+          }
+        });
+      }
+
+      // Re-triggering original if needed (legacy support)
+      if (typeof originalUpdateUI === 'function') originalUpdateUI();
+    };
+
+    // ── NAVEGACIÓN ENTRE PANTALLAS ────────────────
+    function showProfile() {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-profile').classList.add('active');
+      const nameEl = document.getElementById('profile-name-display');
+      if (nameEl) nameEl.textContent = studentConfig.name || 'Alumno';
+      const codeEl = document.getElementById('profile-link-code');
+      const savedId = localStorage.getItem('ss_student_id');
+      if (codeEl && savedId) codeEl.textContent = `ID: ${savedId.substring(0, 8).toUpperCase()}`;
+      document.querySelectorAll('.s-nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === 'profile');
+      });
+      // Add onclick to profile avatar
+      const profileAvatarContainer = document.getElementById('profile-avatar-container');
+      if (profileAvatarContainer) {
+        profileAvatarContainer.onclick = openAvatarPicker;
+      }
+    }
+
+    function goToHistory() {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-history').classList.add('active');
+      if (typeof renderHistory === 'function') renderHistory();
+      document.querySelectorAll('.s-nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === 'history');
+      });
+    }
+
+    function studentTabBack() {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-home').classList.add('active');
+      document.querySelectorAll('.s-nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === 'home');
+      });
+    }
+
+    function studentTab(tab, btn) {
+      if (tab === 'home') studentTabBack();
+      else if (tab === 'history') goToHistory();
+      else if (tab === 'profile') showProfile();
+    }
+
     /**
      * Actualiza la UI según el estado de la conexión
      */
@@ -4695,136 +4854,6 @@
     window.selectAvatarOption = selectAvatarOption;
     window.saveAvatarSelection = saveAvatarSelection;
 
-    // ── AVATAR PICKER LOGIC ────────────────
-    // DESARROLLADOR: Aquí puedes colocar las 12 URLs de Cloudinary que desees. 
-    // Los alumnos elegirán entre estas opciones para su perfil.
-    const AVATAR_OPTIONS = [
-      'https://res.cloudinary.com/duuporwnz/image/upload/v1774118146/flash_zm4ed8.png',
-      'https://res.cloudinary.com/duuporwnz/image/upload/v1774118376/nova_pfzrln.png',
-      'https://res.cloudinary.com/duuporwnz/image/upload/v1774118485/Rocky_oaiv4k.png',
-      'https://res.cloudinary.com/duuporwnz/image/upload/v1774118634/zara_j2ojjx.png',
-      'https://api.dicebear.com/7.x/notionists/svg?seed=Oliver',
-      'https://api.dicebear.com/7.x/notionists/svg?seed=Luna',
-      'https://api.dicebear.com/7.x/notionists/svg?seed=Leo',
-      'https://api.dicebear.com/7.x/notionists/svg?seed=Mia',
-      'https://api.dicebear.com/7.x/notionists/svg?seed=Max',
-      'https://api.dicebear.com/7.x/notionists/svg?seed=NovaPlaceholder',
-      'https://api.dicebear.com/7.x/notionists/svg?seed=Rex',
-      'https://api.dicebear.com/7.x/notionists/svg?seed=Zoe'
-    ];
-
-    let selectedAvatarUrl = null;
-
-    function openAvatarPicker() {
-      const modal = document.getElementById('avatar-picker-modal');
-      const grid = document.getElementById('avatar-grid-options');
-      if (!modal || !grid) return;
-
-      selectedAvatarUrl = studentConfig.photoURL || null;
-
-      grid.innerHTML = AVATAR_OPTIONS.map(url => `
-        <div class="avatar-option ${url === selectedAvatarUrl ? 'selected' : ''}" 
-             onclick="selectAvatarOption('${url}')">
-          <img src="${url}" alt="Avatar">
-        </div>
-      `).join('');
-
-      modal.classList.add('active');
-    }
-
-    function closeAvatarPicker() {
-      document.getElementById('avatar-picker-modal')?.classList.remove('active');
-    }
-
-    function selectAvatarOption(url) {
-      selectedAvatarUrl = url;
-      document.querySelectorAll('.avatar-option').forEach(opt => {
-        opt.classList.toggle('selected', opt.querySelector('img').src === url);
-      });
-    }
-
-    function saveAvatarSelection() {
-      if (!selectedAvatarUrl) return;
-
-      const btn = document.getElementById('btn-save-avatar');
-      const originalText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Guardando...';
-
-      // Actualizar localmente primero para UI instantánea
-      studentConfig.photoURL = selectedAvatarUrl;
-      updateUIFromConfig();
-      saveLocalConfig(studentConfig);
-
-      // Enviar a Firebase
-      const sid = localStorage.getItem('ss_student_id');
-      if (sid) {
-        updateStudentAvatarFS(sid, selectedAvatarUrl)
-          .then(() => {
-            showSToast('✅ Avatar actualizado');
-            closeAvatarPicker();
-          })
-          .catch(err => {
-            console.error(err);
-            showSToast('❌ Error al guardar');
-          })
-          .finally(() => {
-            btn.disabled = false;
-            btn.textContent = originalText;
-          });
-      } else {
-        closeAvatarPicker();
-      }
-    }
-
-    // Actualizar función existente para manejar avatar
-    const originalUpdateUI = window.updateUIFromConfig || function () { };
-    window.updateUIFromConfig = function () {
-      // Intentar llamar a la lógica original si existe (o replicarla si es corta)
-      // En este caso, la lógica original está definida arriba, así que la extenderemos.
-
-      const nameEl = document.getElementById('student-display-name');
-      if (nameEl && studentConfig.name) nameEl.textContent = studentConfig.name;
-
-      const avatarImg = document.getElementById('student-avatar-img');
-      const avatarInit = document.getElementById('student-avatar-initial');
-
-      // Otros elementos de avatar
-      const sosImg = document.getElementById('sos-avatar-img');
-      const sosInit = document.getElementById('sos-avatar-initial');
-      const profImg = document.getElementById('profile-avatar-img');
-      const profInit = document.getElementById('profile-avatar-initial');
-
-      const nameInitial = studentConfig.name ? studentConfig.name[0].toUpperCase() : '?';
-      const defaultAvatar = AVATAR_OPTIONS[0]; // Usar el primero (Flash) como default visual
-
-      if (studentConfig.photoURL || defaultAvatar) {
-        const urlToUse = studentConfig.photoURL || defaultAvatar;
-        [avatarImg, sosImg, profImg].forEach(img => {
-          if (img) {
-            img.src = urlToUse;
-            img.style.display = 'block';
-          }
-        });
-        [avatarInit, sosInit, profInit].forEach(span => {
-          if (span) span.style.display = 'none';
-        });
-      } else {
-        [avatarImg, sosImg, profImg].forEach(img => {
-          if (img) img.style.display = 'none';
-        });
-        [avatarInit, sosInit, profInit].forEach(span => {
-          if (span) {
-            span.textContent = nameInitial;
-            span.style.display = 'block';
-          }
-        });
-      }
-
-      // Llamamos a la lógica original de actualización de UI (que suele estar definida antes)
-      // Nota: Si updateUIFromConfig está definida múltiples veces, la última prevalece.
-      // Así que buscamos dónde se define originalmente para no romper nada.
-    };
 
   </script>
 </body>
