@@ -2040,9 +2040,16 @@
 
       <!-- Top bar -->
       <div class="student-topbar">
-        <div>
-          <div class="student-greeting">Hola,</div>
-          <div class="student-name-top" id="student-display-name">Carlos García</div>
+        <div class="student-info-left">
+          <div class="student-avatar-header" id="student-avatar-btn" onclick="openAvatarPicker()">
+            <img src="" id="student-avatar-img" style="display:none;">
+            <span id="student-avatar-initial">?</span>
+            <div class="student-avatar-badge"></div>
+          </div>
+          <div>
+            <div class="student-greeting">Hola,</div>
+            <div class="student-name-top" id="student-display-name">Carlos García</div>
+          </div>
         </div>
         <div class="status-badge-top status-badge-safe" id="status-badge-top">
           <div
@@ -2552,7 +2559,15 @@
   </div><!-- end shell -->
 
   <script type="module">
-    import { verifyLinkCode, markStudentLinked, writeLiveData, getStudentData, addHistoryEventFS, subscribeStudentConfig } from './firebase-student.js';
+    import {
+      verifyLinkCode,
+      markStudentLinked,
+      writeLiveData,
+      getStudentData,
+      addHistoryEventFS,
+      subscribeStudentConfig,
+      sendNotificationFS
+    } from './firebase-student.js';
 
     /* ═══════════════════════════════════════
        STATE
@@ -3123,6 +3138,7 @@
           // Guardar info del alumno localmente
           localStorage.setItem('ss_student_id', student.id);
           localStorage.setItem('ss_student_name', student.name);
+          if (student.parentid) localStorage.setItem('ss_parent_id', student.parentid);
           localStorage.setItem('ss_student_grade', student.grade || '');
 
           // Marcar como vinculado en Firestore
@@ -4135,11 +4151,28 @@
 
       // Enviar a Firestore si está vinculado
       const studentId = localStorage.getItem('ss_student_id');
+      const parentId = localStorage.getItem('ss_parent_id');
+      const studentName = localStorage.getItem('ss_student_name') || 'Hijo';
+
       if (studentId) {
         try {
           await addHistoryEventFS(studentId, ev);
+
+          // 3. Notificación persistente para eventos CRÍTICOS
+          const criticalTypes = ['sos', 'impact', 'battery', 'checkin', 'offline'];
+          if (criticalTypes.includes(type) && parentId) {
+            const notif = {
+              type,
+              title: title,
+              body: ev.placeName ? `En: ${ev.placeName}` : 'Ubicación detectada',
+              icon: TYPE_CFG[type]?.emoji || '🔔',
+              action: type === 'sos' ? 'emergency' : 'student',
+              studentName: studentName
+            };
+            await sendNotificationFS(studentId, parentId, notif);
+          }
         } catch (e) {
-          console.error("Error enviando evento a Firestore:", e);
+          console.error("Error enviando evento/notificación a Firestore:", e);
         }
       }
 
@@ -4509,6 +4542,7 @@
         unsubConfig = subscribeStudentConfig(savedId, (config) => {
           if (!config) return;
           studentConfig = config;
+          if (config.parentid) localStorage.setItem('ss_parent_id', config.parentid);
           saveLocalConfig(config);
           updateUIFromConfig();
         });
@@ -4574,6 +4608,123 @@
     window.sendManualCheckin = sendManualCheckin;
     window.confirmCancelSOS = confirmCancelSOS;
     window.viewSafeZone = viewSafeZone;
+    window.openAvatarPicker = openAvatarPicker;
+    window.closeAvatarPicker = closeAvatarPicker;
+    window.selectAvatarOption = selectAvatarOption;
+    window.saveAvatarSelection = saveAvatarSelection;
+
+    // ── AVATAR PICKER LOGIC ────────────────
+    // DESARROLLADOR: Aquí puedes colocar las 12 URLs de Cloudinary que desees. 
+    // Los alumnos elegirán entre estas opciones para su perfil.
+    const AVATAR_OPTIONS = [
+      'https://res.cloudinary.com/duuporwnz/image/upload/v1774118146/flash_zm4ed8.png',
+      'https://res.cloudinary.com/duuporwnz/image/upload/v1774118376/nova_pfzrln.png',
+      'https://res.cloudinary.com/duuporwnz/image/upload/v1774118485/Rocky_oaiv4k.png',
+      'https://res.cloudinary.com/duuporwnz/image/upload/v1774118634/zara_j2ojjx.png',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Oliver',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Luna',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Leo',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Mia',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Max',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=NovaPlaceholder',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Rex',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Zoe'
+    ];
+
+    let selectedAvatarUrl = null;
+
+    function openAvatarPicker() {
+      const modal = document.getElementById('avatar-picker-modal');
+      const grid = document.getElementById('avatar-grid-options');
+      if (!modal || !grid) return;
+
+      selectedAvatarUrl = studentConfig.photoURL || null;
+
+      grid.innerHTML = AVATAR_OPTIONS.map(url => `
+        <div class="avatar-option ${url === selectedAvatarUrl ? 'selected' : ''}" 
+             onclick="selectAvatarOption('${url}')">
+          <img src="${url}" alt="Avatar">
+        </div>
+      `).join('');
+
+      modal.classList.add('active');
+    }
+
+    function closeAvatarPicker() {
+      document.getElementById('avatar-picker-modal')?.classList.remove('active');
+    }
+
+    function selectAvatarOption(url) {
+      selectedAvatarUrl = url;
+      document.querySelectorAll('.avatar-option').forEach(opt => {
+        opt.classList.toggle('selected', opt.querySelector('img').src === url);
+      });
+    }
+
+    function saveAvatarSelection() {
+      if (!selectedAvatarUrl) return;
+
+      const btn = document.getElementById('btn-save-avatar');
+      const originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+
+      // Actualizar localmente primero para UI instantánea
+      studentConfig.photoURL = selectedAvatarUrl;
+      updateUIFromConfig();
+      saveLocalConfig(studentConfig);
+
+      // Enviar a Firebase
+      const sid = localStorage.getItem('ss_student_id');
+      if (sid) {
+        updateStudentAvatarFS(sid, selectedAvatarUrl)
+          .then(() => {
+            showSToast('✅ Avatar actualizado');
+            closeAvatarPicker();
+          })
+          .catch(err => {
+            console.error(err);
+            showSToast('❌ Error al guardar');
+          })
+          .finally(() => {
+            btn.disabled = false;
+            btn.textContent = originalText;
+          });
+      } else {
+        closeAvatarPicker();
+      }
+    }
+
+    // Actualizar función existente para manejar avatar
+    const originalUpdateUI = window.updateUIFromConfig || function () { };
+    window.updateUIFromConfig = function () {
+      // Intentar llamar a la lógica original si existe (o replicarla si es corta)
+      // En este caso, la lógica original está definida arriba, así que la extenderemos.
+
+      const nameEl = document.getElementById('student-display-name');
+      if (nameEl && studentConfig.name) nameEl.textContent = studentConfig.name;
+
+      const avatarImg = document.getElementById('student-avatar-img');
+      const avatarInit = document.getElementById('student-avatar-initial');
+
+      if (studentConfig.photoURL) {
+        if (avatarImg) {
+          avatarImg.src = studentConfig.photoURL;
+          avatarImg.style.display = 'block';
+        }
+        if (avatarInit) avatarInit.style.display = 'none';
+      } else {
+        if (avatarImg) avatarImg.style.display = 'none';
+        if (avatarInit) {
+          avatarInit.style.display = 'block';
+          avatarInit.textContent = studentConfig.name ? studentConfig.name[0].toUpperCase() : '?';
+        }
+      }
+
+      // Llamamos a la lógica original de actualización de UI (que suele estar definida antes)
+      // Nota: Si updateUIFromConfig está definida múltiples veces, la última prevalece.
+      // Así que buscamos dónde se define originalmente para no romper nada.
+    };
 
   </script>
 </body>

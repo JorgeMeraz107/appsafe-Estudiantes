@@ -131,6 +131,32 @@ export async function addHistoryEventFS(studentId, event) {
 }
 
 /**
+ * Envía una notificación persistente a la colección del PADRE.
+ * @param {string} studentId
+ * @param {string} parentid — El UID del padre obtenido del documento del estudiante
+ * @param {object} notif — { type, title, body, icon, action }
+ */
+export async function sendNotificationFS(studentId, parentid, notif) {
+  if (!parentid) return;
+  const colRef = collection(db, 'notifications');
+  await addDoc(colRef, {
+    studentId,
+    parentid,
+    ...notif,
+    timestamp: serverTimestamp(),
+    unread: true
+  });
+}
+
+/**
+ * Actualiza el avatar del alumno en Firestore
+ */
+export async function updateStudentAvatarFS(studentId, photoURL) {
+  const docRef = doc(db, 'students', studentId);
+  await updateDoc(docRef, { photoURL });
+}
+
+/**
  * Suscribe en tiempo real a los datos del documento del estudiante.
  * Se usa para sincronizar Contactos y Horario desde el Padre.
  */
