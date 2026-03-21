@@ -1677,13 +1677,13 @@
       height: 44px;
       background: var(--bg-item);
       border: 2px solid var(--border-c);
-      border-radius: 14px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
       cursor: pointer;
-      overflow: visible;
+      overflow: hidden;
       transition: all 0.2s ease;
       -webkit-tap-highlight-color: transparent;
     }
@@ -1701,39 +1701,13 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 12px;
+      border-radius: 50%;
     }
 
     .student-avatar-header span {
       font-size: 20px;
       font-weight: 800;
       color: var(--text-h);
-    }
-
-    .student-avatar-badge {
-      position: absolute;
-      top: -3px;
-      right: -3px;
-      width: 14px;
-      height: 14px;
-      background: var(--safe);
-      border: 2.5px solid var(--bg-app);
-      border-radius: 50%;
-    }
-
-    .student-avatar-edit-icon {
-      position: absolute;
-      bottom: -4px;
-      right: -4px;
-      width: 18px;
-      height: 18px;
-      background: var(--blue-acc);
-      border: 2px solid var(--bg-app);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
 
     .call-overlay {
@@ -2109,13 +2083,6 @@
             title="Cambiar Avatar">
             <img src="" id="student-avatar-img" style="display:none;">
             <span id="student-avatar-initial">?</span>
-            <div class="student-avatar-badge"></div>
-            <div class="student-avatar-edit-icon">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </div>
           </div>
           <div>
             <div class="student-greeting">Hola,</div>
@@ -2336,7 +2303,7 @@
       <div class="sos-content">
         <div class="sos-avatar-container anim anim-1">
           <div class="sos-avatar" id="sos-avatar-view"
-            style="width:80px;height:80px;border-radius:24px;background:rgba(255,255,255,0.1);border:3px solid white;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:12px;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+            style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.1);border:3px solid white;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:12px;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
             <img src="" id="sos-avatar-img" style="width:100%;height:100%;object-fit:cover;display:none;">
             <span id="sos-avatar-initial" style="font-size:32px;font-weight:800;color:white;">?</span>
           </div>
@@ -2412,15 +2379,9 @@
           </svg>
         </button>
         <div class="profile-avatar" id="profile-avatar-view" onclick="openAvatarPicker()"
-          style="width:100px;height:100px;background:var(--bg-item);border-radius:30px;border:3px solid var(--border-c);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px;box-shadow:0 12px 32px rgba(0,0,0,0.1);cursor:pointer;position:relative;">
+          style="width:100px;height:100px;background:var(--bg-item);border-radius:50%;border:4px solid var(--border-c);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px;box-shadow:0 12px 32px rgba(0,0,0,0.1);cursor:pointer;position:relative;">
           <img src="" id="profile-avatar-img" style="width:100%;height:100%;object-fit:cover;display:none;">
           <span id="profile-avatar-initial" style="font-size:36px;font-weight:800;color:var(--text-h);">?</span>
-          <div class="student-avatar-edit-icon">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-          </div>
         </div>
         <div class="profile-name" id="profile-name-display">Cargando...</div>
         <div class="profile-code" id="profile-link-code">Código: ------</div>
