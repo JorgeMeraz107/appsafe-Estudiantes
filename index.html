@@ -2033,6 +2033,33 @@
           </div>
         </div>
 
+        <!-- Indicadores de Zona Segura -->
+        <div class="safe-zones-status anim anim-2" id="safe-zones-container"
+          style="display:none; margin: 12px 16px 0; gap: 10px;">
+          <div class="sz-chip" id="sz-home"
+            style="flex:1; background:var(--bg-item); border:1px solid var(--border-c); border-radius:12px; padding:10px; display:flex; align-items:center; gap:8px;">
+            <div style="font-size:18px;">🏠</div>
+            <div style="flex:1;">
+              <div
+                style="font-size:10px; font-weight:700; color:var(--text-s); text-transform:uppercase; letter-spacing:0.05em;">
+                Hogar</div>
+              <div class="sz-status" id="sz-home-status" style="font-size:12px; font-weight:700; color:var(--text-b);">
+                Fuera</div>
+            </div>
+          </div>
+          <div class="sz-chip" id="sz-school"
+            style="flex:1; background:var(--bg-item); border:1px solid var(--border-c); border-radius:12px; padding:10px; display:flex; align-items:center; gap:8px;">
+            <div style="font-size:18px;">🏫</div>
+            <div style="flex:1;">
+              <div
+                style="font-size:10px; font-weight:700; color:var(--text-s); text-transform:uppercase; letter-spacing:0.05em;">
+                Escuela</div>
+              <div class="sz-status" id="sz-school-status"
+                style="font-size:12px; font-weight:700; color:var(--text-b);">Fuera</div>
+            </div>
+          </div>
+        </div>
+
         <!-- Sensor cards -->
         <div class="sensor-row">
 
@@ -2476,7 +2503,9 @@
       charging: true,
       speed: 0,
       motion: 'Quieto',
-      accel: { x: 0.2, y: 9.8, z: 0.1 }
+      accel: { x: 0.2, y: 9.8, z: 0.1 },
+      impact: false,
+      fall: false
     };
 
     /* ═══════════════════════════════════════
@@ -2689,6 +2718,8 @@
           accel_x: sensorData.accel.x,
           accel_y: sensorData.accel.y,
           accel_z: sensorData.accel.z,
+          impact: sensorData.impact || false,
+          fall: sensorData.fall || false,
           sos: sosActive,
           mode: monitoringMode,
           ts: Date.now()
@@ -2841,6 +2872,69 @@
       }
       if (currentScreen === 'home' || pendingContact) {
         renderCallContacts();
+      }
+
+      // Actualizar estado de zonas seguras
+      updateSafeZoneStatus();
+    }
+
+    /**
+     * Calcula la distancia a Hogar y Escuela y actualiza los indicadores
+     */
+    function updateSafeZoneStatus() {
+      if (!studentConfig || sensorData.lat === null) return;
+
+      const container = document.getElementById('safe-zones-container');
+      const hasHome = studentConfig.homeLat && studentConfig.homeLng;
+      const hasSchool = studentConfig.schoolLat && studentConfig.schoolLng;
+
+      if (!hasHome && !hasSchool) {
+        container.style.display = 'none';
+        return;
+      }
+
+      container.style.display = 'flex';
+
+      // --- HOGAR ---
+      const homeChip = document.getElementById('sz-home');
+      const homeStatus = document.getElementById('sz-home-status');
+      if (hasHome) {
+        homeChip.style.display = 'flex';
+        const dist = haversineStudent(sensorData.lat, sensorData.lng, studentConfig.homeLat, studentConfig.homeLng);
+        if (dist <= 200) {
+          homeStatus.textContent = 'En Casa';
+          homeStatus.style.color = 'var(--safe)';
+          homeChip.style.borderColor = 'rgba(15, 191, 122, 0.3)';
+          homeChip.style.background = 'rgba(15, 191, 122, 0.05)';
+        } else {
+          homeStatus.textContent = dist > 1000 ? (dist / 1000).toFixed(1) + ' km' : Math.round(dist) + ' m';
+          homeStatus.style.color = 'var(--text-b)';
+          homeChip.style.borderColor = 'var(--border-c)';
+          homeChip.style.background = 'var(--bg-card)';
+        }
+      } else {
+        homeChip.style.display = 'none';
+      }
+
+      // --- ESCUELA ---
+      const schoolChip = document.getElementById('sz-school');
+      const schoolStatus = document.getElementById('sz-school-status');
+      if (hasSchool) {
+        schoolChip.style.display = 'flex';
+        const dist = haversineStudent(sensorData.lat, sensorData.lng, studentConfig.schoolLat, studentConfig.schoolLng);
+        if (dist <= 200) {
+          schoolStatus.textContent = 'En Escuela';
+          schoolStatus.style.color = '#2979FF';
+          schoolChip.style.borderColor = 'rgba(41, 121, 255, 0.3)';
+          schoolChip.style.background = 'rgba(41, 121, 255, 0.05)';
+        } else {
+          schoolStatus.textContent = dist > 1000 ? (dist / 1000).toFixed(1) + ' km' : Math.round(dist) + ' m';
+          schoolStatus.style.color = 'var(--text-b)';
+          schoolChip.style.borderColor = 'var(--border-c)';
+          schoolChip.style.background = 'var(--bg-card)';
+        }
+      } else {
+        schoolChip.style.display = 'none';
       }
     }
 
@@ -3258,6 +3352,7 @@
 
       updateGPSUI();
       writeStudentSnapshot();
+      updateSafeZoneStatus();
 
       if (wasNull) {
         // Primera posición — carga el mapa y registra en historial
@@ -3320,18 +3415,32 @@
     }
 
     // ── Real motion handler ───────────────
+    let impactResetTimeout = null;
     function handleMotion(e) {
       const acc = e.acceleration || e.accelerationIncludingGravity;
       if (!acc) return;
       sensorData.accel = { x: acc.x || 0, y: acc.y || 0, z: acc.z || 0 };
       const magnitude = Math.sqrt(acc.x ** 2 + acc.y ** 2 + acc.z ** 2);
+
+      // Detección de caída (baja aceleración prolongada seguida de impacto)
+      // Por ahora usamos una lógica simplificada de impacto fuerte
       sensorData.motion = magnitude < 1 ? 'Quieto' : magnitude < 5 ? 'Caminando' : magnitude < 12 ? 'Corriendo' : 'Impacto';
 
-      // Auto-SOS on heavy impact
-      if (magnitude > 25 && !sosActive) {
+      // Auto-SOS / Alerta en impacto fuerte (> 25 m/s²)
+      if (magnitude > 25 && !sensorData.impact) {
+        sensorData.impact = true;
         showSToast('⚡ Impacto fuerte detectado');
         addHistoryEvent('impact', `Impacto fuerte detectado — ${magnitude.toFixed(1)} m/s²`);
-        // In production: trigger SOS automatically
+
+        // Enviar a Firestore inmediatamente
+        writeStudentSnapshot();
+
+        // Resetear estado de impacto después de 15 segundos
+        if (impactResetTimeout) clearTimeout(impactResetTimeout);
+        impactResetTimeout = setTimeout(() => {
+          sensorData.impact = false;
+          writeStudentSnapshot(); // Actualizar a los padres que ya pasó la fase de impacto
+        }, 15000);
       }
       updateAccelUI();
     }
@@ -3506,6 +3615,13 @@
       catch { }
     }
 
+    function escapeHTML(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
     // Contacto actualmente seleccionado para confirmar
     let pendingContact = null;
 
@@ -3532,8 +3648,8 @@
         ${!c.emergency ? `<div class="call-badge">📞</div>` : ''}
       </div>
       <div class="call-contact-info">
-        <div class="call-contact-name">${c.name}</div>
-        <div class="call-contact-role">${c.role}</div>
+        <div class="call-contact-name">${escapeHTML(c.name)}</div>
+        <div class="call-contact-role">${escapeHTML(c.role)}</div>
         <div class="call-contact-number">${formatPhoneDisplay(c.number)}</div>
       </div>
       <div class="call-contact-action" style="background:${c.actionColor}">
@@ -4123,7 +4239,7 @@
         <div class="h-dot" style="background:${cfg.bg}">${cfg.emoji}</div>
         <div class="h-body">
           <div class="h-header">
-            <div class="h-title">${ev.title}</div>
+            <div class="h-title">${escapeHTML(ev.title)}</div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
               <div class="h-time">${tf.short.replace(/^(Hoy|Ayer|[A-Za-záéíóúÁÉÍÓÚ]+) /, '')}</div>
               <div class="h-expand-arrow">▼</div>

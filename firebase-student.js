@@ -8,6 +8,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
 import {
     getFirestore,
+    enableIndexedDbPersistence,
     doc,
     collection,
     getDoc,
@@ -31,6 +32,15 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Enable offline persistence
+enableIndexedDbPersistence(db).catch((err) => {
+    if (err.code == 'failed-precondition') {
+        console.warn("Firestore persistence target already active in another tab.");
+    } else if (err.code == 'unimplemented') {
+        console.warn("Firestore persistence not supported by this browser.");
+    }
+});
 
 // Importar y configurar Auth para evitar bloqueos por reglas de seguridad
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
