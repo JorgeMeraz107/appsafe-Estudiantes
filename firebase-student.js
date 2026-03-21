@@ -13,10 +13,12 @@ import {
     collection,
     getDoc,
     setDoc,
+    updateDoc,
     query,
     where,
     getDocs,
     addDoc,
+    onSnapshot,
     serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -160,7 +162,6 @@ export async function updateStudentAvatarFS(studentId, photoURL) {
  * Suscribe en tiempo real a los datos del documento del estudiante.
  * Se usa para sincronizar Contactos y Horario desde el Padre.
  */
-import { onSnapshot } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 export function subscribeStudentConfig(studentId, onChange) {
     const ref = doc(db, "students", studentId);
