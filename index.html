@@ -3021,10 +3021,13 @@
       // Usar config cacheada si existe para velocidad, si no pedir a FS
       const data = studentConfig || (await getStudentData(localStorage.getItem('ss_student_id')));
       if (data) {
-        document.getElementById('profile-name-display').textContent = data.name || 'Alumno';
-        document.getElementById('profile-avatar-letter').textContent = (data.name || 'A').charAt(0).toUpperCase();
-        document.getElementById('profile-link-code').textContent = `Código: ${data.linkCode || '------'}`;
-        document.getElementById('profile-grade-badge').textContent = data.grade || 'Sin grado';
+        if (document.getElementById('profile-name-display')) document.getElementById('profile-name-display').textContent = data.name || 'Alumno';
+        // Avatar logic handled in updateUIFromConfig
+        const savedId = localStorage.getItem('ss_student_id');
+        if (document.getElementById('profile-link-code') && savedId) {
+          document.getElementById('profile-link-code').textContent = `ID: ${savedId.substring(0, 8).toUpperCase()}`;
+        }
+        if (document.getElementById('profile-grade-badge')) document.getElementById('profile-grade-badge').textContent = data.grade || 'Sin grado';
       }
 
       showScreen('profile');
@@ -3041,15 +3044,41 @@
       const displayNames = document.querySelectorAll('#student-display-name, #profile-name-display, .student-name-top');
       displayNames.forEach(el => el.textContent = name);
 
-      const avatars = document.querySelectorAll('#profile-avatar-letter, #home-avatar-letter');
-      avatars.forEach(el => el.textContent = name.charAt(0).toUpperCase());
+      // --- AVATAR LOGIC (NEW) ---
+      const avatarImg = document.getElementById('student-avatar-img');
+      const avatarInit = document.getElementById('student-avatar-initial');
+      const sosImg = document.getElementById('sos-avatar-img');
+      const sosInit = document.getElementById('sos-avatar-initial');
+      const profImg = document.getElementById('profile-avatar-img');
+      const profInit = document.getElementById('profile-avatar-initial');
+
+      const nameInitial = name[0].toUpperCase();
+      const defaultAvatar = AVATAR_OPTIONS[0]; // Flash
+
+      if (studentConfig.photoURL || defaultAvatar) {
+        const urlToUse = studentConfig.photoURL || defaultAvatar;
+        [avatarImg, sosImg, profImg].forEach(img => {
+          if (img) { img.src = urlToUse; img.style.display = 'block'; }
+        });
+        [avatarInit, sosInit, profInit].forEach(span => {
+          if (span) span.style.display = 'none';
+        });
+      } else {
+        [avatarImg, sosImg, profImg].forEach(img => {
+          if (img) img.style.display = 'none';
+        });
+        [avatarInit, sosInit, profInit].forEach(span => {
+          if (span) { span.textContent = nameInitial; span.style.display = 'block'; }
+        });
+      }
 
       // Actualizar banner de monitoreo
       evaluateSchedule();
 
       // Si está en estas pantallas, refrescar componentes específicos
       if (currentScreen === 'profile') {
-        document.getElementById('profile-grade-badge').textContent = studentConfig.grade || 'Sin grado';
+        const gradeBadge = document.getElementById('profile-grade-badge');
+        if (gradeBadge) gradeBadge.textContent = studentConfig.grade || 'Sin grado';
       }
       if (currentScreen === 'home' || pendingContact) {
         renderCallContacts();
@@ -4642,98 +4671,6 @@
           .catch(err => { console.error(err); showSToast('❌ Error al guardar'); })
           .finally(() => { btn.disabled = false; btn.textContent = originalText; });
       } else { closeAvatarPicker(); }
-    }
-
-    // Actualizar función existente para manejar avatar
-    const originalUpdateUI = window.updateUIFromConfig || function () { };
-    window.updateUIFromConfig = function () {
-      // Intentar llamar a la lógica original si existe (o replicarla si es corta)
-      // En este caso, la lógica original está definida arriba, así que la extenderemos.
-
-      const nameEl = document.getElementById('student-display-name');
-      if (nameEl && studentConfig.name) nameEl.textContent = studentConfig.name;
-
-      const avatarImg = document.getElementById('student-avatar-img');
-      const avatarInit = document.getElementById('student-avatar-initial');
-
-      // Otros elementos de avatar
-      const sosImg = document.getElementById('sos-avatar-img');
-      const sosInit = document.getElementById('sos-avatar-initial');
-      const profImg = document.getElementById('profile-avatar-img');
-      const profInit = document.getElementById('profile-avatar-initial');
-
-      const nameInitial = studentConfig.name ? studentConfig.name[0].toUpperCase() : '?';
-      const defaultAvatar = AVATAR_OPTIONS[0]; // Usar el primero (Flash) como default visual
-
-      if (studentConfig.photoURL || defaultAvatar) {
-        const urlToUse = studentConfig.photoURL || defaultAvatar;
-        [avatarImg, sosImg, profImg].forEach(img => {
-          if (img) {
-            img.src = urlToUse;
-            img.style.display = 'block';
-          }
-        });
-        [avatarInit, sosInit, profInit].forEach(span => {
-          if (span) {
-            span.style.display = 'none';
-          }
-        });
-      } else {
-        [avatarImg, sosImg, profImg].forEach(img => {
-          if (img) img.style.display = 'none';
-        });
-        [avatarInit, sosInit, profInit].forEach(span => {
-          if (span) {
-            span.textContent = nameInitial;
-            span.style.display = 'block';
-          }
-        });
-      }
-
-      // Re-triggering original if needed (legacy support)
-      if (typeof originalUpdateUI === 'function') originalUpdateUI();
-    };
-
-    // ── NAVEGACIÓN ENTRE PANTALLAS ────────────────
-    function showProfile() {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById('screen-profile').classList.add('active');
-      const nameEl = document.getElementById('profile-name-display');
-      if (nameEl) nameEl.textContent = studentConfig.name || 'Alumno';
-      const codeEl = document.getElementById('profile-link-code');
-      const savedId = localStorage.getItem('ss_student_id');
-      if (codeEl && savedId) codeEl.textContent = `ID: ${savedId.substring(0, 8).toUpperCase()}`;
-      document.querySelectorAll('.s-nav-item').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-tab') === 'profile');
-      });
-      // Add onclick to profile avatar
-      const profileAvatarContainer = document.getElementById('profile-avatar-container');
-      if (profileAvatarContainer) {
-        profileAvatarContainer.onclick = openAvatarPicker;
-      }
-    }
-
-    function goToHistory() {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById('screen-history').classList.add('active');
-      if (typeof renderHistory === 'function') renderHistory();
-      document.querySelectorAll('.s-nav-item').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-tab') === 'history');
-      });
-    }
-
-    function studentTabBack() {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById('screen-home').classList.add('active');
-      document.querySelectorAll('.s-nav-item').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-tab') === 'home');
-      });
-    }
-
-    function studentTab(tab, btn) {
-      if (tab === 'home') studentTabBack();
-      else if (tab === 'history') goToHistory();
-      else if (tab === 'profile') showProfile();
     }
 
     /**
