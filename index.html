@@ -1672,6 +1672,70 @@
     /* ═══════════════════════════════════════
    CALL SHEET — Hoja de llamada
 ═══════════════════════════════════════ */
+    .student-avatar-header {
+      width: 44px;
+      height: 44px;
+      background: var(--bg-item);
+      border: 2px solid var(--border-c);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      overflow: visible;
+      transition: all 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .student-avatar-header:hover {
+      transform: scale(1.05);
+      border-color: var(--blue-acc);
+    }
+
+    .student-avatar-header:active {
+      transform: scale(0.95);
+    }
+
+    .student-avatar-header img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .student-avatar-header span {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-h);
+    }
+
+    .student-avatar-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 14px;
+      height: 14px;
+      background: var(--safe);
+      border: 2.5px solid var(--bg-app);
+      border-radius: 50%;
+    }
+
+    .student-avatar-edit-icon {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 18px;
+      height: 18px;
+      background: var(--blue-acc);
+      border: 2px solid var(--bg-app);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
     .call-overlay {
       position: fixed;
       inset: 0;
@@ -2041,10 +2105,17 @@
       <!-- Top bar -->
       <div class="student-topbar">
         <div class="student-info-left">
-          <div class="student-avatar-header" id="student-avatar-btn" onclick="openAvatarPicker()">
+          <div class="student-avatar-header" id="student-avatar-btn" onclick="openAvatarPicker()"
+            title="Cambiar Avatar">
             <img src="" id="student-avatar-img" style="display:none;">
             <span id="student-avatar-initial">?</span>
             <div class="student-avatar-badge"></div>
+            <div class="student-avatar-edit-icon">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </div>
           </div>
           <div>
             <div class="student-greeting">Hola,</div>
@@ -2262,8 +2333,15 @@
     <div class="screen" id="screen-sos">
       <div class="sos-active-bg"></div>
 
-      <div class="sos-active-header">
-        <div class="sos-active-badge">🆘 SOS ACTIVO</div>
+      <div class="sos-content">
+        <div class="sos-avatar-container anim anim-1">
+          <div class="sos-avatar" id="sos-avatar-view"
+            style="width:80px;height:80px;border-radius:24px;background:rgba(255,255,255,0.1);border:3px solid white;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:12px;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+            <img src="" id="sos-avatar-img" style="width:100%;height:100%;object-fit:cover;display:none;">
+            <span id="sos-avatar-initial" style="font-size:32px;font-weight:800;color:white;">?</span>
+          </div>
+        </div>
+        <div class="sos-alert-title anim anim-1">¡S.O.S ENVIADO!</div>
         <div class="sos-active-timer" id="sos-timer">00:00</div>
       </div>
 
@@ -2333,7 +2411,11 @@
             <path d="M11 4L7 9L11 14" stroke="var(--text-b)" stroke-width="2" stroke-linecap="round" />
           </svg>
         </button>
-        <div class="profile-avatar" id="profile-avatar-letter">-</div>
+        <div class="profile-avatar" id="profile-avatar-view"
+          style="width:100px;height:100px;background:var(--bg-item);border-radius:30px;border:3px solid var(--border-c);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px;box-shadow:0 12px 32px rgba(0,0,0,0.1);">
+          <img src="" id="profile-avatar-img" style="width:100%;height:100%;object-fit:cover;display:none;">
+          <span id="profile-avatar-initial" style="font-size:36px;font-weight:800;color:var(--text-h);">?</span>
+        </div>
         <div class="profile-name" id="profile-name-display">Cargando...</div>
         <div class="profile-code" id="profile-link-code">Código: ------</div>
         <div style="display:flex;gap:10px;margin-top:4px;">
@@ -4707,18 +4789,34 @@
       const avatarImg = document.getElementById('student-avatar-img');
       const avatarInit = document.getElementById('student-avatar-initial');
 
+      // Otros elementos de avatar
+      const sosImg = document.getElementById('sos-avatar-img');
+      const sosInit = document.getElementById('sos-avatar-initial');
+      const profImg = document.getElementById('profile-avatar-img');
+      const profInit = document.getElementById('profile-avatar-initial');
+
+      const nameInitial = studentConfig.name ? studentConfig.name[0].toUpperCase() : '?';
+
       if (studentConfig.photoURL) {
-        if (avatarImg) {
-          avatarImg.src = studentConfig.photoURL;
-          avatarImg.style.display = 'block';
-        }
-        if (avatarInit) avatarInit.style.display = 'none';
+        [avatarImg, sosImg, profImg].forEach(img => {
+          if (img) {
+            img.src = studentConfig.photoURL;
+            img.style.display = 'block';
+          }
+        });
+        [avatarInit, sosInit, profInit].forEach(span => {
+          if (span) span.style.display = 'none';
+        });
       } else {
-        if (avatarImg) avatarImg.style.display = 'none';
-        if (avatarInit) {
-          avatarInit.style.display = 'block';
-          avatarInit.textContent = studentConfig.name ? studentConfig.name[0].toUpperCase() : '?';
-        }
+        [avatarImg, sosImg, profImg].forEach(img => {
+          if (img) img.style.display = 'none';
+        });
+        [avatarInit, sosInit, profInit].forEach(span => {
+          if (span) {
+            span.textContent = nameInitial;
+            span.style.display = 'block';
+          }
+        });
       }
 
       // Llamamos a la lógica original de actualización de UI (que suele estar definida antes)
