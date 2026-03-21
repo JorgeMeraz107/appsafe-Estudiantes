@@ -5,12 +5,10 @@
    SDK: Firebase 12.10.0 (ESModules — CDN)
    ═══════════════════════════════════════════════════════════════ */
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
     getFirestore,
-    initializeFirestore,
-    persistentLocalCache,
-    persistentIndexedDb,
+    enableIndexedDbPersistence,
     doc,
     collection,
     getDoc,
@@ -20,7 +18,7 @@ import {
     getDocs,
     addDoc,
     serverTimestamp,
-} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 /* ── Configuración del proyecto ────────────────────────────────── */
 const firebaseConfig = {
@@ -33,14 +31,19 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = initializeFirestore(app, {
-    localCache: persistentLocalCache({
-        tabManager: persistentIndexedDb()
-    })
+const db = getFirestore(app);
+
+// Enable offline persistence (v9/v10 standard)
+enableIndexedDbPersistence(db).catch((err) => {
+    if (err.code == 'failed-precondition') {
+        console.warn("Firestore persistence target already active in another tab.");
+    } else if (err.code == 'unimplemented') {
+        console.warn("Firestore persistence not supported by this browser.");
+    }
 });
 
 // Importar y configurar Auth para evitar bloqueos por reglas de seguridad
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 const auth = getAuth(app);
 
 // Iniciar sesión de forma anónima silenciosamente (necesario si Firestore Rules exigen autenticación)
