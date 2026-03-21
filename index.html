@@ -4796,11 +4796,13 @@
       const profInit = document.getElementById('profile-avatar-initial');
 
       const nameInitial = studentConfig.name ? studentConfig.name[0].toUpperCase() : '?';
+      const defaultAvatar = AVATAR_OPTIONS[0]; // Usar el primero (Flash) como default visual
 
-      if (studentConfig.photoURL) {
+      if (studentConfig.photoURL || defaultAvatar) {
+        const urlToUse = studentConfig.photoURL || defaultAvatar;
         [avatarImg, sosImg, profImg].forEach(img => {
           if (img) {
-            img.src = studentConfig.photoURL;
+            img.src = urlToUse;
             img.style.display = 'block';
           }
         });
