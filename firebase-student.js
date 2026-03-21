@@ -8,7 +8,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
 import {
     getFirestore,
-    enableIndexedDbPersistence,
+    initializeFirestore,
+    persistentLocalCache,
+    persistentIndexedDb,
     doc,
     collection,
     getDoc,
@@ -31,15 +33,10 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Enable offline persistence
-enableIndexedDbPersistence(db).catch((err) => {
-    if (err.code == 'failed-precondition') {
-        console.warn("Firestore persistence target already active in another tab.");
-    } else if (err.code == 'unimplemented') {
-        console.warn("Firestore persistence not supported by this browser.");
-    }
+const db = initializeFirestore(app, {
+    localCache: persistentLocalCache({
+        tabManager: persistentIndexedDb()
+    })
 });
 
 // Importar y configurar Auth para evitar bloqueos por reglas de seguridad
