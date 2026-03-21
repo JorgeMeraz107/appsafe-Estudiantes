@@ -1986,6 +1986,113 @@
     .anim-5 {
       animation-delay: 0.33s;
     }
+
+    /* ═══════════════════════════════════════
+       AVATAR PICKER MODAL
+    ═══════════════════════════════════════ */
+    .avatar-picker-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .avatar-picker-modal.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .avatar-picker-content {
+      width: 100%;
+      max-width: 360px;
+      background: var(--bg-app);
+      border: 1px solid var(--border-c);
+      border-radius: 28px;
+      padding: 24px;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+    }
+
+    .avatar-picker-modal.active .avatar-picker-content {
+      transform: scale(1);
+    }
+
+    .avatar-picker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .avatar-picker-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-h);
+    }
+
+    .avatar-picker-close {
+      background: transparent;
+      border: none;
+      color: var(--text-s);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .avatar-option {
+      aspect-ratio: 1;
+      border-radius: 16px;
+      border: 2px solid transparent;
+      background: var(--bg-item);
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .avatar-option.selected {
+      border-color: var(--safe);
+      background: rgba(15, 191, 122, 0.1);
+    }
+
+    .avatar-option img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-picker-footer {
+      margin-top: 24px;
+    }
+
+    .avatar-save-btn {
+      width: 100%;
+      height: 52px;
+      border-radius: 14px;
+      background: var(--safe);
+      color: white;
+      border: none;
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -2602,6 +2709,27 @@
           </div>
         </div>
 
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════
+       MODAL: ELEGIR AVATAR
+  ══════════════════════════════ -->
+    <div class="avatar-picker-modal" id="avatar-picker-modal">
+      <div class="avatar-picker-content">
+        <div class="avatar-picker-header">
+          <div class="avatar-picker-title">Elige tu Avatar</div>
+          <button class="avatar-picker-close" onclick="closeAvatarPicker()">×</button>
+        </div>
+        <div class="avatar-grid" id="avatar-grid-options">
+          <!-- Opciones cargadas por JS -->
+        </div>
+        <div class="avatar-picker-footer">
+          <button class="avatar-save-btn" id="btn-save-avatar" onclick="saveAvatarSelection()">
+            Guardar Cambios
+          </button>
+        </div>
       </div>
     </div>
 
