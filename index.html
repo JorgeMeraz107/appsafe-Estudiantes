@@ -2050,20 +2050,33 @@
     .avatar-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      max-height: 380px;
+      gap: 10px;
+      max-height: 420px;
       overflow-y: auto;
-      padding-right: 4px;
+      padding: 4px 6px 4px 2px;
     }
 
     .avatar-option {
       aspect-ratio: 1;
-      border-radius: 16px;
-      border: 2px solid transparent;
-      background: var(--bg-item);
+      border-radius: 18px;
+      border: 2.5px solid transparent;
+      background: var(--bg-card);
       cursor: pointer;
       overflow: hidden;
-      transition: all 0.2s;
+      transition: all 0.2s cubic-bezier(.4, 0, .2, 1);
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .avatar-option:hover {
+      transform: scale(1.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .avatar-option:active {
+      transform: scale(0.95);
     }
 
     .avatar-option.selected {
@@ -2074,7 +2087,8 @@
     .avatar-option img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      border-radius: 12px;
     }
 
     .avatar-picker-footer {
