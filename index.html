@@ -4704,18 +4704,52 @@
 
     // ── AVATAR PICKER LOGIC ────────────────
     const AVATAR_OPTIONS = [
+      // ── Cloudinary — avatares reales ──────────────────────────────
       'https://res.cloudinary.com/duuporwnz/image/upload/v1774118146/flash_zm4ed8.png',
       'https://res.cloudinary.com/duuporwnz/image/upload/v1774118376/nova_pfzrln.png',
       'https://res.cloudinary.com/duuporwnz/image/upload/v1774118485/Rocky_oaiv4k.png',
       'https://res.cloudinary.com/duuporwnz/image/upload/v1774118634/zara_j2ojjx.png',
+      'https://res.cloudinary.com/duuporwnz/image/upload/v1774144397/Titan_kebybw.png',
+      'https://res.cloudinary.com/duuporwnz/image/upload/v1774144389/echo_qkfe2i.png',
+      'https://res.cloudinary.com/duuporwnz/image/upload/v1774144380/luna_upcmnz.png',
+      // ── DiceBear Notionists — cool & variados ─────────────────────
       'https://api.dicebear.com/7.x/notionists/svg?seed=Oliver',
-      'https://api.dicebear.com/7.x/notionists/svg?seed=Luna',
       'https://api.dicebear.com/7.x/notionists/svg?seed=Leo',
       'https://api.dicebear.com/7.x/notionists/svg?seed=Mia',
       'https://api.dicebear.com/7.x/notionists/svg?seed=Max',
-      'https://api.dicebear.com/7.x/notionists/svg?seed=NovaPlaceholder',
       'https://api.dicebear.com/7.x/notionists/svg?seed=Rex',
-      'https://api.dicebear.com/7.x/notionists/svg?seed=Zoe'
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Zoe',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Sam',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Kai',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Aria',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Blaze',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Cleo',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Dash',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Viper',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Storm',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Pixel',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Jade',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Frost',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Cruz',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Neon',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Quinn',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Rio',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Sage',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Thorn',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Wolf',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Echo',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Iris',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Knox',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Nova',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Orion',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Phoenix',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Quartz',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Raven',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Shadow',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Tiger',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Ursa',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Valor',
+      'https://api.dicebear.com/7.x/notionists/svg?seed=Wren'
     ];
 
     let selectedAvatarUrl = null;
