@@ -2587,8 +2587,11 @@
         <div class="profile-code" id="profile-link-code">Código: ------</div>
         <div style="display:flex;gap:10px;margin-top:4px;">
           <div
-            style="background:rgba(15,191,122,0.15);border:1px solid rgba(15,191,122,0.3);border-radius:100px;padding:5px 14px;font-size:12px;color:var(--safe);">
-            ✅ Vinculado
+            style="background:rgba(15,191,122,0.15);border:1px solid rgba(15,191,122,0.3);border-radius:100px;padding:5px 14px;font-size:12px;color:var(--safe);display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Vinculado</span>
           </div>
           <div id="profile-grade-badge"
             style="background: var(--bg-card);border: 1px solid var(--border-c);border-radius:100px;padding:5px 14px;font-size:12px;color: var(--text-b);">
@@ -4656,7 +4659,8 @@
       // Batería
       if (ev.battery != null) {
         const color = ev.battery > 50 ? 'var(--safe)' : ev.battery > 20 ? 'var(--warn)' : 'var(--danger)';
-        chips.push(`<span style="color:${color}; display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="18" height="12" rx="2" ry="2"></rect><line x1="23" y1="13" x2="23" y2="11"></line></svg> ${ev.battery}%${ev.charging ? ' ⚡' : ''}</span>`);
+        const bolt = ev.charging ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left:2px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>` : '';
+        chips.push(`<span style="color:${color}; display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="18" height="12" rx="2" ry="2"></rect><line x1="23" y1="13" x2="23" y2="11"></line></svg> ${ev.battery}%${bolt}</span>`);
       }
 
       // Movimiento
@@ -4724,19 +4728,21 @@
       const battColor = (ev.battery ?? 100) > 50 ? 'var(--safe)' : (ev.battery ?? 100) > 20 ? 'var(--warn)' : 'var(--danger)';
       rows.push(`
     <div class="h-detail-cell">
-      <div class="h-dc-label">🔋 Batería</div>
+      <div class="h-dc-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><rect x="1" y="6" width="18" height="12" rx="2" ry="2"></rect><line x1="23" y1="13" x2="23" y2="11"></line></svg> Batería</div>
       <div class="h-dc-value" style="color:${battColor}">${ev.battery ?? '?'}%</div>
     </div>
     <div class="h-detail-cell">
-      <div class="h-dc-label">⚡ Cargador</div>
-      <div class="h-dc-value">${ev.charging ? 'Conectado ⚡' : 'Desconectado'}</div>
+      <div class="h-dc-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg> Cargador</div>
+      <div class="h-dc-value" style="display:flex; align-items:center;">
+        ${ev.charging ? 'Conectado <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left:4px; color:var(--safe);"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>' : 'Desconectado'}
+      </div>
     </div>`);
 
       // ── ACELERÓMETRO ───────────────────────
       if (ev.accel_x != null) {
         rows.push(`
       <div class="h-detail-cell full">
-        <div class="h-dc-label">📳 Acelerómetro (X / Y / Z)</div>
+        <div class="h-dc-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg> Acelerómetro (X / Y / Z)</div>
         <div class="h-dc-value">${ev.accel_x} / ${ev.accel_y} / ${ev.accel_z} m/s²</div>
       </div>`);
       }
@@ -4744,11 +4750,11 @@
       // ── RED ───────────────────────────────
       rows.push(`
     <div class="h-detail-cell">
-      <div class="h-dc-label">📡 Red</div>
+      <div class="h-dc-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg> Red</div>
       <div class="h-dc-value">${ev.network ?? 'Desconocida'}</div>
     </div>
     <div class="h-detail-cell">
-      <div class="h-dc-label">🕐 Hora exacta</div>
+      <div class="h-dc-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Hora exacta</div>
       <div class="h-dc-value" style="font-size:12px;">${formatEventTime(ev.timestamp).full}</div>
     </div>`);
 
