@@ -170,4 +170,20 @@ export function subscribeStudentConfig(studentId, onChange) {
     });
 }
 
+/**
+ * Actualiza la ubicación de la zona segura (Hogar o Escuela) del alumno
+ */
+export async function updateStudentSafeZoneFS(studentId, type, lat, lng) {
+  const docRef = doc(db, 'students', studentId);
+  const updates = {};
+  if (type === 'home') {
+    updates.homeLat = lat;
+    updates.homeLng = lng;
+  } else if (type === 'school') {
+    updates.schoolLat = lat;
+    updates.schoolLng = lng;
+  }
+  await updateDoc(docRef, updates);
+}
+
 export { db, auth };
