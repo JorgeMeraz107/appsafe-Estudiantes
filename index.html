@@ -2398,7 +2398,7 @@
             </div>
           </div>
 
-          <!-- Inteligencia Predictiva (NUEVO) -->
+          <!-- Inteligencia Predictiva -->
           <div class="s-card safe anim anim-4" id="card-smart">
             <div class="s-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -2415,6 +2415,85 @@
               style="margin-top:auto; height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden;">
               <div id="s-smart-bar" style="width:100%; height:100%; background:var(--safe); transition: all 0.5s;">
               </div>
+            </div>
+          </div>
+
+          <!-- Red y Señal (NUEVO) -->
+          <div class="s-card info anim anim-5" id="card-net">
+            <div class="s-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+                <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                <line x1="12" y1="20" x2="12.01" y2="20"></line>
+              </svg>
+            </div>
+            <div class="s-label">Red y Señal</div>
+            <div class="s-value" id="s-net-type">4G</div>
+            <div class="s-sub" id="s-net-status">Señal Estable</div>
+            <div class="s-sub" style="margin-top:2px;font-size:10px;opacity:0.6;" id="s-net-latency">Ping: --ms</div>
+          </div>
+
+          <!-- Entorno Sonoro (NUEVO) -->
+          <div class="s-card safe anim anim-5" id="card-audio">
+            <div class="s-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </div>
+            <div class="s-label">Ruido Ambiente</div>
+            <div class="s-value" id="s-audio-db">-- dB</div>
+            <div class="s-sub" id="s-audio-state">Tranquilo</div>
+            <div class="mini-bars" id="s-audio-bars" style="height:12px;margin-top:4px;">
+              <div class="mini-bar" style="height:20%;background:var(--safe);"></div>
+              <div class="mini-bar" style="height:30%;background:var(--safe);"></div>
+              <div class="mini-bar" style="height:25%;background:var(--safe);"></div>
+            </div>
+          </div>
+
+          <!-- Salud del Sistema (NUEVO) -->
+          <div class="s-card info anim anim-6" id="card-system">
+            <div class="s-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                <rect x="9" y="9" width="6" height="6"></rect>
+                <line x1="9" y1="1" x2="9" y2="4"></line>
+                <line x1="15" y1="1" x2="15" y2="4"></line>
+                <line x1="9" y1="20" x2="9" y2="23"></line>
+                <line x1="15" y1="20" x2="15" y2="23"></line>
+                <line x1="20" y1="9" x2="23" y2="9"></line>
+                <line x1="20" y1="15" x2="23" y2="15"></line>
+                <line x1="1" y1="9" x2="4" y2="9"></line>
+                <line x1="1" y1="15" x2="4" y2="15"></line>
+              </svg>
+            </div>
+            <div class="s-label">Sistema</div>
+            <div class="s-value" id="s-sys-storage">-- %</div>
+            <div class="s-sub">Almacenamiento</div>
+            <div class="s-sub" id="s-sys-status" style="margin-top:2px;font-size:10px;opacity:0.6;">Optimizado</div>
+          </div>
+
+          <!-- Brújula (NUEVO) -->
+          <div class="s-card info anim anim-6" id="card-compass">
+            <div class="s-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+              </svg>
+            </div>
+            <div class="s-label">Dirección</div>
+            <div class="s-value" id="s-compass-deg">--°</div>
+            <div class="s-sub" id="s-compass-dir">Norte</div>
+            <div id="compass-viz"
+              style="width:30px;height:30px;border:2px solid var(--border-c);border-radius:50%;margin-top:4px;display:flex;align-items:center;justify-content:center;transition:transform 0.3s;">
+              <div style="width:2px;height:12px;background:var(--danger);border-radius:2px;"></div>
             </div>
           </div>
 
@@ -3013,10 +3092,18 @@
       impact: false,
       fall: false,
       // Smart Additions
-      light: 50,           // en lux
-      proximity: false,     // true si está tapado (bolsillo)
-      smartRisk: 'bajo',    // bajo | medio | alto
-      smartStatus: 'Analizando...'
+      light: 50,
+      proximity: false,
+      smartRisk: 'bajo',
+      smartStatus: 'Analizando...',
+      // Advanced Additions (HUD)
+      networkType: '4G',
+      networkDownlink: 0,
+      networkLatency: 40,
+      noiseLevel: 30,      // dB
+      storageUsage: 45,    // %
+      heading: 0,          // grados
+      orientation: 'Norte'
     };
 
     /* ═══════════════════════════════════════
@@ -3233,6 +3320,11 @@
           fall: sensorData.fall || false,
           light: sensorData.light,
           risk: sensorData.smartRisk,
+          noise: sensorData.noiseLevel,
+          net_type: sensorData.networkType,
+          net_latency: sensorData.networkLatency,
+          storage: sensorData.storageUsage,
+          heading: sensorData.heading,
           sos: sosActive,
           mode: monitoringMode,
           ts: Date.now()
@@ -3931,9 +4023,13 @@
       // antes de que el motor decida si baja a modo 'low'.
       setTimeout(startScheduleEngine, 3000);
 
-      // ── Sensores Smart (NUEVO) ─────────────────
+      // ── Sensores Smart & Avanzados (HUD) ─────────
       startLightSensor();
-      setInterval(smartSecurityAnalyzer, 5000); // Analiza riesgos cada 5 segundos
+      startNetworkMonitor();
+      startAudioMonitor();
+      startSystemMonitor();
+      startOrientationMonitor();
+      setInterval(smartSecurityAnalyzer, 5000);
     }
 
     /* ── Callbacks GPS globales (usados por startGPSFull y startGPSLow) ── */
@@ -4125,6 +4221,7 @@
       updateBatteryUI();
       updateAccelUI();
       updateSmartUI();
+      updateAdvancedUI();
 
       // Speed
       const speedEl = document.getElementById('s-speed');
@@ -4132,6 +4229,110 @@
       if (speedEl) speedEl.textContent = sensorData.speed.toFixed(1);
       if (speedState) speedState.textContent = sensorData.speed > 10 ? 'En vehículo' : sensorData.speed > 4 ? 'Corriendo' : 'A pie';
     }
+
+    /* ── UI Advanced Updates (HUD Extension) ── */
+    function updateAdvancedUI() {
+      // Net
+      const nType = document.getElementById('s-net-type');
+      const nStat = document.getElementById('s-net-status');
+      const nLat = document.getElementById('s-net-latency');
+      if (nType) nType.textContent = sensorData.networkType.toUpperCase();
+      if (nStat) nStat.textContent = navigator.onLine ? 'Conectado' : 'Sin señal';
+      if (nLat) nLat.textContent = `Ping: ${sensorData.networkLatency}ms`;
+
+      // Audio
+      const aDb = document.getElementById('s-audio-db');
+      const aStat = document.getElementById('s-audio-state');
+      const aBars = document.querySelectorAll('#s-audio-bars .mini-bar');
+      if (aDb) aDb.textContent = Math.round(sensorData.noiseLevel) + ' dB';
+      if (aStat) {
+        if (sensorData.noiseLevel > 80) aStat.textContent = 'Ruidoso / Gritos';
+        else if (sensorData.noiseLevel > 50) aStat.textContent = 'Conversación';
+        else aStat.textContent = 'Tranquilo';
+      }
+      aBars.forEach(bar => {
+        const h = Math.random() * (sensorData.noiseLevel / 2) + 10;
+        bar.style.height = h + '%';
+        bar.style.background = sensorData.noiseLevel > 75 ? 'var(--danger)' : 'var(--safe)';
+      });
+
+      // System
+      const sStorage = document.getElementById('s-sys-storage');
+      if (sStorage) sStorage.textContent = sensorData.storageUsage + ' %';
+
+      // Compass
+      const cDeg = document.getElementById('s-compass-deg');
+      const cDir = document.getElementById('s-compass-dir');
+      const cViz = document.getElementById('compass-viz');
+      if (cDeg) cDeg.textContent = Math.round(sensorData.heading) + '°';
+      if (cDir) cDir.textContent = sensorData.orientation;
+      if (cViz) cViz.style.transform = `rotate(${sensorData.heading}deg)`;
+    }
+
+    /* ── Sensores HUD Implementations ─────── */
+    function startNetworkMonitor() {
+      const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+      const updateNet = () => {
+        if (conn) {
+          sensorData.networkType = conn.effectiveType || 'online';
+          sensorData.networkLatency = conn.rtt || 0;
+          sensorData.networkDownlink = conn.downlink || 0;
+        }
+      };
+      if (conn) conn.addEventListener('change', updateNet);
+      updateNet();
+    }
+
+    function startAudioMonitor() {
+      // Intentar acceder al micrófono para medir dB reales
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const analyser = audioCtx.createAnalyser();
+          const source = audioCtx.createMediaStreamSource(stream);
+          source.connect(analyser);
+          analyser.fftSize = 256;
+          const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+          setInterval(() => {
+            analyser.getByteFrequencyData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+            const avg = sum / dataArray.length;
+            sensorData.noiseLevel = Math.max(20, (avg * 1.5) + 30); // normalizar a dB aprox
+          }, 500);
+        }).catch(() => {
+          // Fallback simulación
+          setInterval(() => {
+            sensorData.noiseLevel = 30 + (Math.random() * 15);
+            if (sensorData.motion === 'Corriendo') sensorData.noiseLevel += 20;
+          }, 2000);
+        });
+      }
+    }
+
+    function startSystemMonitor() {
+      if (navigator.storage && navigator.storage.estimate) {
+        navigator.storage.estimate().then(est => {
+          const usage = (est.usage / est.quota) * 100 || 5;
+          sensorData.storageUsage = Math.round(usage);
+        });
+      }
+    }
+
+    function startOrientationMonitor() {
+      window.addEventListener('deviceorientation', (e) => {
+        let heading = e.alpha || 0; // en móviles, alpha es el norte magnético aprox
+        if (e.webkitCompassHeading) heading = e.webkitCompassHeading;
+        sensorData.heading = heading;
+
+        const dirs = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste'];
+        const idx = Math.round(heading / 45) % 8;
+        sensorData.orientation = dirs[idx];
+      });
+    }
+
+    /* ── Sensores Smart Implementation ───── */
 
     /* ── UI Smart Updates ───────────── */
     function updateSmartUI() {
@@ -4224,13 +4425,13 @@
         && sensorData.light < 10
         && !isSafe;
 
-      // 🚨 PATRÓN 2: Desconexión Crítica
-      // Se desconecta cargador y hay movimiento brusco inmediato
-      const isPickpocketPattern = !sensorData.charging && sensorData.motion === 'Corriendo' && !isSafe;
+      // 🚨 PATRÓN 3: Altercado / Grito
+      // Nivel de ruido extremo + movimiento brusco o impacto
+      const isNoiseAlert = sensorData.noiseLevel > 88 && (sensorData.motion === 'Corriendo' || sensorData.impact);
 
-      if (isSnatchPattern) {
+      if (isSnatchPattern || isNoiseAlert) {
         risk = 'alto';
-        status = '¡Amenaza Detectada!';
+        status = isNoiseAlert ? '¡Altercado Detectado!' : '¡Amenaza Detectada!';
       } else if (isPickpocketPattern || (sensorData.speed > 30 && !isSafe)) {
         risk = 'medio';
         status = 'Movimiento Inusual';
@@ -4242,9 +4443,10 @@
       // Disparar evento si el riesgo es alto y no hemos avisado hace poco
       if (risk === 'alto' && (now - lastSmartAlertTs > 60000)) {
         lastSmartAlertTs = now;
-        addHistoryEvent('sos', '🚨 Alerta Smart: Posible robo detectado', {
-          reason: 'Patrón de arrebato/movimiento brusco en zona no segura',
+        addHistoryEvent('sos', `🚨 Alerta Smart: ${status}`, {
+          reason: isNoiseAlert ? 'Nivel de ruido crítico + movimiento' : 'Patrón de arrebato en zona no segura',
           lux: sensorData.light,
+          noise: sensorData.noiseLevel,
           speed: sensorData.speed
         });
 
