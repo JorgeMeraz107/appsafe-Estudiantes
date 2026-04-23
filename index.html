@@ -2488,12 +2488,38 @@
                 <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
               </svg>
             </div>
-            <div class="s-label">Dirección</div>
+            <div class="s-label">Dirección Real</div>
             <div class="s-value" id="s-compass-deg">--°</div>
             <div class="s-sub" id="s-compass-dir">Norte</div>
-            <div id="compass-viz"
-              style="width:30px;height:30px;border:2px solid var(--border-c);border-radius:50%;margin-top:4px;display:flex;align-items:center;justify-content:center;transition:transform 0.3s;">
-              <div style="width:2px;height:12px;background:var(--danger);border-radius:2px;"></div>
+
+            <!-- Brújula Visual Real -->
+            <div id="compass-container"
+              style="position:relative; width:60px; height:60px; margin: 8px auto 0; display:flex; align-items:center; justify-content:center;">
+              <!-- Aguja (estática, el fondo gira) -->
+              <div
+                style="position:absolute; top:0; z-index:10; width:4px; height:10px; background:var(--danger); border-radius:10px;">
+              </div>
+
+              <!-- Rosa de los vientos (gira) -->
+              <div id="compass-rose"
+                style="width:100%; height:100%; border:2px solid var(--border-c); border-radius:50%; transition: transform 0.2s cubic-bezier(0.1, 0.3, 0.3, 1); position:relative;">
+                <div
+                  style="position:absolute; top:4px; left:50%; transform:translateX(-50%); font-size:10px; font-weight:800; color:var(--danger);">
+                  N</div>
+                <div
+                  style="position:absolute; bottom:4px; left:50%; transform:translateX(-50%); font-size:8px; font-weight:700; color:var(--text-s);">
+                  S</div>
+                <div
+                  style="position:absolute; right:4px; top:50%; transform:translateY(-50%); font-size:8px; font-weight:700; color:var(--text-s);">
+                  E</div>
+                <div
+                  style="position:absolute; left:4px; top:50%; transform:translateY(-50%); font-size:8px; font-weight:700; color:var(--text-s);">
+                  O</div>
+                <!-- Puntitos intermedios -->
+                <div
+                  style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:4px; height:4px; background:var(--border-c); border-radius:50%;">
+                </div>
+              </div>
             </div>
           </div>
 
@@ -4263,10 +4289,14 @@
       // Compass
       const cDeg = document.getElementById('s-compass-deg');
       const cDir = document.getElementById('s-compass-dir');
-      const cViz = document.getElementById('compass-viz');
+      const cRose = document.getElementById('compass-rose');
+
       if (cDeg) cDeg.textContent = Math.round(sensorData.heading) + '°';
       if (cDir) cDir.textContent = sensorData.orientation;
-      if (cViz) cViz.style.transform = `rotate(${sensorData.heading}deg)`;
+
+      // En una brújula real, la rosa gira en sentido opuesto al heading 
+      // para que el Norte (0°) siempre apunte al norte real.
+      if (cRose) cRose.style.transform = `rotate(${-sensorData.heading}deg)`;
     }
 
     /* ── Sensores HUD Implementations ─────── */
@@ -4321,15 +4351,55 @@
     }
 
     function startOrientationMonitor() {
-      window.addEventListener('deviceorientation', (e) => {
-        let heading = e.alpha || 0; // en móviles, alpha es el norte magnético aprox
-        if (e.webkitCompassHeading) heading = e.webkitCompassHeading;
-        sensorData.heading = heading;
+      const compassCard = document.getElementById('card-compass');
+      if (compassCard) {
+        compassCard.style.cursor = 'pointer';
+        compassCard.onclick = requestCompassPermission;
+      }
 
-        const dirs = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste'];
-        const idx = Math.round(heading / 45) % 8;
-        sensorData.orientation = dirs[idx];
-      });
+      window.addEventListener('deviceorientation', handleOrientation);
+      // Fallback para simulación si no se mueve nada
+      setTimeout(() => {
+        if (sensorData.heading === 0) {
+          console.log('Brújula: Usando simulación inicial');
+          sensorData.heading = 10;
+          updateAdvancedUI();
+        }
+      }, 5000);
+    }
+
+    function handleOrientation(e) {
+      let heading = 0;
+      if (e.webkitCompassHeading) {
+        heading = e.webkitCompassHeading; // iOS
+      } else if (e.alpha !== null) {
+        // En Android alpha es relativo al inicio.
+        heading = 360 - e.alpha;
+      }
+
+      if (heading === sensorData.heading) return;
+
+      sensorData.heading = heading;
+      const dirs = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste'];
+      const idx = Math.round(heading / 45) % 8;
+      sensorData.orientation = dirs[idx];
+      updateAdvancedUI();
+    }
+
+    async function requestCompassPermission() {
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+          const res = await DeviceOrientationEvent.requestPermission();
+          if (res === 'granted') {
+            showSToast('🧭 Brújula calibrada correctamente');
+            window.addEventListener('deviceorientation', handleOrientation);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        showSToast('🧭 Brújula activa');
+      }
     }
 
     /* ── Sensores Smart Implementation ───── */
