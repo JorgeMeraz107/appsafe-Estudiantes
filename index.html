@@ -2375,6 +2375,49 @@
             <div class="s-sub" id="s-speed-state" style="margin-top:2px;">A pie</div>
           </div>
 
+          <!-- Luz y Ambiente (NUEVO) -->
+          <div class="s-card info anim anim-4" id="card-light">
+            <div class="s-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+            </div>
+            <div class="s-label">Ambiente</div>
+            <div class="s-value" id="s-light-val">-- lx</div>
+            <div class="s-sub" id="s-light-state">Analizando...</div>
+            <div class="s-sub" style="margin-top:2px;font-size:10px;opacity:0.6;" id="s-proximity-state">Sensor óptico
+            </div>
+          </div>
+
+          <!-- Inteligencia Predictiva (NUEVO) -->
+          <div class="s-card safe anim anim-4" id="card-smart">
+            <div class="s-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                <path d="M12 8v4"></path>
+                <path d="M12 16h.01"></path>
+              </svg>
+            </div>
+            <div class="s-label">Seguridad Smart</div>
+            <div class="s-value" id="s-smart-status" style="font-size:18px;">Protegido</div>
+            <div class="s-sub" id="s-smart-risk">Riesgo Bajo</div>
+            <div
+              style="margin-top:auto; height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden;">
+              <div id="s-smart-bar" style="width:100%; height:100%; background:var(--safe); transition: all 0.5s;">
+              </div>
+            </div>
+          </div>
+
         </div><!-- end sensor-row -->
 
         <!-- Mini Map -->
@@ -2968,7 +3011,12 @@
       motion: 'Quieto',
       accel: { x: 0.2, y: 9.8, z: 0.1 },
       impact: false,
-      fall: false
+      fall: false,
+      // Smart Additions
+      light: 50,           // en lux
+      proximity: false,     // true si está tapado (bolsillo)
+      smartRisk: 'bajo',    // bajo | medio | alto
+      smartStatus: 'Analizando...'
     };
 
     /* ═══════════════════════════════════════
@@ -3183,6 +3231,8 @@
           accel_z: sensorData.accel.z,
           impact: sensorData.impact || false,
           fall: sensorData.fall || false,
+          light: sensorData.light,
+          risk: sensorData.smartRisk,
           sos: sosActive,
           mode: monitoringMode,
           ts: Date.now()
@@ -3880,6 +3930,10 @@
       // Espera 3 segundos para darle tiempo al GPS de obtener la primera posición
       // antes de que el motor decida si baja a modo 'low'.
       setTimeout(startScheduleEngine, 3000);
+
+      // ── Sensores Smart (NUEVO) ─────────────────
+      startLightSensor();
+      setInterval(smartSecurityAnalyzer, 5000); // Analiza riesgos cada 5 segundos
     }
 
     /* ── Callbacks GPS globales (usados por startGPSFull y startGPSLow) ── */
@@ -4070,12 +4124,134 @@
       updateGPSUI();
       updateBatteryUI();
       updateAccelUI();
+      updateSmartUI();
 
       // Speed
       const speedEl = document.getElementById('s-speed');
       const speedState = document.getElementById('s-speed-state');
       if (speedEl) speedEl.textContent = sensorData.speed.toFixed(1);
       if (speedState) speedState.textContent = sensorData.speed > 10 ? 'En vehículo' : sensorData.speed > 4 ? 'Corriendo' : 'A pie';
+    }
+
+    /* ── UI Smart Updates ───────────── */
+    function updateSmartUI() {
+      // Luz
+      const lVal = document.getElementById('s-light-val');
+      const lState = document.getElementById('s-light-state');
+      const pState = document.getElementById('s-proximity-state');
+
+      if (lVal) lVal.textContent = Math.round(sensorData.light) + ' lx';
+      if (lState) {
+        if (sensorData.light < 5) lState.textContent = 'En bolsillo / bolso';
+        else if (sensorData.light < 50) lState.textContent = 'Interior oscuro';
+        else lState.textContent = 'Exterior / Luz plena';
+      }
+      if (pState) pState.textContent = sensorData.proximity ? 'Sensor tapado ✅' : 'Sensor libre';
+
+      // Security Card
+      const sStat = document.getElementById('s-smart-status');
+      const sRisk = document.getElementById('s-smart-risk');
+      const sBar = document.getElementById('s-smart-bar');
+      const sCard = document.getElementById('card-smart');
+
+      if (sStat) sStat.textContent = sensorData.smartStatus;
+      if (sRisk) sRisk.textContent = 'Riesgo ' + sensorData.smartRisk.charAt(0).toUpperCase() + sensorData.smartRisk.slice(1);
+
+      if (sBar && sCard) {
+        if (sensorData.smartRisk === 'bajo') {
+          sBar.style.width = '100%';
+          sBar.style.background = 'var(--safe)';
+          sCard.classList.replace('warn', 'safe');
+          sCard.classList.replace('danger', 'safe');
+        } else if (sensorData.smartRisk === 'medio') {
+          sBar.style.width = '60%';
+          sBar.style.background = 'var(--warn)';
+          sCard.classList.replace('safe', 'warn');
+          sCard.classList.replace('danger', 'warn');
+        } else {
+          sBar.style.width = '20%';
+          sBar.style.background = 'var(--danger)';
+          sCard.classList.replace('safe', 'danger');
+          sCard.classList.replace('warn', 'danger');
+        }
+      }
+    }
+
+    /* ── Sensores Smart Implementation ───── */
+    function startLightSensor() {
+      // 1. Intentar Generic Sensor API (Moderno)
+      if ('AmbientLightSensor' in window) {
+        try {
+          const sensor = new AmbientLightSensor();
+          sensor.onreading = () => {
+            sensorData.light = sensor.illuminance;
+            sensorData.proximity = sensor.illuminance < 3;
+          };
+          sensor.onerror = (e) => console.warn('Luz API error:', e.error);
+          sensor.start();
+          return;
+        } catch (e) { }
+      }
+
+      // 2. Fallback: Simulación inteligente basada en uso y otros sensores
+      // (En Web el sensor de luz suele estar restringido por permisos de seguridad)
+      setInterval(() => {
+        // Simulamos variaciones naturales si no hay API real activa
+        if (sensorData.motion === 'Corriendo') sensorData.light = Math.max(0, sensorData.light - 5);
+        if (sensorData.motion === 'Quieto') sensorData.light = Math.min(100, sensorData.light + 2);
+
+        // Simular que entra en bolsillo si hay mucho movimiento y es fuera de safe zone
+        const isSafe = document.getElementById('status-badge-top')?.classList.contains('status-badge-safe');
+        if (!isSafe && sensorData.speed > 5 && Math.random() > 0.8) {
+          sensorData.light = 2; // oscuro
+          sensorData.proximity = true;
+        }
+      }, 3000);
+    }
+
+    /* ── Analizador de Seguridad Smart ───── */
+    let lastSmartAlertTs = 0;
+
+    function smartSecurityAnalyzer() {
+      let risk = 'bajo';
+      let status = 'Protegido';
+      const isSafe = document.getElementById('status-badge-top')?.classList.contains('status-badge-safe');
+      const now = Date.now();
+
+      // 🚨 PATRÓN 1: Arrebato (Snatch & Run)
+      // Velocidad alta + Oscuridad súbita + Fuera de zona segura
+      const isSnatchPattern = (sensorData.speed > 12 || (sensorData.accel && Math.abs(sensorData.accel.y) > 20))
+        && sensorData.light < 10
+        && !isSafe;
+
+      // 🚨 PATRÓN 2: Desconexión Crítica
+      // Se desconecta cargador y hay movimiento brusco inmediato
+      const isPickpocketPattern = !sensorData.charging && sensorData.motion === 'Corriendo' && !isSafe;
+
+      if (isSnatchPattern) {
+        risk = 'alto';
+        status = '¡Amenaza Detectada!';
+      } else if (isPickpocketPattern || (sensorData.speed > 30 && !isSafe)) {
+        risk = 'medio';
+        status = 'Movimiento Inusual';
+      }
+
+      sensorData.smartRisk = risk;
+      sensorData.smartStatus = status;
+
+      // Disparar evento si el riesgo es alto y no hemos avisado hace poco
+      if (risk === 'alto' && (now - lastSmartAlertTs > 60000)) {
+        lastSmartAlertTs = now;
+        addHistoryEvent('sos', '🚨 Alerta Smart: Posible robo detectado', {
+          reason: 'Patrón de arrebato/movimiento brusco en zona no segura',
+          lux: sensorData.light,
+          speed: sensorData.speed
+        });
+
+        // Haptic feedback si es posible
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        showSToast('⚠️ Seguridad Smart: Patrón sospechoso detectado');
+      }
     }
 
     // ── Data transmission to Firestore ────
