@@ -3356,6 +3356,57 @@
       }, 5 * 60 * 1000);
     }
 
+    /* ── Motor Heurístico Autónomo (Edge AI) ── */
+    function runHeuristicEngine(payload) {
+      // Evitar múltiples disparos si ya hay un SOS en curso
+      if (sosActive) return;
+
+      const isSafeZone = document.getElementById('status-badge-top')?.classList.contains('status-badge-safe');
+
+      // Vector 1: Secuestro / Traslado forzoso
+      if (payload.speed > 40 && !isSafeZone && payload.light < 10) {
+        triggerAutonomousSOS('Traslado rápido y oscuro (Posible vehículo/maletero)');
+        return;
+      }
+
+      // Vector 2: Impacto Severo
+      if (payload.impact && payload.speed < 5) {
+         // Evaluamos aceleración combinada
+         const mag = Math.sqrt(payload.accel_x**2 + payload.accel_y**2 + payload.accel_z**2);
+         if (mag > 25) {
+            triggerAutonomousSOS('Impacto severo detectado (Posible caída fuerte/agresión)');
+            return;
+         }
+      }
+
+      // Vector 3: Entorno Hostil (Pánico)
+      if (payload.noise > 85 && payload.motion === 'Corriendo' && payload.light < 10) {
+        triggerAutonomousSOS('Altercado/Pánico detectado (Gritos y evasión)');
+        return;
+      }
+    }
+
+    function triggerAutonomousSOS(reason) {
+      if (sosActive) return;
+      sosActive = true;
+      
+      showSToast('🚨 PELIGRO: S.O.S Autónomo activado');
+      addHistoryEvent('sos', '🚨 [AUTO-SOS] Alerta generada por IA Local', { reason: reason });
+      
+      // Intentar vibrar fuerte para avisarle al niño que la app lo protegió
+      if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 1000]);
+      
+      // Actualizar UI al instante
+      showScreen('sos');
+      const timerEl = document.getElementById('sos-timer');
+      const msgEl = document.querySelector('.sos-active-msg');
+      if (timerEl) timerEl.textContent = "AUTÓNOMO";
+      if (msgEl) msgEl.textContent = "IA DETECTÓ PELIGRO";
+      
+      // Forzar transmisión de datos
+      writeStudentSnapshot();
+    }
+
     /* ── Escribe snapshot a Firestore y localStorage ── */
     async function writeStudentSnapshot() {
       try {
@@ -3383,6 +3434,10 @@
           mode: monitoringMode,
           ts: Date.now()
         };
+
+        // Correr motor heurístico ANTES de guardar (Edge AI)
+        // Esto permite detectar anomalías en los sensores en tiempo real
+        runHeuristicEngine(payload);
 
         // Guardar en LS para uso sin conexión (opcional)
         localStorage.setItem(LS_STUDENT, JSON.stringify(payload));
