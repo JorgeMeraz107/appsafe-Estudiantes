@@ -21,6 +21,7 @@ import {
     onSnapshot,
     serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 /* ── Configuración del proyecto ────────────────────────────────── */
 const firebaseConfig = {
@@ -34,6 +35,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 // Enable offline persistence (v9/v10 standard)
 enableIndexedDbPersistence(db).catch((err) => {
@@ -153,9 +155,24 @@ export async function sendNotificationFS(studentId, parentid, notif) {
 /**
  * Actualiza el avatar del alumno en Firestore
  */
-export async function updateStudentAvatarFS(studentId, photoURL) {
-  const docRef = doc(db, 'students', studentId);
-  await updateDoc(docRef, { photoURL });
+export async function updateStudentAvatarFS(studentId, url) {
+    if (!studentId || !url) return;
+    const ref = doc(db, "students", studentId);
+    await updateDoc(ref, { photoURL: url });
+}
+
+/**
+ * Sube un archivo WebP optimizado a Firebase Storage y retorna la URL
+ * @param {string} studentId
+ * @param {Blob} blob WebP blob generado por canvas
+ * @returns {Promise<string>} Download URL
+ */
+export async function uploadCustomAvatarWebP(studentId, blob) {
+    if (!studentId || !blob) throw new Error("Faltan datos para subir imagen");
+    const storageRef = ref(storage, `avatars/${studentId}_${Date.now()}.webp`);
+    await uploadBytes(storageRef, blob);
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
 }
 
 /**

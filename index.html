@@ -2995,7 +2995,7 @@
             Mi Ubicación
           </button>
           <button class="fullmap-btn fullmap-btn-ghost" onclick="sendManualCheckin()">
-            ✅ Check-in aquí
+            Check-in aquí
           </button>
         </div>
       </div>
@@ -3044,7 +3044,7 @@
               Cancelar
             </button>
             <button class="call-confirm-btn call-btn-yes" onclick="confirmCall()" id="confirm-call-btn">
-              📞 Llamar ahora
+              Llamar ahora
             </button>
           </div>
         </div>
@@ -3065,6 +3065,21 @@
         <div class="avatar-grid" id="avatar-grid-options">
           <!-- Opciones cargadas por JS -->
         </div>
+        
+        <!-- Subir imagen personalizada (WebP Engine) -->
+        <div style="margin: 16px 20px; text-align: center;">
+          <input type="file" id="custom-avatar-input" accept="image/*" style="display: none;" onchange="handleCustomAvatarUpload(event)">
+          <button class="btn-ghost" style="width: 100%; height: 48px; border-radius: 12px; border: 1px dashed var(--blue-acc); color: var(--blue-acc); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;" onclick="document.getElementById('custom-avatar-input').click()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Subir mi propia foto
+          </button>
+          <div id="upload-status" style="font-size: 11px; color: var(--text-s); margin-top: 8px; display: none;">Optimizando imagen...</div>
+        </div>
+
         <div class="avatar-picker-footer">
           <button class="avatar-save-btn" id="btn-save-avatar" onclick="saveAvatarSelection()">
             Guardar Cambios
@@ -3084,8 +3099,20 @@
       addHistoryEventFS,
       subscribeStudentConfig,
       sendNotificationFS,
-      updateStudentAvatarFS
+      updateStudentAvatarFS,
+      uploadCustomAvatarWebP
     } from './firebase-student.js';
+
+    /* ═══════════════════════════════════════
+       REGISTRO DE SERVICE WORKER (OFFLINE)
+    ═══════════════════════════════════════ */
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(reg => console.log('✅ Service Worker registrado (Modo Offline Activo)'))
+          .catch(err => console.error('Error registrando SW:', err));
+      });
+    }
 
     /* ═══════════════════════════════════════
        STATE
@@ -5500,6 +5527,90 @@
           .finally(() => { btn.disabled = false; btn.textContent = originalText; });
       } else { closeAvatarPicker(); }
     }
+
+    /* ═══════════════════════════════════════
+       WEBP ENGINE (COMPRESIÓN INTELIGENTE)
+    ═══════════════════════════════════════ */
+    window.handleCustomAvatarUpload = function(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const statusEl = document.getElementById('upload-status');
+      statusEl.style.display = 'block';
+      statusEl.textContent = 'Optimizando imagen...';
+
+      // 1. Leer archivo
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // 2. Crear Canvas para recortar y comprimir a WebP
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Redimensionar a máximo 400x400
+          const maxDim = 400;
+          let width = img.width;
+          let height = img.height;
+          
+          if (width > height) {
+            if (width > maxDim) { height *= maxDim / width; width = maxDim; }
+          } else {
+            if (height > maxDim) { width *= maxDim / height; height = maxDim; }
+          }
+          
+          // Hacerlo cuadrado recortando el centro
+          const size = Math.min(width, height);
+          canvas.width = size;
+          canvas.height = size;
+          
+          const offsetX = (width - size) / 2;
+          const offsetY = (height - size) / 2;
+          
+          // Dibujar la imagen escalada y centrada
+          // Primero creamos un canvas temporal para el escalado
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = width;
+          tempCanvas.height = height;
+          tempCanvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          
+          // Luego recortamos el centro al canvas final
+          ctx.drawImage(tempCanvas, offsetX, offsetY, size, size, 0, 0, size, size);
+          
+          // 3. Exportar a WebP (0.8 calidad reduce 80% peso sin perder nitidez)
+          canvas.toBlob((blob) => {
+            statusEl.textContent = 'Subiendo a la nube...';
+            
+            const sid = localStorage.getItem('ss_student_id');
+            if (sid) {
+              uploadCustomAvatarWebP(sid, blob)
+                .then(url => {
+                  statusEl.textContent = '¡Listo!';
+                  setTimeout(() => statusEl.style.display = 'none', 2000);
+                  
+                  // Actualizar UI
+                  selectedAvatarUrl = url;
+                  studentConfig.photoURL = url;
+                  updateUIFromConfig();
+                  saveLocalConfig(studentConfig);
+                  showSToast('✅ Foto personalizada actualizada');
+                  closeAvatarPicker();
+                })
+                .catch(err => {
+                  console.error("Error al subir WebP:", err);
+                  statusEl.textContent = 'Error al subir. Intenta de nuevo.';
+                  showSToast('❌ Error al subir foto');
+                });
+            } else {
+               statusEl.style.display = 'none';
+               closeAvatarPicker();
+            }
+          }, 'image/webp', 0.8);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
 
     /**
      * Actualiza la UI según el estado de la conexión
