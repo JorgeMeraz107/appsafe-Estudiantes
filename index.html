@@ -2106,10 +2106,84 @@
       font-weight: 700;
       cursor: pointer;
     }
+
+    /* ══════════════════════════════
+       GLOBAL LOADER (SPLASH SCREEN)
+    ══════════════════════════════ */
+    #global-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: var(--bg-app);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s;
+    }
+
+    #global-loader.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .loader-logo-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .loader-logo-pulse {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(41, 121, 255, 0.15) 0%, transparent 70%);
+      animation: loader-pulse 2s infinite;
+    }
+
+    @keyframes loader-pulse {
+      0% { transform: scale(0.8); opacity: 0.3; }
+      50% { transform: scale(1.2); opacity: 0.6; }
+      100% { transform: scale(0.8); opacity: 0.3; }
+    }
+
+    .loader-text {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-h);
+      letter-spacing: -0.02em;
+      margin-top: 10px;
+    }
+
+    .loader-sub {
+      font-size: 13px;
+      color: var(--text-s);
+      margin-top: 8px;
+      font-weight: 500;
+    }
   </style>
 </head>
 
 <body>
+  <!-- ══════════════════════════════
+       GLOBAL LOADER (INLINE SVG)
+  ══════════════════════════════ -->
+  <div id="global-loader">
+    <div class="loader-logo-container">
+      <div class="loader-logo-pulse"></div>
+      <svg width="64" height="64" viewBox="0 0 38 38" fill="none" style="position:relative; z-index:2;">
+        <path d="M19 3L5 9V19C5 27.3 11.2 35.1 19 37C26.8 35.1 33 27.3 33 19V9L19 3Z" fill="var(--text-h)" fill-opacity="0.9" />
+        <path d="M13 19L17 23L25 15" stroke="#2979FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </div>
+    <div class="loader-text">SchoolSafe</div>
+    <div class="loader-sub" id="loader-status">Iniciando sistema seguro...</div>
+  </div>
+
   <script>
     // Chequeo inmediato de sesión para evitar "flash" de pantalla de vinculación
     (function initStartup() {
@@ -5760,7 +5834,19 @@
           DeviceMotionEvent.requestPermission().catch(() => { });
         }, { once: true });
       }
+
+      // Ocultar loader global después de que todo esté listo
+      setTimeout(hideGlobalLoader, 1500);
     });
+
+    function hideGlobalLoader() {
+      const loader = document.getElementById('global-loader');
+      if (loader) {
+        loader.classList.add('fade-out');
+        // Remover del DOM después de la animación para liberar memoria
+        setTimeout(() => loader.remove(), 600);
+      }
+    }
 
     // Registrar funciones globales
     window.vincular = vincular;
