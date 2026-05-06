@@ -3204,7 +3204,8 @@
       subscribeStudentConfig,
       sendNotificationFS,
       updateStudentAvatarFS,
-      uploadCustomAvatarWebP
+      uploadCustomAvatarWebP,
+      unlinkStudentFS
     } from './firebase-student.js';
 
     /* ═══════════════════════════════════════
@@ -4965,10 +4966,34 @@
 
 
 
-    function desvincular() {
+    async function desvincular() {
       const c = confirm('¿Seguro que deseas desvincular este dispositivo? Ya no se enviará ubicación ni alertas a tus padres.');
       if (c) {
-        // Reset estado GPS y mapa para que al re-vincular funcione desde cero
+        const studentId = localStorage.getItem('ss_student_id');
+        const parentId = studentConfig?.parentid;
+        const studentName = localStorage.getItem('ss_student_name') || 'Tu hijo';
+
+        if (studentId) {
+          try {
+            // 1. Notificar al padre antes de romper el vínculo
+            if (parentId) {
+              await sendNotificationFS(studentId, parentId, {
+                type: 'warn',
+                title: '⚠️ Dispositivo Desvinculado',
+                body: `${studentName} ha desvinculado su dispositivo manualmente.`,
+                icon: '🔓',
+                action: 'student'
+              });
+            }
+
+            // 2. Actualizar Firestore (Genera nuevo código)
+            await unlinkStudentFS(studentId);
+          } catch (e) {
+            console.warn("Error al notificar desvinculación:", e);
+          }
+        }
+
+        // 3. Reset estado local
         sensorData.lat = null;
         sensorData.lng = null;
         mapsInitialized = false;
@@ -4983,7 +5008,7 @@
 
         localStorage.removeItem('ss_student_id');
         localStorage.removeItem('ss_student_name');
-        localStorage.removeItem('ss_student_config'); // Clear cached config
+        localStorage.removeItem('ss_student_config'); 
 
         showScreen('link');
         showSToast('Dispositivo desvinculado');

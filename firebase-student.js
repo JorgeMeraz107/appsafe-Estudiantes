@@ -203,4 +203,21 @@ export async function updateStudentSafeZoneFS(studentId, type, lat, lng) {
   await updateDoc(docRef, updates);
 }
 
+/**
+ * Desvincula al alumno en Firestore.
+ * Genera un nuevo código de 6 dígitos para que el padre pueda re-vincularlo.
+ * @param {string} studentId
+ */
+export async function unlinkStudentFS(studentId) {
+    if (!studentId) return;
+    const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const docRef = doc(db, "students", studentId);
+    await updateDoc(docRef, {
+        linked: false,
+        linkCode: newCode,
+        linkedAt: null
+    });
+    return newCode;
+}
+
 export { db, auth };
