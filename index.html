@@ -2347,23 +2347,7 @@
 
       <div class="home-scroll">
 
-        <!-- Chat con Padres Card -->
-        <div class="anim anim-1" style="margin: 16px 16px 0;">
-          <button onclick="openChat()" style="width:100%; display:flex; align-items:center; gap:16px; padding:16px; background:linear-gradient(135deg, var(--blue), #1A237E); border:none; border-radius:20px; color:white; text-align:left; box-shadow:0 8px 24px rgba(41,121,255,0.3); position:relative; overflow:hidden;">
-            <div style="position:absolute; right:-10px; top:-10px; opacity:0.1;">
-              <svg width="100" height="100" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-            </div>
-            <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); border-radius:14px; display:flex; align-items:center; justify-content:center;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-              </svg>
-            </div>
-            <div>
-              <div style="font-family:'Sora',sans-serif; font-size:16px; font-weight:800; margin-bottom:2px;">Chat de Seguridad</div>
-              <div style="font-size:12px; opacity:0.8; font-weight:500;">Habla con tus padres al instante</div>
-            </div>
-          </button>
-        </div>
+        <!-- El botón de Chat ha sido movido a un FAB (Floating Action Button) profesional -->
 
         <!-- SOS Button -->
         <div class="sos-section anim anim-1">
@@ -2739,6 +2723,30 @@
           <span class="live-dot-small"></span>
           <span id="conn-status">Conectado · Sincronizando datos...</span>
         </div>
+
+        <!-- Floating Action Button (FAB) para Chat de Seguridad -->
+        <button onclick="openChat()" class="anim anim-4" style="
+          position: fixed;
+          bottom: calc(85px + env(safe-area-inset-bottom));
+          right: 20px;
+          width: 56px;
+          height: 56px;
+          border-radius: 28px;
+          background: linear-gradient(135deg, var(--blue), #1A237E);
+          border: none;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 8px 24px rgba(41,121,255,0.4);
+          z-index: 100;
+          cursor: pointer;
+          transition: transform 0.2s, box-shadow 0.2s;
+        " onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.92)'" ontouchend="this.style.transform='scale(1)'">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </button>
 
     </div>
 
@@ -6002,8 +6010,11 @@
       
       const home = document.getElementById('screen-home');
       const chat = document.getElementById('screen-chat');
+      const nav = document.getElementById('student-nav');
+      
       home.classList.remove('active');
       chat.classList.add('active');
+      if (nav) nav.style.display = 'none';
 
       if (chatUnsub) chatUnsub();
       if (window.ss_firebase?.subscribeToChat) {
@@ -6016,6 +6027,10 @@
     window.goBackChat = function() {
       document.getElementById('screen-chat').classList.remove('active');
       document.getElementById('screen-home').classList.add('active');
+      
+      const nav = document.getElementById('student-nav');
+      if (nav) nav.style.display = 'flex';
+
       if (chatUnsub) { chatUnsub(); chatUnsub = null; }
     };
 
