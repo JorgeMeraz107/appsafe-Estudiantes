@@ -2194,6 +2194,19 @@
       margin-top: 8px;
       font-weight: 500;
     }
+    /* ── Chat Bubbles (Student) ── */
+    .chat-messages { display: flex; flex-direction: column; gap: 10px; padding: 20px; flex: 1; overflow-y: auto; background: var(--bg-app); }
+    .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 18px; font-size: 14px; line-height: 1.4; position: relative; animation: msgIn 0.3s ease-out; }
+    .chat-bubble.student { align-self: flex-end; background: var(--blue); color: white; border-bottom-right-radius: 4px; box-shadow: 0 4px 12px rgba(41,121,255,0.2); }
+    .chat-bubble.parent { align-self: flex-start; background: var(--bg-card); color: var(--text-h); border-bottom-left-radius: 4px; border: 1px solid var(--border-c); }
+    .chat-time { font-size: 9px; opacity: 0.6; margin-top: 4px; display: block; }
+    .chat-bubble.student .chat-time { text-align: right; color: rgba(255,255,255,0.8); }
+    
+    .chat-input-bar { padding: 12px 16px; background: var(--topbar-bg); border-top: 1px solid var(--border-c); display: flex; gap: 10px; align-items: center; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+    .chat-input { flex: 1; background: var(--bg-app); border: 1px solid var(--border-c); border-radius: 20px; padding: 10px 16px; font-size: 14px; color: var(--text-h); outline: none; }
+    .chat-send-btn { width: 40px; height: 40px; background: var(--blue); color: white; border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    
+    @keyframes msgIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 
@@ -2333,6 +2346,24 @@
       </div>
 
       <div class="home-scroll">
+
+        <!-- Chat con Padres Card -->
+        <div class="anim anim-1" style="margin: 16px 16px 0;">
+          <button onclick="openChat()" style="width:100%; display:flex; align-items:center; gap:16px; padding:16px; background:linear-gradient(135deg, var(--blue), #1A237E); border:none; border-radius:20px; color:white; text-align:left; box-shadow:0 8px 24px rgba(41,121,255,0.3); position:relative; overflow:hidden;">
+            <div style="position:absolute; right:-10px; top:-10px; opacity:0.1;">
+              <svg width="100" height="100" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            </div>
+            <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); border-radius:14px; display:flex; align-items:center; justify-content:center;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            <div>
+              <div style="font-family:'Sora',sans-serif; font-size:16px; font-weight:800; margin-bottom:2px;">Chat de Seguridad</div>
+              <div style="font-size:12px; opacity:0.8; font-weight:500;">Habla con tus padres al instante</div>
+            </div>
+          </button>
+        </div>
 
         <!-- SOS Button -->
         <div class="sos-section anim anim-1">
@@ -2709,7 +2740,36 @@
           <span id="conn-status">Conectado · Sincronizando datos...</span>
         </div>
 
+    </div>
+
+    <!-- ══════════════════════════════
+       SCREEN: CHAT CON PADRES
+    ══════════════════════════════ -->
+    <div class="screen" id="screen-chat">
+      <div class="history-topbar">
+        <button class="back-icon-btn" onclick="goBackChat()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <div class="history-title">Chat de Seguridad</div>
+        <div style="width:38px;"></div>
       </div>
+      
+      <div class="chat-messages" id="chat-messages-list">
+        <!-- Mensajes -->
+      </div>
+      
+      <div class="chat-input-bar">
+        <input type="text" id="chat-input-field" class="chat-input" placeholder="Escribe a tus padres..." onkeypress="if(event.key==='Enter') sendChatMsg()">
+        <button class="chat-send-btn" onclick="sendChatMsg()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
 
       <!-- Nav bar -->
       <nav id="student-nav">
@@ -5931,6 +5991,78 @@
     window.closeAvatarPicker = closeAvatarPicker;
     window.selectAvatarOption = selectAvatarOption;
     window.saveAvatarSelection = saveAvatarSelection;
+
+    /* ── Chat Logic ── */
+    let chatUnsub = null;
+    window.openChat = function() {
+      const studentId = localStorage.getItem('ss_student_id');
+      if (!studentId) return;
+
+      document.getElementById('chat-messages-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-s);font-size:12px;">Conectando...</div>';
+      
+      const home = document.getElementById('screen-home');
+      const chat = document.getElementById('screen-chat');
+      home.classList.remove('active');
+      chat.classList.add('active');
+
+      if (chatUnsub) chatUnsub();
+      if (window.ss_firebase?.subscribeToChat) {
+        chatUnsub = window.ss_firebase.subscribeToChat(studentId, (msgs) => {
+          renderChatMessages(msgs);
+        });
+      }
+    };
+
+    window.goBackChat = function() {
+      document.getElementById('screen-chat').classList.remove('active');
+      document.getElementById('screen-home').classList.add('active');
+      if (chatUnsub) { chatUnsub(); chatUnsub = null; }
+    };
+
+    function renderChatMessages(msgs) {
+      const list = document.getElementById('chat-messages-list');
+      if (!list) return;
+
+      if (msgs.length === 0) {
+        list.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-s);font-size:13px;">No hay mensajes. Dile algo a tus padres para avisar que estás bien.</div>';
+        return;
+      }
+
+      function escapeHTML(str) {
+        return String(str).replace(/[&<>'"]/g, tag => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+        }[tag] || tag));
+      }
+
+      list.innerHTML = msgs.map(m => {
+        const isStudent = m.sender === 'student';
+        const bubbleClass = isStudent ? 'student' : 'parent';
+        const time = m.ts ? new Date(m.ts.seconds ? m.ts.seconds * 1000 : m.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
+        
+        return `
+          <div class="chat-bubble ${bubbleClass}">
+            ${escapeHTML(m.text)}
+            <span class="chat-time">${time}</span>
+          </div>
+        `;
+      }).join('');
+      
+      list.scrollTop = list.scrollHeight;
+    }
+
+    window.sendChatMsg = async function() {
+      const studentId = localStorage.getItem('ss_student_id');
+      const input = document.getElementById('chat-input-field');
+      const text = input?.value.trim();
+      if (!text || !studentId) return;
+
+      input.value = '';
+      try {
+        await window.ss_firebase.sendChatMessage(studentId, 'student', text);
+      } catch(e) {
+        showSToast("Error al enviar");
+      }
+    };
 
 
   </script>
