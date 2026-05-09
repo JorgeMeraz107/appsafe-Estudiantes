@@ -2727,18 +2727,18 @@
         <!-- Floating Action Button (FAB) para Chat de Seguridad -->
         <button onclick="openChat()" class="anim anim-4" style="
           position: fixed;
-          bottom: calc(85px + env(safe-area-inset-bottom));
+          bottom: calc(90px + env(safe-area-inset-bottom));
           right: 20px;
-          width: 56px;
-          height: 56px;
-          border-radius: 28px;
-          background: linear-gradient(135deg, var(--blue), #1A237E);
+          width: 54px;
+          height: 54px;
+          border-radius: 18px;
+          background: #007AFF;
           border: none;
           color: white;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 8px 24px rgba(41,121,255,0.4);
+          box-shadow: 0 4px 14px rgba(0, 122, 255, 0.35);
           z-index: 100;
           cursor: pointer;
           transition: transform 0.2s, box-shadow 0.2s;
@@ -6012,15 +6012,26 @@
       const chat = document.getElementById('screen-chat');
       const nav = document.getElementById('student-nav');
       
-      home.classList.remove('active');
-      chat.classList.add('active');
+      if (home) home.classList.remove('active');
+      if (chat) {
+        chat.classList.add('active');
+        chat.style.zIndex = '1000'; // Fuerza visualización por encima de todo
+      }
       if (nav) nav.style.display = 'none';
 
-      if (chatUnsub) chatUnsub();
-      if (window.ss_firebase?.subscribeToChat) {
-        chatUnsub = window.ss_firebase.subscribeToChat(studentId, (msgs) => {
-          renderChatMessages(msgs);
-        });
+      if (chatUnsub) {
+        try { chatUnsub(); } catch(e){}
+      }
+      
+      try {
+        if (window.ss_firebase?.subscribeToChat) {
+          chatUnsub = window.ss_firebase.subscribeToChat(studentId, (msgs) => {
+            renderChatMessages(msgs);
+          });
+        }
+      } catch (err) {
+        console.error("Error al abrir chat:", err);
+        document.getElementById('chat-messages-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--danger);font-size:13px;">Error de conexión. Reintenta.</div>';
       }
     };
 
