@@ -1362,6 +1362,87 @@
     }
 
     /* ═══════════════════════════════════════
+   MODERN MODAL (Confirm/Alert)
+═══════════════════════════════════════ */
+    .m-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .m-modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .m-modal {
+      background: var(--navy-mid);
+      width: 100%;
+      max-width: 340px;
+      border-radius: 28px;
+      padding: 28px;
+      border: 1px solid var(--border-c);
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.3s cubic-bezier(.4, 0, .2, 1);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    }
+    .m-modal-overlay.active .m-modal {
+      transform: scale(1) translateY(0);
+    }
+    .m-modal-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background: rgba(232, 54, 74, 0.1);
+      color: var(--danger);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .m-modal-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-h);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .m-modal-body {
+      font-size: 14px;
+      color: var(--text-b);
+      text-align: center;
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+    .m-modal-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .m-modal-btn {
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s, background 0.2s;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .m-modal-btn:active { transform: scale(0.97); }
+    .m-modal-btn-confirm { background: var(--danger); color: white; }
+    .m-modal-btn-cancel { background: var(--bg-item); color: var(--text-b); border: 1px solid var(--border-c); }
+
+    /* ═══════════════════════════════════════
    TOAST
 ═══════════════════════════════════════ */
     .s-toast {
@@ -2780,7 +2861,26 @@
       </div>
     </div>
 
-      <!-- Nav bar -->
+    <!-- Modern Confirmation Modal -->
+    <div id="modern-confirm-modal" class="m-modal-overlay">
+      <div class="m-modal">
+        <div class="m-modal-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <div class="m-modal-title" id="m-modal-title">¿Estás seguro?</div>
+        <div class="m-modal-body" id="m-modal-body">Esta acción no se puede deshacer.</div>
+        <div class="m-modal-actions">
+          <button class="m-modal-btn m-modal-btn-confirm" id="m-modal-confirm-btn">Confirmar</button>
+          <button class="m-modal-btn m-modal-btn-cancel" onclick="closeModernConfirm()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav bar -->
       <nav id="student-nav">
         <button class="s-nav-item active" data-tab="home" onclick="studentTab('home', this)">
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
@@ -5021,7 +5121,7 @@
 
     /* ── Formatea número para mostrar ───── */
     function formatPhoneDisplay(number) {
-      if (number === '911') return '📞 911 — Emergencias';
+      if (number === '911') return '911 — Emergencias';
       // +50499998888 → +504 9999-8888
       const clean = number.replace(/\D/g, '');
       if (clean.length === 11 && clean.startsWith('504')) {
@@ -5035,53 +5135,76 @@
 
 
 
+    let onConfirmCallback = null;
+    function confirmModern(title, body, confirmLabel, callback) {
+      document.getElementById('m-modal-title').textContent = title;
+      document.getElementById('m-modal-body').textContent = body;
+      const confirmBtn = document.getElementById('m-modal-confirm-btn');
+      confirmBtn.textContent = confirmLabel || 'Confirmar';
+      onConfirmCallback = callback;
+      confirmBtn.onclick = () => {
+        closeModernConfirm();
+        if (onConfirmCallback) onConfirmCallback();
+      };
+      document.getElementById('modern-confirm-modal').classList.add('active');
+    }
+
+    function closeModernConfirm() {
+      document.getElementById('modern-confirm-modal').classList.remove('active');
+    }
+
     async function desvincular() {
-      const c = confirm('¿Seguro que deseas desvincular este dispositivo? Ya no se enviará ubicación ni alertas a tus padres.');
-      if (c) {
-        const studentId = localStorage.getItem('ss_student_id');
-        const parentId = studentConfig?.parentid;
-        const studentName = localStorage.getItem('ss_student_name') || 'Tu hijo';
+      confirmModern(
+        'Desvincular Dispositivo',
+        '¿Seguro que deseas desvincularte? Ya no se enviará tu ubicación ni alertas de seguridad a tus padres.',
+        'Desvincularme',
+        async () => {
+          const studentId = localStorage.getItem('ss_student_id');
+          const parentId = studentConfig?.parentid;
+          const studentName = localStorage.getItem('ss_student_name') || 'Tu hijo';
 
-        if (studentId) {
-          try {
-            // 1. Notificar al padre antes de romper el vínculo
-            if (parentId) {
-              await sendNotificationFS(studentId, parentId, {
-                type: 'warn',
-                title: '⚠️ Dispositivo Desvinculado',
-                body: `${studentName} ha desvinculado su dispositivo manualmente.`,
-                icon: '🔓',
-                action: 'student'
-              });
+          if (studentId) {
+            try {
+              // 1. Notificar al padre antes de romper el vínculo
+              if (parentId) {
+                await sendNotificationFS(studentId, parentId, {
+                  type: 'warn',
+                  title: 'Dispositivo Desvinculado',
+                  body: `${studentName} ha desvinculado su dispositivo manualmente.`,
+                  icon: 'unlink',
+                  action: 'student'
+                });
+              }
+
+              // 2. Actualizar Firestore (Genera nuevo código)
+              await unlinkStudentFS(studentId);
+            } catch (e) {
+              console.warn("Error al notificar desvinculación:", e);
             }
-
-            // 2. Actualizar Firestore (Genera nuevo código)
-            await unlinkStudentFS(studentId);
-          } catch (e) {
-            console.warn("Error al notificar desvinculación:", e);
           }
+
+          // 3. Reset estado local
+          sensorData.lat = null;
+          sensorData.lng = null;
+          mapsInitialized = false;
+
+          if (gpsWatchId !== null) {
+            navigator.geolocation.clearWatch(gpsWatchId);
+            gpsWatchId = null;
+          }
+          if (dataInterval) clearInterval(dataInterval);
+          if (gpsLowInterval) clearInterval(gpsLowInterval);
+          if (scheduleCheckInterval) clearInterval(scheduleCheckInterval);
+
+          localStorage.removeItem('ss_student_id');
+          localStorage.removeItem('ss_student_name');
+          localStorage.removeItem('ss_student_config'); 
+          localStorage.removeItem('ss_parent_id');
+
+          showScreen('link');
+          showSToast('Dispositivo desvinculado correctamente');
         }
-
-        // 3. Reset estado local
-        sensorData.lat = null;
-        sensorData.lng = null;
-        mapsInitialized = false;
-
-        if (gpsWatchId !== null) {
-          navigator.geolocation.clearWatch(gpsWatchId);
-          gpsWatchId = null;
-        }
-        if (dataInterval) clearInterval(dataInterval);
-        if (gpsLowInterval) clearInterval(gpsLowInterval);
-        if (scheduleCheckInterval) clearInterval(scheduleCheckInterval);
-
-        localStorage.removeItem('ss_student_id');
-        localStorage.removeItem('ss_student_name');
-        localStorage.removeItem('ss_student_config'); 
-
-        showScreen('link');
-        showSToast('Dispositivo desvinculado');
-      }
+      );
     }
 
     /* ═══════════════════════════════════════
@@ -5094,7 +5217,7 @@
       if ('geolocation' in navigator) {
         navigator.permissions?.query({ name: 'geolocation' }).then(p => {
           const ok = p.state === 'granted';
-          if (gpsStatus) gpsStatus.textContent = ok ? 'Activado ✅' : p.state === 'denied' ? 'Denegado ❌ — Actívalo en ajustes' : 'Pendiente de permiso';
+          if (gpsStatus) gpsStatus.textContent = ok ? 'Activado' : p.state === 'denied' ? 'Denegado — Actívalo en ajustes' : 'Pendiente de permiso';
           if (gpsDot) gpsDot.style.background = ok ? 'var(--safe)' : 'var(--danger)';
         }).catch(() => {
           if (gpsStatus) gpsStatus.textContent = 'GPS disponible';
@@ -5108,7 +5231,7 @@
       const motionStatus = document.getElementById('motion-perm-status');
       const motionDot = document.getElementById('motion-perm-dot');
       const hasMotion = !!window.DeviceMotionEvent;
-      if (motionStatus) motionStatus.textContent = hasMotion ? 'Acelerómetro disponible ✅' : 'No disponible — Usando simulación';
+      if (motionStatus) motionStatus.textContent = hasMotion ? 'Acelerómetro disponible' : 'No disponible — Usando simulación';
       if (motionDot) motionDot.style.background = hasMotion ? 'var(--safe)' : 'var(--warn)';
 
       // Battery
@@ -5116,7 +5239,7 @@
       const battDot = document.getElementById('battery-perm-dot');
       if ('getBattery' in navigator) {
         navigator.getBattery().then(b => {
-          if (battStatus) battStatus.textContent = `${Math.round(b.level * 100)}% · ${b.charging ? 'Cargando ⚡' : 'Sin cargador'}`;
+          if (battStatus) battStatus.textContent = `${Math.round(b.level * 100)}% · ${b.charging ? 'Cargando' : 'Sin cargador'}`;
           if (battDot) battDot.style.background = 'var(--safe)';
         }).catch(() => {
           if (battStatus) battStatus.textContent = 'API disponible (simulada)';
@@ -5584,7 +5707,7 @@
     function clearHistory() {
       localStorage.removeItem(HISTORY_KEY);
       renderHistory();
-      showSToast('🗑️ Historial borrado');
+      showSToast('Historial borrado');
     }
 
     /* ═══════════════════════════════════════
@@ -5781,8 +5904,8 @@
       const sid = localStorage.getItem('ss_student_id');
       if (sid) {
         updateStudentAvatarFS(sid, selectedAvatarUrl)
-          .then(() => { showSToast('✅ Avatar actualizado'); closeAvatarPicker(); })
-          .catch(err => { console.error(err); showSToast('❌ Error al guardar'); })
+          .then(() => { showSToast('Avatar actualizado'); closeAvatarPicker(); })
+          .catch(err => { console.error(err); showSToast('Error al guardar'); })
           .finally(() => { btn.disabled = false; btn.textContent = originalText; });
       } else { closeAvatarPicker(); }
     }
@@ -5852,13 +5975,13 @@
                   studentConfig.photoURL = url;
                   updateUIFromConfig();
                   saveLocalConfig(studentConfig);
-                  showSToast('✅ Foto personalizada actualizada');
+                  showSToast('Foto personalizada actualizada');
                   closeAvatarPicker();
                 })
                 .catch(err => {
                   console.error("Error al subir WebP:", err);
                   statusEl.textContent = 'Error al subir. Intenta de nuevo.';
-                  showSToast('❌ Error al subir foto');
+                  showSToast('Error al subir foto');
                 });
             } else {
                statusEl.style.display = 'none';
@@ -5936,12 +6059,12 @@
       window.addEventListener('online', () => {
         updateConnectionUI(true);
         addHistoryEvent('info', 'Conexión restaurada — En línea');
-        showSToast('📶 Conexión restaurada');
+        showSToast('Conexión restaurada');
       });
       window.addEventListener('offline', () => {
         updateConnectionUI(false);
         addHistoryEvent('offline', 'Sin conexión a internet');
-        showSToast('📵 Sin conexión');
+        showSToast('Sin conexión');
       });
 
       // Estado inicial de conexión

@@ -19,6 +19,8 @@ import {
     getDocs,
     addDoc,
     onSnapshot,
+    orderBy,
+    limit,
     serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
@@ -215,9 +217,48 @@ export async function unlinkStudentFS(studentId) {
     await updateDoc(docRef, {
         linked: false,
         linkCode: newCode,
-        linkedAt: null
+        linkedAt: null,
+        parentid: null
     });
     return newCode;
 }
 
+/**
+ * Suscribe al chat en tiempo real (últimos 20 mensajes).
+ */
+export function subscribeToChat(studentId, onChange) {
+    const q = query(
+        collection(db, "students", studentId, "chat"),
+        orderBy("ts", "asc"),
+        limit(20)
+    );
+    return onSnapshot(q, snap => {
+        const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onChange(msgs);
+    });
+}
+
+/**
+ * Envía un mensaje al chat.
+ */
+export async function sendChatMessage(studentId, sender, text) {
+    if (!text.trim()) return;
+    const chatRef = collection(db, "students", studentId, "chat");
+    await addDoc(chatRef, {
+        sender: sender, // 'parent' o 'student'
+        text: text.trim(),
+        ts: serverTimestamp()
+    });
+}
+
 export { db, auth };
+
+window.ss_firebase = {
+  db,
+  auth,
+  subscribeStudentConfig,
+  updateStudentSafeZoneFS,
+  unlinkStudentFS,
+  subscribeToChat,
+  sendChatMessage
+};
