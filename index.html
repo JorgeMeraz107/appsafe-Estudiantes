@@ -1295,20 +1295,9 @@
       position: relative;
     }
 
-    .s-nav-item.active::after {
-      content: '';
-      position: absolute;
-      top: 8px;
-      width: 32px;
-      height: 4px;
-      background: var(--blue);
-      border-radius: 2px;
-      opacity: 0.15;
-    }
-
     .s-nav-item.active svg path,
     .s-nav-item.active svg circle {
-      fill: var(--safe) !important;
+      fill: rgba(77, 148, 255, 0.15);
     }
 
     /* ═══════════════════════════════════════
@@ -2845,7 +2834,7 @@
             </div>
           </div>
           <div class="map-accuracy-info" id="map-acc-info">
-            📍 Precisión: ±6m
+            Precisión: ±6m
           </div>
         </div>
 
@@ -3347,11 +3336,11 @@
         <div class="fullmap-actions" id="fullmap-zone-actions" style="display:none; margin-bottom: 8px;">
           <button class="fullmap-btn fullmap-btn-ghost" id="fbtn-home" onclick="viewSafeZone('home')"
             style="display:none;">
-            🏠 Ver Hogar
+            Ver Hogar
           </button>
           <button class="fullmap-btn fullmap-btn-ghost" id="fbtn-school" onclick="viewSafeZone('school')"
             style="display:none;">
-            🏫 Ver Escuela
+            Ver Escuela
           </button>
         </div>
         <div class="fullmap-actions">
@@ -3760,8 +3749,8 @@
       if (sosActive) return;
       sosActive = true;
       
-      showSToast('🚨 PELIGRO: S.O.S Autónomo activado');
-      addHistoryEvent('sos', '🚨 [AUTO-SOS] Alerta generada por IA Local', { reason: reason });
+      showSToast('PELIGRO: S.O.S Autónomo activado');
+      addHistoryEvent('sos', '[AUTO-SOS] Alerta generada por IA Local', { reason: reason });
       
       // Intentar vibrar fuerte para avisarle al niño que la app lo protegió
       if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 1000]);
@@ -4436,7 +4425,7 @@
 
     function updateMapAccInfo(accuracy) {
       const el = document.getElementById('map-acc-info');
-      if (el) el.textContent = `📍 Precisión: ±${accuracy || sensorData.accuracy}m`;
+      if (el) el.textContent = `Precisión: ±${accuracy || sensorData.accuracy}m`;
     }
 
     function updateFullMapCoords(lat, lng, accuracy) {
