@@ -2223,12 +2223,22 @@
       position: fixed;
       inset: 0;
       z-index: 99999;
-      background: var(--bg-app);
+      background: var(--navy);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s;
+      padding: 32px;
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
+    }
+
+    .loader-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0, 122, 255, 0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 50% at 0% 100%, rgba(52, 199, 89, 0.05) 0%, transparent 60%);
+      pointer-events: none;
     }
 
     #global-loader.fade-out {
@@ -2236,44 +2246,60 @@
       visibility: hidden;
     }
 
-    .loader-logo-container {
-      position: relative;
+    .loader-logo {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--blue), #0056B3);
+      border-radius: 26px;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: var(--shadow-md);
       margin-bottom: 24px;
+      position: relative;
     }
 
-    .loader-logo-pulse {
-      position: absolute;
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(41, 121, 255, 0.15) 0%, transparent 70%);
-      animation: loader-pulse 2s infinite;
-    }
-
-    @keyframes loader-pulse {
-      0% { transform: scale(0.8); opacity: 0.3; }
-      50% { transform: scale(1.2); opacity: 0.6; }
-      100% { transform: scale(0.8); opacity: 0.3; }
-    }
-
-    .loader-text {
+    .loader-title {
       font-family: 'Sora', sans-serif;
-      font-size: 22px;
+      font-size: 32px;
       font-weight: 800;
       color: var(--text-h);
-      letter-spacing: -0.02em;
-      margin-top: 10px;
+      text-align: center;
+      margin-bottom: 12px;
+      position: relative;
     }
 
-    .loader-sub {
-      font-size: 13px;
-      color: var(--text-s);
-      margin-top: 8px;
-      font-weight: 500;
+    .loader-progress-container {
+      width: 140px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin-top: 32px;
+      overflow: hidden;
+      position: relative;
     }
+
+    .loader-progress-bar {
+      width: 40%;
+      height: 100%;
+      background: var(--blue);
+      border-radius: 2px;
+      animation: loader-slide 1.5s infinite ease-in-out;
+    }
+
+    @keyframes loader-slide {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(250%); }
+    }
+
+    .loader-status {
+      font-size: 14px;
+      color: var(--text-s);
+      margin-top: 16px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+    
     /* ── Chat Bubbles (Student) ── */
     .chat-messages { 
       display: flex; 
@@ -2375,15 +2401,18 @@
        GLOBAL LOADER (INLINE SVG)
   ══════════════════════════════ -->
   <div id="global-loader">
-    <div class="loader-logo-container">
-      <div class="loader-logo-pulse"></div>
-      <svg width="64" height="64" viewBox="0 0 38 38" fill="none" style="position:relative; z-index:2;">
-        <path d="M19 3L5 9V19C5 27.3 11.2 35.1 19 37C26.8 35.1 33 27.3 33 19V9L19 3Z" fill="var(--text-h)" fill-opacity="0.9" />
-        <path d="M13 19L17 23L25 15" stroke="#2979FF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+    <div class="loader-bg"></div>
+    <div class="loader-logo">
+      <svg width="42" height="42" viewBox="0 0 38 38" fill="none">
+        <path d="M19 3L5 9V19C5 27.3 11.2 35.1 19 37C26.8 35.1 33 27.3 33 19V9L19 3Z" fill="white" fill-opacity="0.9" />
+        <path d="M13 19L17 23L25 15" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </div>
-    <div class="loader-text">SchoolSafe</div>
-    <div class="loader-sub" id="loader-status">Iniciando sistema seguro...</div>
+    <div class="loader-title">SchoolSafe</div>
+    <div class="loader-status" id="loader-status">Verificando seguridad...</div>
+    <div class="loader-progress-container">
+      <div class="loader-progress-bar"></div>
+    </div>
   </div>
 
   <script>
