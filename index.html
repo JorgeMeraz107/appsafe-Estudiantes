@@ -6388,6 +6388,20 @@
     let html5QrCode = null;
 
     window.startQRScan = async function() {
+      // 1. Verificar Seguridad (HTTPS es obligatorio para cámara en móviles)
+      const isSecure = location.protocol === 'https:' || location.hostname === 'localhost';
+      if (!isSecure) {
+        showSToast("Error: La cámara requiere una conexión segura (HTTPS)");
+        console.warn("La cámara fue bloqueada por el navegador: El sitio no es HTTPS.");
+        return;
+      }
+
+      // 2. Verificar soporte de hardware
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showSToast("Error: Tu navegador no soporta el acceso a la cámara");
+        return;
+      }
+
       const scanModal = document.createElement('div');
       scanModal.id = 'qr-scan-modal';
       scanModal.style = "position:fixed; inset:0; background:#000; z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; font-family:'Outfit',sans-serif;";
@@ -6437,7 +6451,15 @@
         );
       } catch (err) {
         console.error("Error al iniciar cámara:", err);
-        showSToast("Error al acceder a la cámara");
+        let msg = "Error al acceder a la cámara";
+        if (err.name === 'NotAllowedError' || err === 'NotAllowedError') {
+          msg = "Permiso de cámara denegado por el usuario";
+        } else if (err.name === 'NotFoundError') {
+          msg = "No se detectó ninguna cámara en el dispositivo";
+        } else if (err.name === 'NotReadableError') {
+          msg = "La cámara ya está siendo usada por otra aplicación";
+        }
+        showSToast(msg);
         stopQRScan();
       }
     };
