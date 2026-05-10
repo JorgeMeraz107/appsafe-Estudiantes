@@ -3406,6 +3406,8 @@
     let monitoringMode = 'full';       // 'full' | 'low' | 'off'  — estado actual
     let studentConfig = null;          // Datos dinámicos del alumno (contactos, horario)
     let unsubConfig = null;
+    let lastSentPayload = null;        // Para evitar enviar datos duplicados y ahorrar batería
+    let lastSentTime = 0;             // Timestamp del último envío exitoso a Firestore
 
     // Simulated student data — lat/lng null until real GPS arrives
     let sensorData = {
@@ -3715,17 +3717,57 @@
         // Guardar en LS para uso sin conexión (opcional)
         localStorage.setItem(LS_STUDENT, JSON.stringify(payload));
 
-        // Cargar en Firestore a los Padres
+        // Cargar en Firestore a los Padres solo si es necesario (Ahorro inteligente de batería)
         const studentId = localStorage.getItem('ss_student_id');
-        if (studentId) {
+        if (studentId && shouldTransmit(payload)) {
           await writeLiveData(studentId, payload);
+          lastSentPayload = JSON.parse(JSON.stringify(payload));
+          lastSentTime = Date.now();
         }
 
         const connEl = document.getElementById('conn-status');
-        if (connEl) connEl.textContent = `Conectado · ${new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+        if (connEl) {
+          const timeStr = new Date().toLocaleTimeString('es-HN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          connEl.textContent = `Conectado · ${timeStr}${!shouldTransmit(payload) ? ' (Modo Ahorro)' : ''}`;
+        }
       } catch (e) {
         console.error("Error transmitiendo datos a Firestore", e);
       }
+    }
+
+    /**
+     * Lógica Inteligente de Transmisión (Filtro de ahorro de batería)
+     * Decide si los cambios justifican activar la antena de radio.
+     */
+    function shouldTransmit(p) {
+      // 1. Prioridad Máxima: Emergencias
+      if (p.sos || p.impact || p.fall || p.risk === 'alto') return true;
+
+      // 2. Heartbeat: Al menos cada 5 minutos enviar pulso de vida
+      const now = Date.now();
+      if (now - lastSentTime > 300000) return true;
+
+      // Si no hay datos previos, enviar el primero
+      if (!lastSentPayload) return true;
+
+      // 3. Movimiento Significativo: > 15 metros
+      if (p.lat && p.lng && lastSentPayload.lat && lastSentPayload.lng) {
+        const dist = haversineMeters(lastSentPayload.lat, lastSentPayload.lng, p.lat, p.lng);
+        if (dist > 15) return true;
+      }
+
+      // 4. Cambios Críticos de Estado
+      if (p.charging !== lastSentPayload.charging) return true;
+      
+      // Batería baja o cambio significativo (cada 5%)
+      const batteryDiff = Math.abs((p.battery || 0) - (lastSentPayload.battery || 0));
+      if (batteryDiff >= 0.05) return true;
+
+      // Cambio de red (importante para conectividad)
+      if (p.net_type !== lastSentPayload.net_type) return true;
+
+      // Si nada ha cambiado significativamente, ahorrar energía
+      return false;
     }
 
     /* ── Evalúa y aplica el modo correcto ─ */
@@ -6150,7 +6192,11 @@
       
       try {
         if (window.ss_firebase?.subscribeToChat) {
-          chatUnsub = window.ss_firebase.subscribeToChat(studentId, (msgs) => {
+          chatUnsub = window.ss_firebase.subscribeToChat(studentId, (msgs, err) => {
+            if (err) {
+              document.getElementById('chat-messages-list').innerHTML = `<div style="text-align:center;padding:20px;color:var(--danger);font-size:12px;">Error: ${err.message}</div>`;
+              return;
+            }
             renderChatMessages(msgs);
           });
         }

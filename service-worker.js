@@ -64,27 +64,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. NETWORK-FIRST PARA LA APP SHELL (HTML, JS)
-  // Intenta descargar la última versión. Si falla (offline), usa el caché.
+  // 2. STALE-WHILE-REVALIDATE PARA LA APP SHELL (HTML, JS)
+  // Sirve desde el caché INSTANTÁNEAMENTE y actualiza en segundo plano.
   if (event.request.mode === 'navigate' || url.origin === location.origin) {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
+      caches.match(event.request).then((cachedResponse) => {
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
           }
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-          return response;
-        })
-        .catch(() => {
-          // Si no hay red, sirve el index.html guardado
-          return caches.match(event.request).then((cached) => {
-            return cached || caches.match('./index.html');
-          });
-        })
+          return networkResponse;
+        }).catch(() => {
+          // Error de red silencioso, ya servimos desde el caché
+        });
+
+        // Retorna el caché si existe, sino espera a la red
+        return cachedResponse || fetchPromise;
+      })
     );
     return;
   }
