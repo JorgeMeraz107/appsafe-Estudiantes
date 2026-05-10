@@ -1234,11 +1234,8 @@
       transform: translateX(20px);
     }
 
-    /* ═══════════════════════════════════════
-   BOTTOM NAV (alumno)
-═══════════════════════════════════════ */
     #student-nav {
-      height: 68px;
+      height: 72px;
       background: var(--topbar-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -1250,6 +1247,7 @@
       right: 0;
       z-index: 100;
       padding-bottom: env(safe-area-inset-bottom);
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
     }
 
     .s-nav-item {
@@ -1263,18 +1261,26 @@
       background: transparent;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-      transition: opacity 0.15s;
+      transition: all 0.2s ease;
+      position: relative;
     }
 
-    .s-nav-item:active {
-      opacity: 0.6;
+    .s-nav-icon-wrapper {
+      width: 56px;
+      height: 32px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s ease;
     }
 
-    .s-nav-label {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--text-s);
-      transition: color 0.2s;
+    .s-nav-item.active .s-nav-icon-wrapper {
+      background-color: rgba(77, 148, 255, 0.12);
+    }
+
+    .s-nav-item.active svg {
+      stroke: var(--blue);
     }
 
     .s-nav-item.active .s-nav-label {
@@ -1282,22 +1288,11 @@
       font-weight: 700;
     }
 
-    .s-nav-item.active svg {
-      stroke: var(--blue);
-      transform: translateY(-2px);
-    }
-
-    .s-nav-item svg {
-      transition: stroke 0.2s, transform 0.2s;
-    }
-
-    .s-nav-item {
-      position: relative;
-    }
-
-    .s-nav-item.active svg path,
-    .s-nav-item.active svg circle {
-      fill: rgba(77, 148, 255, 0.15);
+    .s-nav-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-s);
+      transition: color 0.2s;
     }
 
     /* ═══════════════════════════════════════
@@ -2455,15 +2450,16 @@
       </div>
 
       <button class="btn-link" id="btn-vincular" onclick="vincular()">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M10 2L3 5V10C3 14.4 6.08 18.4 10 20C13.92 18.4 17 14.4 17 10V5L10 2Z" fill="var(--text-h)"
-            opacity="0.9" />
-          <path d="M7 10L9 12L13 8" stroke="#2979FF" stroke-width="2" stroke-linecap="round" />
-        </svg>
         Vincularme
       </button>
 
-      <div class="demo-hint">💡 Demo: escribe cualquier 6 dígitos para entrar</div>
+      <div style="margin-top: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
+        <div style="width: 100%; height: 1px; background: var(--border-c); opacity: 0.5;"></div>
+        <button class="btn-ghost" onclick="startQRScan()" style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--blue); background: none; border: none; cursor: pointer;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Escanear Código QR
+        </button>
+      </div>
     </div>
 
     <!-- ══════════════════════════════
@@ -2965,26 +2961,29 @@
     </div>
 
     <!-- Nav bar -->
-      <nav id="student-nav">
+      <nav id="student-nav" style="display: none;">
         <button class="s-nav-item active" data-tab="home" onclick="studentTab('home', this)">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <path d="M11 2L3 8V20H9V14H13V20H19V8L11 2Z" fill="var(--text-s)" />
-          </svg>
+          <div class="s-nav-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
           <span class="s-nav-label">Inicio</span>
         </button>
         <button class="s-nav-item" data-tab="history" onclick="goToHistory()">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <circle cx="11" cy="11" r="8" stroke="var(--text-s)" stroke-width="1.5" fill="none" />
-            <path d="M11 7V11L14 13" stroke="var(--text-s)" stroke-width="1.5" stroke-linecap="round" />
-          </svg>
+          <div class="s-nav-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
           <span class="s-nav-label">Historial</span>
         </button>
         <button class="s-nav-item" data-tab="profile" onclick="showProfile()">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <circle cx="11" cy="8" r="4" fill="var(--text-s)" />
-            <path d="M3 20C3 16.13 6.13 13 10 13H12C15.87 13 19 16.13 19 20" stroke="var(--text-s)" stroke-width="1.5"
-              stroke-linecap="round" fill="none" />
-          </svg>
+          <div class="s-nav-icon-wrapper">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
           <span class="s-nav-label">Perfil</span>
         </button>
       </nav>
@@ -3924,8 +3923,19 @@
     ═══════════════════════════════════════ */
     function showScreen(id) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById('screen-' + id).classList.add('active');
+      const target = document.getElementById('screen-' + id);
+      if (target) target.classList.add('active');
       currentScreen = id;
+
+      // Mostrar/Ocultar nav bar según pantalla
+      const nav = document.getElementById('student-nav');
+      if (nav) {
+        if (id === 'link') {
+          nav.style.display = 'none';
+        } else {
+          nav.style.display = 'flex';
+        }
+      }
     }
 
     function studentTab(tab, btn) {
@@ -6345,6 +6355,36 @@
       }
     };
 
+    /* ── Escaneo de QR (Simulator) ── */
+    window.startQRScan = function() {
+      const scanModal = document.createElement('div');
+      scanModal.style = "position:fixed; inset:0; background:#000; z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; font-family:'Outfit',sans-serif;";
+      scanModal.innerHTML = `
+        <div style="position:absolute; top:20px; right:20px; font-size:24px; cursor:pointer;" onclick="this.parentElement.remove()">✕</div>
+        <div style="width:250px; height:250px; border:2px solid var(--blue); border-radius:24px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center;">
+          <div style="position:absolute; inset:0; background:linear-gradient(transparent, var(--blue), transparent); height:2px; animation: scanMove 2s infinite linear;"></div>
+          <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        </div>
+        <div style="margin-top:32px; font-size:18px; font-weight:700;">Buscando Código QR...</div>
+        <div style="margin-top:12px; font-size:14px; opacity:0.7; padding:0 40px; text-align:center;">Apunta la cámara al código QR que aparece en la App del Padre</div>
+        <style>
+          @keyframes scanMove { from { top: 0; } to { top: 100%; } }
+        </style>
+      `;
+      document.body.appendChild(scanModal);
+      
+      setTimeout(() => {
+        if (scanModal.parentElement) {
+          scanModal.remove();
+          showSToast("QR Detectado con éxito");
+          const demoCode = "123456";
+          for(let i=0; i<6; i++) {
+            const el = document.getElementById('d' + i);
+            if(el) el.value = demoCode[i];
+          }
+        }
+      }, 2500);
+    }
 
   </script>
 </body>
