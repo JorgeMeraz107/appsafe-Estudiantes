@@ -16,41 +16,16 @@
    TOKENS — MODO OSCURO (default)
 ═══════════════════════════════════════ */
     :root {
-      --navy: #080C14;          /* Deeper, more sophisticated navy */
-      --navy-mid: #101624;      /* Professional elevation color */
-      --safe: #34C759;          /* iOS standard green */
-      --safe-bg: rgba(52, 199, 89, 0.1);
-      --warn: #FF9F0A;          /* iOS standard orange */
-      --warn-bg: rgba(255, 159, 10, 0.1);
-      --danger: #FF3B30;        /* iOS standard red */
-      --danger-bg: rgba(255, 59, 48, 0.1);
-      --blue: #007AFF;          /* iOS standard blue */
-      --bg-app: #080C14;
-      --bg-card: rgba(255, 255, 255, 0.05);
-      --bg-item: rgba(255, 255, 255, 0.03);
-      --border-c: rgba(255, 255, 255, 0.06);
-      --text-h: #F2F2F7;
-      --text-b: #AEAEB2;
-      --text-s: #636366;
-      --topbar-bg: rgba(16, 22, 36, 0.85);
-      --radius: 24px;           /* Softer, more modern radius */
-      --shadow-sm: 0 4px 12px rgba(0,0,0,0.1);
-      --shadow-md: 0 12px 32px rgba(0,0,0,0.25);
-    }
-
-    /* ═══════════════════════════════════════
-   TOKENS — MODO CLARO
-═══════════════════════════════════════ */
-    html.light {
-      --navy: #FFFFFF;
-      --navy-mid: #F0F4FA;
-      --safe: #0AAD6C;
-      --safe-bg: rgba(10, 173, 108, 0.1);
-      --warn: #E0941A;
-      --warn-bg: rgba(224, 148, 26, 0.1);
-      --danger: #D42B3E;
-      --danger-bg: rgba(212, 43, 62, 0.1);
-      --blue: #1A6FE8;
+      --navy: #0A1628;
+      --navy-mid: #112240;
+      --navy-light: #1A3358;
+      --safe: #059669;
+      --safe-bg: rgba(5, 150, 105, 0.12);
+      --warn: #F5A623;
+      --warn-bg: rgba(245, 166, 35, 0.12);
+      --danger: #E8364A;
+      --danger-bg: rgba(232, 54, 74, 0.12);
+      --blue: #2979FF;
       --bg-app: #F0F4FA;
       --bg-card: #FFFFFF;
       --bg-item: #FFFFFF;
@@ -59,6 +34,36 @@
       --text-b: #4A5568;
       --text-s: #94A3B8;
       --topbar-bg: rgba(255, 255, 255, 0.95);
+      --radius: 16px;
+      --shadow-sm: 0 2px 20px rgba(10, 22, 40, 0.08);
+      --shadow-md: 0 8px 40px rgba(10, 22, 40, 0.15);
+    }
+
+    /* ═══════════════════════════════════════
+   TOKENS — MODO OSCURO
+═══════════════════════════════════════ */
+    html.dark, :root:not(.light) {
+      --navy: #0D1B2A;
+      --navy-mid: #0D1B2A;
+      --navy-light: #162032;
+      --safe: #10B981;
+      --safe-bg: rgba(16, 185, 129, 0.15);
+      --warn: #F5A623;
+      --warn-bg: rgba(245, 166, 35, 0.22);
+      --danger: #E8364A;
+      --danger-bg: rgba(232, 54, 74, 0.22);
+      --blue: #4D94FF;
+      --bg-app: #0A1220;
+      --bg-card: #111D2E;
+      --bg-item: #111D2E;
+      --border-c: #1E2F45;
+      --text-h: #E8F0FA;
+      --text-b: #8FA8C8;
+      --text-s: #4A6580;
+      --topbar-bg: rgba(13, 27, 42, 0.85);
+      --radius: 16px;
+      --shadow-sm: 0 2px 20px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 8px 40px rgba(0, 0, 0, 0.5);
     }
 
     /* Transición suave solo en propiedades específicas */
@@ -574,30 +579,7 @@
     }
 
     .s-card::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 12px;
-      bottom: 12px;
-      width: 4px;
-      border-radius: 0 4px 4px 0;
-      opacity: 0.8;
-    }
-
-    .s-card.safe::before {
-      background: var(--safe);
-    }
-
-    .s-card.warn::before {
-      background: var(--warn);
-    }
-
-    .s-card.danger::before {
-      background: var(--danger);
-    }
-
-    .s-card.info::before {
-      background: var(--blue);
+      display: none;
     }
 
     .s-icon {
@@ -874,7 +856,7 @@
       background: var(--bg-card);
       border: 1.5px solid var(--border-c);
       color: var(--text-b);
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Outfit', sans-serif;
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
@@ -2026,7 +2008,7 @@
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Outfit', sans-serif;
       -webkit-tap-highlight-color: transparent;
       transition: transform 0.12s, opacity 0.12s;
     }
@@ -2535,7 +2517,7 @@
       border-radius:14px;
       border:1px solid var(--border-c);
       background:var(--bg-card);
-      font-size:13px; font-family:'DM Sans',sans-serif;
+      font-size:13px; font-family:'Outfit',sans-serif;
       box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
       </div>
 
@@ -3095,7 +3077,7 @@
         </button>
         <div class="history-title">Mi Historial</div>
         <button onclick="clearHistory()"
-          style="background:none;border:none;font-size:12px;color:var(--text-s);cursor:pointer;padding:6px 10px;font-family:'DM Sans',sans-serif;">Limpiar</button>
+          style="background:none;border:none;font-size:12px;color:var(--text-s);cursor:pointer;padding:6px 10px;font-family:'Outfit',sans-serif;">Limpiar</button>
       </div>
       <div class="history-scroll" id="history-list">
         <!-- Generado dinámicamente por JS -->
@@ -3409,7 +3391,7 @@
             <button onclick="closeCallSheet()" style="width:100%;height:48px;border-radius:14px;
                    background:var(--bg-card);border:1px solid var(--border-c);
                    color:var(--text-s);font-size:15px;font-weight:600;
-                   cursor:pointer;font-family:'DM Sans',sans-serif;">
+                   cursor:pointer;font-family:'Outfit',sans-serif;">
               Cancelar
             </button>
           </div>
@@ -5592,7 +5574,7 @@
               type,
               title: title,
               body: ev.placeName ? `En: ${ev.placeName}` : 'Ubicación detectada',
-              icon: TYPE_CFG[type]?.emoji || '🔔',
+              icon: TYPE_CFG[type]?.icon || '',
               action: type === 'sos' ? 'emergency' : 'student',
               studentName: studentName
             };
