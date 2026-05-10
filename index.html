@@ -9,8 +9,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>SchoolSafe — Alumno</title>
   <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap"
     rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     /* ═══════════════════════════════════════
    TOKENS — MODO OSCURO (default)
@@ -6384,36 +6384,72 @@
       }
     };
 
-    /* ── Escaneo de QR (Simulator) ── */
-    window.startQRScan = function() {
+    /* ── Escaneo de QR (Real con Cámara) ── */
+    let html5QrCode = null;
+
+    window.startQRScan = async function() {
       const scanModal = document.createElement('div');
+      scanModal.id = 'qr-scan-modal';
       scanModal.style = "position:fixed; inset:0; background:#000; z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; font-family:'Outfit',sans-serif;";
       scanModal.innerHTML = `
-        <div style="position:absolute; top:20px; right:20px; font-size:24px; cursor:pointer;" onclick="this.parentElement.remove()">✕</div>
-        <div style="width:250px; height:250px; border:2px solid var(--blue); border-radius:24px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center;">
-          <div style="position:absolute; inset:0; background:linear-gradient(transparent, var(--blue), transparent); height:2px; animation: scanMove 2s infinite linear;"></div>
-          <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <div style="position:absolute; top:20px; right:20px; font-size:24px; cursor:pointer; z-index:10;" onclick="stopQRScan()">✕</div>
+        <div id="reader" style="width:100%; max-width:400px; background:#000;"></div>
+        <div style="position:absolute; bottom:80px; text-align:center; width:100%; pointer-events:none;">
+          <div style="font-size:18px; font-weight:700; margin-bottom:8px;">Escaneando Código QR...</div>
+          <div style="font-size:14px; opacity:0.7;">Apunta al QR en la App del Padre</div>
         </div>
-        <div style="margin-top:32px; font-size:18px; font-weight:700;">Buscando Código QR...</div>
-        <div style="margin-top:12px; font-size:14px; opacity:0.7; padding:0 40px; text-align:center;">Apunta la cámara al código QR que aparece en la App del Padre</div>
         <style>
-          @keyframes scanMove { from { top: 0; } to { top: 100%; } }
+          #reader__scan_region { background: #000 !important; }
+          #reader video { width: 100% !important; height: auto !important; object-fit: cover !important; }
         </style>
       `;
       document.body.appendChild(scanModal);
-      
-      setTimeout(() => {
-        if (scanModal.parentElement) {
-          scanModal.remove();
-          showSToast("QR Detectado con éxito");
-          const demoCode = "123456";
-          for(let i=0; i<6; i++) {
-            const el = document.getElementById('d' + i);
-            if(el) el.value = demoCode[i];
+
+      html5QrCode = new Html5Qrcode("reader");
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+      try {
+        await html5QrCode.start(
+          { facingMode: "environment" }, 
+          config,
+          (decodedText) => {
+            // Éxito: El código fue detectado
+            console.log("QR Detectado:", decodedText);
+            stopQRScan();
+            showSToast("QR Vinculado con éxito");
+            
+            // Llenar inputs si es un código de 6 dígitos
+            const code = decodedText.trim();
+            if (code.length === 6 && !isNaN(code)) {
+              for(let i=0; i<6; i++) {
+                const el = document.getElementById('d' + i);
+                if(el) el.value = code[i];
+              }
+              // Opcional: auto-vincular
+              vincular();
+            } else {
+              showSToast("Código QR no válido");
+            }
+          },
+          (errorMessage) => {
+            // Error de escaneo (común mientras busca)
           }
-        }
-      }, 2500);
-    }
+        );
+      } catch (err) {
+        console.error("Error al iniciar cámara:", err);
+        showSToast("Error al acceder a la cámara");
+        stopQRScan();
+      }
+    };
+
+    window.stopQRScan = async function() {
+      if (html5QrCode) {
+        try { await html5QrCode.stop(); } catch(e) {}
+        html5QrCode = null;
+      }
+      const modal = document.getElementById('qr-scan-modal');
+      if (modal) modal.remove();
+    };
 
   </script>
 </body>
