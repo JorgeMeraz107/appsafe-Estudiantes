@@ -3743,11 +3743,33 @@
     }
 
     /* ── Motor Heurístico Autónomo (Edge AI) ── */
+    const lastSmartAlerts = {};
+    
+    function triggerSmartAlert(type, title, body) {
+      const now = Date.now();
+      // Evitar spam: solo 1 alerta del mismo tipo cada 15 minutos
+      if (lastSmartAlerts[type] && now - lastSmartAlerts[type] < 15 * 60 * 1000) return;
+      
+      lastSmartAlerts[type] = now;
+      addHistoryEvent('warn', title, { detail: body });
+      
+      const studentId = localStorage.getItem('ss_student_id');
+      if (studentId && studentConfig?.parentid) {
+         sendNotificationFS(studentId, studentConfig.parentid, {
+            type: 'smart_alert',
+            title: title,
+            body: body,
+            icon: 'alert-triangle'
+         });
+      }
+    }
+
     function runHeuristicEngine(payload) {
       // Evitar múltiples disparos si ya hay un SOS en curso
       if (sosActive) return;
 
       const isSafeZone = document.getElementById('status-badge-top')?.classList.contains('status-badge-safe');
+      const inSchedule = isWithinSchedule();
 
       // Vector 1: Secuestro / Traslado forzoso
       if (payload.speed > 40 && !isSafeZone && payload.light < 10) {
@@ -3769,6 +3791,28 @@
       if (payload.noise > 85 && payload.motion === 'Corriendo' && payload.light < 10) {
         triggerAutonomousSOS('Altercado/Pánico detectado (Gritos y evasión)');
         return;
+      }
+
+      // ────────────────────────────────────────────────────────
+      // NUEVOS VECTORES INTELIGENTES (Contexto: Celular Guardado)
+      // ────────────────────────────────────────────────────────
+
+      // Vector 4: Guardián de Mochila (Manipulación en clase)
+      // Si está en el colegio, en horario de clase, la luz sube de golpe y hay movimiento (no estaba guardado)
+      if (isSafeZone && inSchedule) {
+         const mag = Math.sqrt(payload.accel_x**2 + payload.accel_y**2 + payload.accel_z**2);
+         if (payload.light > 150 && mag > 2 && payload.speed < 5) {
+             triggerSmartAlert('backpack_tamper', 'Manipulación de Dispositivo', 'El celular fue sacado de su lugar de guardado durante el horario escolar.');
+         }
+      }
+
+      // Vector 5: Disturbio Ambiental (Micrófono espía)
+      // Si el celular está guardado (oscuro, sin moverse) pero detecta mucho ruido
+      if (isSafeZone && inSchedule) {
+          const mag = Math.sqrt(payload.accel_x**2 + payload.accel_y**2 + payload.accel_z**2);
+          if (payload.light < 10 && mag < 1.5 && payload.noise > 85) {
+             triggerSmartAlert('environmental_disturbance', 'Anomalía Acústica en el Colegio', 'Se detectó ruido inusualmente alto (>85dB) cerca de las pertenencias del alumno.');
+          }
       }
     }
 
@@ -5016,21 +5060,49 @@
       const now = Date.now();
 
       // 🚨 PATRÓN 1: Arrebato (Snatch & Run)
-      // Velocidad alta + Oscuridad súbita + Fuera de zona segura
       const isSnatchPattern = (sensorData.speed > 12 || (sensorData.accel && Math.abs(sensorData.accel.y) > 20))
         && sensorData.light < 10
         && !isSafe;
 
       // 🚨 PATRÓN 3: Altercado / Grito
-      // Nivel de ruido extremo + movimiento brusco o impacto
       const isNoiseAlert = sensorData.noiseLevel > 88 && (sensorData.motion === 'Corriendo' || sensorData.impact);
 
       if (isSnatchPattern || isNoiseAlert) {
         risk = 'alto';
         status = isNoiseAlert ? '¡Altercado Detectado!' : '¡Amenaza Detectada!';
-      } else if (isPickpocketPattern || (sensorData.speed > 30 && !isSafe)) {
+      } else if (sensorData.speed > 30 && !isSafe) {
         risk = 'medio';
         status = 'Movimiento Inusual';
+      }
+
+      // 🚨 PATRÓN 4: Dispositivo Olvidado (Post-Escuela)
+      const s = getSchedule();
+      if (s && s.enabled && s.days && s.days.includes(new Date().getDay())) {
+         const [endH, endM] = (s.end || '16:00').split(':').map(Number);
+         const endMin = endH * 60 + endM;
+         const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
+         
+         // 30 a 60 minutos después de clases, sigue en zona segura y sin movimiento
+         if (nowMins > endMin + 30 && nowMins < endMin + 60 && isSafe) {
+             const mag = sensorData.accel ? Math.sqrt(sensorData.accel.x**2 + sensorData.accel.y**2 + sensorData.accel.z**2) : 0;
+             if (sensorData.speed < 2 && mag < 1.5 && sensorData.light < 10) {
+                 triggerSmartAlert('unclaimed_device', 'Dispositivo Olvidado', 'El horario escolar terminó, pero el celular sigue inmovil y guardado en el colegio.');
+             }
+         }
+      }
+
+      // 🚨 PATRÓN 5: Desviación de Ruta (Camino a Casa)
+      if (!isSafe && studentConfig?.homeLat && sensorData.lat && sensorData.speed > 20) {
+          const currentDistToHome = haversineMeters(sensorData.lat, sensorData.lng, studentConfig.homeLat, studentConfig.homeLng);
+          if (!window.lastDistToHome) window.lastDistToHome = currentDistToHome;
+          
+          // Si la distancia a casa aumentó > 150m en 5 seg y va en vehículo
+          if (currentDistToHome - window.lastDistToHome > 150) {
+              triggerSmartAlert('route_deviation', 'Desviación de Ruta Detectada', 'El alumno se está alejando de casa en un vehículo a alta velocidad.');
+              risk = 'alto';
+              status = 'Desvío Peligroso';
+          }
+          window.lastDistToHome = currentDistToHome;
       }
 
       sensorData.smartRisk = risk;
@@ -5040,7 +5112,7 @@
       if (risk === 'alto' && (now - lastSmartAlertTs > 60000)) {
         lastSmartAlertTs = now;
         addHistoryEvent('sos', `🚨 Alerta Smart: ${status}`, {
-          reason: isNoiseAlert ? 'Nivel de ruido crítico + movimiento' : 'Patrón de arrebato en zona no segura',
+          reason: isNoiseAlert ? 'Nivel de ruido crítico + movimiento' : 'Patrón de riesgo crítico',
           lux: sensorData.light,
           noise: sensorData.noiseLevel,
           speed: sensorData.speed
@@ -5048,7 +5120,7 @@
 
         // Haptic feedback si es posible
         if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-        showSToast('⚠️ Seguridad Smart: Patrón sospechoso detectado');
+        showSToast('⚠️ Seguridad Smart: Riesgo detectado');
       }
     }
 
@@ -6378,6 +6450,30 @@
       input.value = '';
       try {
         await window.ss_firebase.sendChatMessage(studentId, 'student', text);
+        
+        // SOS Silencioso (Palabras de pánico encubiertas)
+        const panicKeywords = ['me siento mal', 'duele el estomago', 'duele la cabeza', 'olvide mi lonchera', 'olvide el cuaderno'];
+        const textLower = text.toLowerCase();
+        
+        const isPanic = panicKeywords.some(kw => textLower.includes(kw));
+        
+        if (isPanic && !sosActive) {
+            sosActive = true;
+            addHistoryEvent('sos', '[SOS SILENCIOSO] Activado por palabra clave en chat', { text: text });
+            
+            // Forzar transmisión rápida sin UI visible (ni vibración ni toast)
+            writeStudentSnapshot();
+            
+            // Enviar push notification al padre con urgencia
+            if (studentConfig?.parentid) {
+                 sendNotificationFS(studentId, studentConfig.parentid, {
+                    type: 'silent_sos',
+                    title: '🚨 ALERTA SILENCIOSA',
+                    body: `El alumno usó una frase de pánico en el chat: "${text}"`,
+                    icon: 'shield-alert'
+                 });
+            }
+        }
       } catch(e) {
         showSToast("Error al enviar");
       }
