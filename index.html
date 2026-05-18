@@ -4636,6 +4636,16 @@
       sensorData.lng = pos.coords.longitude;
       sensorData.accuracy = Math.round(pos.coords.accuracy);
       sensorData.speed = pos.coords.speed ? +(pos.coords.speed * 3.6).toFixed(1) : 0;
+      
+      // Fallback Inteligente: Si el magnetómetro está bloqueado por permisos del navegador móvil,
+      // usamos el vector de dirección (heading) del GPS cuando el alumno está en movimiento.
+      if (!window.hasRealOrientation && pos.coords.heading !== null && pos.coords.speed > 0.5) {
+          sensorData.heading = pos.coords.heading;
+          const dirs = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste'];
+          const idx = Math.round(sensorData.heading / 45) % 8;
+          sensorData.orientation = dirs[idx];
+          updateAdvancedUI(); // Refresca la brújula en pantalla
+      }
 
       updateGPSUI();
       writeStudentSnapshot();
@@ -4928,23 +4938,56 @@
       }
 
       window.addEventListener('deviceorientation', handleOrientation);
-      // Fallback para simulación si no se mueve nada
+      
+      // Fallback inteligente para simulación si no hay hardware (ej. en PC)
       setTimeout(() => {
-        if (sensorData.heading === 0) {
-          console.log('Brújula: Usando simulación inicial');
-          sensorData.heading = 10;
-          updateAdvancedUI();
+        if (!window.hasRealOrientation && sensorData.heading === 0) {
+          console.log('Brújula: Iniciando simulación fluida (sin sensor detectado)');
+          
+          let targetHeading = Math.random() * 360;
+          setInterval(() => {
+            if (window.hasRealOrientation) return; // Si entra sensor real, cancelar simulación
+            
+            // Movimiento suave hacia el target
+            let diff = targetHeading - sensorData.heading;
+            
+            // Normalizar diferencia para girar por el camino más corto
+            if (diff > 180) diff -= 360;
+            if (diff < -180) diff += 360;
+            
+            sensorData.heading += diff * 0.05;
+            
+            // Mantener en rango 0-360
+            if (sensorData.heading >= 360) sensorData.heading -= 360;
+            if (sensorData.heading < 0) sensorData.heading += 360;
+            
+            // Cambiar target aleatoriamente al acercarse
+            if (Math.abs(diff) < 2) {
+                targetHeading = (sensorData.heading + (Math.random() * 90 - 45));
+                if (targetHeading < 0) targetHeading += 360;
+                if (targetHeading >= 360) targetHeading -= 360;
+            }
+
+            const dirs = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste'];
+            const idx = Math.round(sensorData.heading / 45) % 8;
+            sensorData.orientation = dirs[idx];
+            updateAdvancedUI();
+          }, 100);
         }
-      }, 5000);
+      }, 3000);
     }
 
     function handleOrientation(e) {
       let heading = 0;
-      if (e.webkitCompassHeading) {
+      if (e.webkitCompassHeading !== undefined) {
         heading = e.webkitCompassHeading; // iOS
+        window.hasRealOrientation = true;
       } else if (e.alpha !== null) {
-        // En Android alpha es relativo al inicio.
+        // En Android alpha es relativo al inicio, asumimos absoluto para demostración
         heading = 360 - e.alpha;
+        window.hasRealOrientation = true;
+      } else {
+        return;
       }
 
       if (heading === sensorData.heading) return;
