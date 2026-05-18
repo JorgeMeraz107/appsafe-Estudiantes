@@ -4937,60 +4937,61 @@
         compassCard.onclick = requestCompassPermission;
       }
 
+      // Intentar escuchar el magnetómetro real
       window.addEventListener('deviceorientation', handleOrientation);
-      
-      // Fallback inteligente para simulación si no hay hardware (ej. en PC)
-      setTimeout(() => {
-        if (!window.hasRealOrientation && sensorData.heading === 0) {
-          console.log('Brújula: Iniciando simulación fluida (sin sensor detectado)');
-          
-          let targetHeading = Math.random() * 360;
-          setInterval(() => {
-            if (window.hasRealOrientation) return; // Si entra sensor real, cancelar simulación
-            
-            // Movimiento suave hacia el target
-            let diff = targetHeading - sensorData.heading;
-            
-            // Normalizar diferencia para girar por el camino más corto
-            if (diff > 180) diff -= 360;
-            if (diff < -180) diff += 360;
-            
-            sensorData.heading += diff * 0.05;
-            
-            // Mantener en rango 0-360
-            if (sensorData.heading >= 360) sensorData.heading -= 360;
-            if (sensorData.heading < 0) sensorData.heading += 360;
-            
-            // Cambiar target aleatoriamente al acercarse
-            if (Math.abs(diff) < 2) {
-                targetHeading = (sensorData.heading + (Math.random() * 90 - 45));
-                if (targetHeading < 0) targetHeading += 360;
-                if (targetHeading >= 360) targetHeading -= 360;
-            }
 
-            const dirs = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste'];
-            const idx = Math.round(sensorData.heading / 45) % 8;
-            sensorData.orientation = dirs[idx];
-            updateAdvancedUI();
-          }, 100);
+      // Motor de animación fluida — arranca SIEMPRE de inmediato.
+      // Si el sensor real confirma datos válidos, este motor se detiene automáticamente.
+      let targetHeading = 15 + Math.random() * 60;
+      window._compassSimInterval = setInterval(() => {
+        if (window.hasRealOrientation) return; // Sensor real confirmado, no interferir
+
+        // Interpolación suave hacia el target (easing orgánico)
+        let diff = targetHeading - sensorData.heading;
+        if (diff > 180) diff -= 360;
+        if (diff < -180) diff += 360;
+        
+        sensorData.heading += diff * 0.04;
+        
+        // Mantener en rango 0-360
+        if (sensorData.heading >= 360) sensorData.heading -= 360;
+        if (sensorData.heading < 0) sensorData.heading += 360;
+        
+        // Al llegar cerca del target, elegir uno nuevo con giro suave
+        if (Math.abs(diff) < 1.5) {
+          targetHeading = sensorData.heading + (Math.random() * 70 - 35);
+          if (targetHeading < 0) targetHeading += 360;
+          if (targetHeading >= 360) targetHeading -= 360;
         }
-      }, 3000);
+
+        const dirs = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste'];
+        const idx = Math.round(sensorData.heading / 45) % 8;
+        sensorData.orientation = dirs[idx];
+        updateAdvancedUI();
+      }, 120);
     }
 
     function handleOrientation(e) {
       let heading = 0;
-      if (e.webkitCompassHeading !== undefined) {
-        heading = e.webkitCompassHeading; // iOS
-        window.hasRealOrientation = true;
-      } else if (e.alpha !== null) {
-        // En Android alpha es relativo al inicio, asumimos absoluto para demostración
-        heading = 360 - e.alpha;
-        window.hasRealOrientation = true;
+      
+      if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
+        heading = e.webkitCompassHeading; // iOS Safari
+      } else if (e.alpha !== null && e.alpha !== undefined) {
+        heading = 360 - e.alpha; // Android Chrome
       } else {
-        return;
+        return; // Sin datos reales, dejar que la simulación siga
       }
 
-      if (heading === sensorData.heading) return;
+      // Confirmar que tenemos sensor real funcionando
+      window.hasRealOrientation = true;
+
+      // Detener simulación si aún está corriendo
+      if (window._compassSimInterval) {
+        clearInterval(window._compassSimInterval);
+        window._compassSimInterval = null;
+      }
+
+      if (Math.abs(heading - sensorData.heading) < 0.5) return; // Filtrar micro-cambios
 
       sensorData.heading = heading;
       const dirs = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste'];
