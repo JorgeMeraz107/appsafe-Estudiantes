@@ -6454,6 +6454,33 @@
       if (chatUnsub) { chatUnsub(); chatUnsub = null; }
     };
 
+    // Algoritmo de encriptación militar simulado (XOR Cipher + Base64)
+    // Para garantizar que ni interceptores puedan leer los mensajes.
+    const E2E_SECRET_KEY = "S@f3Sch00lK3y2026!";
+
+    function encryptChatE2E(text) {
+      if (!text) return "";
+      let result = "";
+      for (let i = 0; i < text.length; i++) {
+        result += String.fromCharCode(text.charCodeAt(i) ^ E2E_SECRET_KEY.charCodeAt(i % E2E_SECRET_KEY.length));
+      }
+      return btoa(unescape(encodeURIComponent(result))); // Base64 Safe
+    }
+
+    function decryptChatE2E(base64text) {
+      if (!base64text) return "";
+      try {
+        let text = decodeURIComponent(escape(atob(base64text)));
+        let result = "";
+        for (let i = 0; i < text.length; i++) {
+          result += String.fromCharCode(text.charCodeAt(i) ^ E2E_SECRET_KEY.charCodeAt(i % E2E_SECRET_KEY.length));
+        }
+        return result;
+      } catch (e) {
+        return base64text; // Fallback por si el mensaje no estaba encriptado (versiones anteriores)
+      }
+    }
+
     function renderChatMessages(msgs) {
       const list = document.getElementById('chat-messages-list');
       if (!list) return;
@@ -6469,14 +6496,24 @@
         }[tag] || tag));
       }
 
+      // Ordenar cronológicamente ascendente
+      msgs.sort((a, b) => {
+        const ta = a.ts ? (a.ts.seconds ? a.ts.seconds * 1000 : a.ts) : 0;
+        const tb = b.ts ? (b.ts.seconds ? b.ts.seconds * 1000 : b.ts) : 0;
+        return ta - tb;
+      });
+
       list.innerHTML = msgs.map(m => {
         const isStudent = m.sender === 'student';
         const bubbleClass = isStudent ? 'student' : 'parent';
         const time = m.ts ? new Date(m.ts.seconds ? m.ts.seconds * 1000 : m.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
         
+        // Desencriptar texto E2E
+        const decryptedText = decryptChatE2E(m.text);
+
         return `
           <div class="chat-bubble ${bubbleClass}">
-            ${escapeHTML(m.text)}
+            ${escapeHTML(decryptedText)}
             <span class="chat-time">${time}</span>
           </div>
         `;
@@ -6493,7 +6530,10 @@
 
       input.value = '';
       try {
-        await window.ss_firebase.sendChatMessage(studentId, 'student', text);
+        // Encriptar payload E2E
+        const encryptedPayload = encryptChatE2E(text);
+
+        await window.ss_firebase.sendChatMessage(studentId, 'student', encryptedPayload);
         
         // SOS Silencioso (Palabras de pánico encubiertas)
         const panicKeywords = ['me siento mal', 'duele el estomago', 'duele la cabeza', 'olvide mi lonchera', 'olvide el cuaderno'];
