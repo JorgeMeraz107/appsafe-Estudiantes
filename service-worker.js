@@ -1,5 +1,5 @@
-const CACHE_NAME = 'ss-student-cache-v1';
-const IMAGE_CACHE = 'ss-student-images-v1';
+const CACHE_NAME = 'ss-student-cache-v2';
+const IMAGE_CACHE = 'ss-student-images-v2';
 
 // Recursos críticos (App Shell)
 const ASSETS_TO_CACHE = [
