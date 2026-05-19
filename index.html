@@ -2959,43 +2959,77 @@
         <!-- Mensajes -->
       </div>
       
-      <!-- Emojis Modernos de Estilo WhatsApp (Elegantes e Interactivos) -->
+      <!-- Emojis Modernos de Estilo WhatsApp (Elegantes e Interactivos con Twemoji Vector HD) -->
       <div class="chat-emoji-bar" style="display: flex; gap: 10px; padding: 10px 14px; background: var(--bg-card); border-top: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; align-items: center; justify-content: space-around;">
         <style>
           .chat-emoji-bar::-webkit-scrollbar { display: none; }
           .emoji-tray-btn {
             background: transparent;
             border: none;
-            font-size: 22px;
             cursor: pointer;
-            padding: 4px;
+            padding: 6px;
             border-radius: 8px;
             transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
             align-items: center;
             justify-content: center;
           }
-          .emoji-tray-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.2) translateY(-2px);
+          .emoji-tray-btn img {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            pointer-events: none;
           }
-          .emoji-tray-btn:active {
+          .emoji-tray-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+          }
+          .emoji-tray-btn:hover img {
+            transform: scale(1.25) translateY(-2px);
+          }
+          .emoji-tray-btn:active img {
             transform: scale(0.9);
           }
         </style>
-        <button onclick="insertEmoji('😀')" class="emoji-tray-btn" title="Sonrisa">😀</button>
-        <button onclick="insertEmoji('😂')" class="emoji-tray-btn" title="Risa">😂</button>
-        <button onclick="insertEmoji('🥰')" class="emoji-tray-btn" title="Amor">🥰</button>
-        <button onclick="insertEmoji('👍')" class="emoji-tray-btn" title="Entendido">👍</button>
-        <button onclick="insertEmoji('❤️')" class="emoji-tray-btn" title="Corazón">❤️</button>
-        <button onclick="insertEmoji('🙏')" class="emoji-tray-btn" title="Por favor">🙏</button>
-        <button onclick="insertEmoji('🎉')" class="emoji-tray-btn" title="Fiesta">🎉</button>
-        <button onclick="insertEmoji('🚶')" class="emoji-tray-btn" title="Caminando">🚶</button>
-        <button onclick="insertEmoji('🚌')" class="emoji-tray-btn" title="Autobús">🚌</button>
-        <button onclick="insertEmoji('🏫')" class="emoji-tray-btn" title="Escuela">🏫</button>
-        <button onclick="insertEmoji('🏠')" class="emoji-tray-btn" title="Casa">🏠</button>
-        <button onclick="insertEmoji('⚠️')" class="emoji-tray-btn" title="Advertencia">⚠️</button>
-        <button onclick="insertEmoji('🚨')" class="emoji-tray-btn" title="Emergencia">🚨</button>
+        <button onclick="insertEmoji('😀')" class="emoji-tray-btn" title="Sonrisa">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f600.svg" alt="😀">
+        </button>
+        <button onclick="insertEmoji('😂')" class="emoji-tray-btn" title="Risa">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f602.svg" alt="😂">
+        </button>
+        <button onclick="insertEmoji('🥰')" class="emoji-tray-btn" title="Amor">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f970.svg" alt="🥰">
+        </button>
+        <button onclick="insertEmoji('👍')" class="emoji-tray-btn" title="Entendido">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f44d.svg" alt="👍">
+        </button>
+        <button onclick="insertEmoji('❤️')" class="emoji-tray-btn" title="Corazón">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2764.svg" alt="❤️">
+        </button>
+        <button onclick="insertEmoji('🙏')" class="emoji-tray-btn" title="Por favor">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f64f.svg" alt="🙏">
+        </button>
+        <button onclick="insertEmoji('🎉')" class="emoji-tray-btn" title="Fiesta">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f389.svg" alt="🎉">
+        </button>
+        <button onclick="insertEmoji('🚶')" class="emoji-tray-btn" title="Caminando">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6b6.svg" alt="🚶">
+        </button>
+        <button onclick="insertEmoji('🚌')" class="emoji-tray-btn" title="Autobús">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f68c.svg" alt="🚌">
+        </button>
+        <button onclick="insertEmoji('🏫')" class="emoji-tray-btn" title="Escuela">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3eb.svg" alt="🏫">
+        </button>
+        <button onclick="insertEmoji('🏠')" class="emoji-tray-btn" title="Casa">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f3e0.svg" alt="🏠">
+        </button>
+        <button onclick="insertEmoji('⚠️')" class="emoji-tray-btn" title="Advertencia">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/26a0.svg" alt="⚠️">
+        </button>
+        <button onclick="insertEmoji('🚨')" class="emoji-tray-btn" title="Emergencia">
+          <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6a8.svg" alt="🚨">
+        </button>
       </div>
       <div class="chat-input-bar">
         <input type="text" id="chat-input-field" class="chat-input" placeholder="Escribe a tus padres..." onkeypress="if(event.key==='Enter') sendChatMsg()">
