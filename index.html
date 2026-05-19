@@ -2959,43 +2959,43 @@
         <!-- Mensajes -->
       </div>
       
-      <!-- Emojis Rápidos de Seguridad y Estado -->
-      <div class="chat-emoji-bar" style="display: flex; gap: 8px; padding: 8px 12px; background: var(--bg-card); border-top: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; align-items: center;">
+      <!-- Emojis Modernos de Estilo WhatsApp (Elegantes e Interactivos) -->
+      <div class="chat-emoji-bar" style="display: flex; gap: 10px; padding: 10px 14px; background: var(--bg-card); border-top: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; align-items: center; justify-content: space-around;">
         <style>
           .chat-emoji-bar::-webkit-scrollbar { display: none; }
-          .emoji-btn {
-            background: var(--bg-body, #1e293b);
-            border: 1px solid var(--border, #334155);
-            border-radius: 20px;
-            padding: 6px 14px;
-            font-size: 13px;
-            color: var(--text-main, #f8fafc);
+          .emoji-tray-btn {
+            background: transparent;
+            border: none;
+            font-size: 22px;
             cursor: pointer;
-            display: flex;
+            padding: 4px;
+            border-radius: 8px;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
             align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            font-family: inherit;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            justify-content: center;
           }
-          .emoji-btn:hover {
-            background: var(--border, #475569) !important;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+          .emoji-tray-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.2) translateY(-2px);
           }
-          .emoji-btn:active {
-            transform: translateY(0) scale(0.95);
+          .emoji-tray-btn:active {
+            transform: scale(0.9);
           }
         </style>
-        <button onclick="insertEmoji('✅')" class="emoji-btn">✅ Todo bien</button>
-        <button onclick="insertEmoji('⚠️')" class="emoji-btn">⚠️ Demorado</button>
-        <button onclick="insertEmoji('🚌')" class="emoji-btn">🚌 En camino</button>
-        <button onclick="insertEmoji('🏫')" class="emoji-btn">🏫 Escuela</button>
-        <button onclick="insertEmoji('🏠')" class="emoji-btn">🏠 En casa</button>
-        <button onclick="insertEmoji('🚶')" class="emoji-btn">🚶 Caminando</button>
-        <button onclick="insertEmoji('👍')" class="emoji-btn">👍 Entendido</button>
-        <button onclick="insertEmoji('❤️')" class="emoji-btn">❤️ Te quiero</button>
+        <button onclick="insertEmoji('😀')" class="emoji-tray-btn" title="Sonrisa">😀</button>
+        <button onclick="insertEmoji('😂')" class="emoji-tray-btn" title="Risa">😂</button>
+        <button onclick="insertEmoji('🥰')" class="emoji-tray-btn" title="Amor">🥰</button>
+        <button onclick="insertEmoji('👍')" class="emoji-tray-btn" title="Entendido">👍</button>
+        <button onclick="insertEmoji('❤️')" class="emoji-tray-btn" title="Corazón">❤️</button>
+        <button onclick="insertEmoji('🙏')" class="emoji-tray-btn" title="Por favor">🙏</button>
+        <button onclick="insertEmoji('🎉')" class="emoji-tray-btn" title="Fiesta">🎉</button>
+        <button onclick="insertEmoji('🚶')" class="emoji-tray-btn" title="Caminando">🚶</button>
+        <button onclick="insertEmoji('🚌')" class="emoji-tray-btn" title="Autobús">🚌</button>
+        <button onclick="insertEmoji('🏫')" class="emoji-tray-btn" title="Escuela">🏫</button>
+        <button onclick="insertEmoji('🏠')" class="emoji-tray-btn" title="Casa">🏠</button>
+        <button onclick="insertEmoji('⚠️')" class="emoji-tray-btn" title="Advertencia">⚠️</button>
+        <button onclick="insertEmoji('🚨')" class="emoji-tray-btn" title="Emergencia">🚨</button>
       </div>
       <div class="chat-input-bar">
         <input type="text" id="chat-input-field" class="chat-input" placeholder="Escribe a tus padres..." onkeypress="if(event.key==='Enter') sendChatMsg()">
