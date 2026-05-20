@@ -852,23 +852,31 @@
     .sos-cancel-btn {
       width: calc(100% - 48px);
       height: 56px;
-      border-radius: 16px;
-      background: var(--bg-card);
-      border: 1.5px solid var(--border-c);
-      color: var(--text-b);
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
       font-family: 'Outfit', sans-serif;
       font-size: 15px;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: all 0.2s ease;
       -webkit-tap-highlight-color: transparent;
-      margin: 0 24px 32px;
+      margin: 0 24px 40px;
       position: relative;
       z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      flex-shrink: 0;
     }
 
     .sos-cancel-btn:active {
-      background: var(--bg-item);
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(0.97);
     }
 
     /* ═══════════════════════════════════════
@@ -3088,63 +3096,78 @@
           <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6a8.svg" alt="🚨">
         </button>
       </div>
-      <div class="chat-input-bar">
-        <input type="text" id="chat-input-field" class="chat-input" placeholder="Escribe a tus padres..."
-          onkeypress="if(event.key==='Enter') sendChatMsg()">
-        <button class="chat-send-btn" onclick="sendChatMsg()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
-        </button>
-      </div>
-    </div>
+      <div cla    <div class="screen" id="screen-sos" style="justify-content: space-between; overflow-y: auto; padding-top: 20px;">
+      <div class="sos-active-bg"></div>
 
-    <!-- Modern Confirmation Modal -->
-    <div id="modern-confirm-modal" class="m-modal-overlay">
-      <div class="m-modal">
-        <div class="m-modal-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-            <line x1="12" y1="9" x2="12" y2="13"></line>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-          </svg>
+      <div class="sos-content" style="flex-shrink: 0;">
+        <div class="sos-avatar-container anim anim-1">
+          <div class="sos-avatar" id="sos-avatar-view"
+            style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.1);border:3px solid white;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:12px;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+            <img src="" id="sos-avatar-img" style="width:100%;height:100%;object-fit:cover;display:none;">
+            <span id="sos-avatar-initial" style="font-size:32px;font-weight:800;color:white;">?</span>
+          </div>
         </div>
-        <div class="m-modal-title" id="m-modal-title">¿Estás seguro?</div>
-        <div class="m-modal-body" id="m-modal-body">Esta acción no se puede deshacer.</div>
-        <div class="m-modal-actions">
-          <button class="m-modal-btn m-modal-btn-confirm" id="m-modal-confirm-btn">Confirmar</button>
-          <button class="m-modal-btn m-modal-btn-cancel" onclick="closeModernConfirm()">Cancelar</button>
+        <div class="sos-alert-title anim anim-1">¡S.O.S ENVIADO!</div>
+        <div class="sos-active-timer" id="sos-timer">00:00</div>
+      </div>
+
+      <div class="sos-center" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 20px 0;">
+        <div class="sos-big-ring">
+          <div class="sos-big-pulse"></div>
+          <div class="sos-big-pulse"></div>
+          <div class="sos-big-pulse"></div>
+          <div class="sos-big-icon" style="display:flex; align-items:center; justify-content:center;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: white;">
+              <path d="M12 2L2 22h20L12 2z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+        </div>
+
+        <div class="sos-active-msg">¡Alerta enviada!</div>
+        <div class="sos-active-sub" style="opacity: 0.8;">
+          Tus padres han sido notificados.<br>
+          Mantente en un lugar seguro.
+        </div>
+
+        <div class="sos-location-chip" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 100px; display: flex; align-items: center; gap: 8px; padding: 10px 20px; font-size: 13px; font-weight: 500; margin-top: 10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span id="sos-location-text">Obteniendo ubicación GPS...</span>
+        </div>
+
+        <!-- Mini sensor recap -->
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center; margin-top: 15px;">
+          <div
+            style="background:rgba(232,54,74,0.2);border:1px solid rgba(232,54,74,0.4);border-radius:100px;padding:8px 16px;font-size:12px;font-weight:500;color: white;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="6" width="18" height="12" rx="2" ry="2"></rect>
+              <line x1="23" y1="13" x2="23" y2="11"></line>
+            </svg>
+            <span id="sos-battery">--%</span>
+          </div>
+          <div
+            style="background:rgba(232,54,74,0.2);border:1px solid rgba(232,54,74,0.4);border-radius:100px;padding:8px 16px;font-size:12px;font-weight:500;color: white;display:flex;align-items:center;gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+            </svg>
+            <span id="sos-motion">Analizando...</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Nav bar -->
-    <nav id="student-nav" style="display: none;">
-      <button class="s-nav-item active" data-tab="home" onclick="studentTab('home', this)">
-        <div class="s-nav-icon-wrapper">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2">
-            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
-        </div>
-        <span class="s-nav-label">Inicio</span>
-      </button>
-      <button class="s-nav-item" data-tab="history" onclick="goToHistory()">
-        <div class="s-nav-icon-wrapper">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2">
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
-        </div>
-        <span class="s-nav-label">Historial</span>
-      </button>
-      <button class="s-nav-item" data-tab="profile" onclick="showProfile()">
-        <div class="s-nav-icon-wrapper">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <button class="sos-cancel-btn" onclick="confirmCancelSOS()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+          <path d="M9 12l2 2 4-4"></path>
+        </svg>
+        Estoy a salvo — Cancelar SOS
+      </button>v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
         </div>
