@@ -2071,7 +2071,13 @@
       }
     }
 
-    .anim {
+    .screen:not(.active) .anim {
+      opacity: 0;
+      transform: translateY(16px);
+      animation: none !important;
+    }
+
+    .screen.active .anim {
       animation: fade-up 0.4s both;
     }
 
@@ -3096,13 +3102,24 @@
           <img src="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f6a8.svg" alt="🚨">
         </button>
       </div>
+
+      <div class="chat-input-bar">
+        <input type="text" id="chat-input-field" class="chat-input" placeholder="Escribe un mensaje de seguridad..." onkeydown="if(event.key === 'Enter') sendChatMsg()">
+        <button class="chat-send-btn" onclick="sendChatMsg()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
     <!-- ══════════════════════════════
        SCREEN: SOS ACTIVO
   ══════════════════════════════ -->
     <div class="screen" id="screen-sos" style="justify-content: space-between; overflow-y: auto; padding-top: 20px;">
       <div class="sos-active-bg"></div>
 
-      <div class="sos-content" style="flex-shrink: 0;">
+      <div class="sos-content" style="flex-shrink: 0; position: relative; z-index: 10;">
         <div class="sos-avatar-container anim anim-1">
           <div class="sos-avatar" id="sos-avatar-view"
             style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.1);border:3px solid white;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:12px;box-shadow:0 10px 30px rgba(0,0,0,0.3);">
@@ -3114,7 +3131,7 @@
         <div class="sos-active-timer" id="sos-timer">00:00</div>
       </div>
 
-      <div class="sos-center" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 20px 0;">
+      <div class="sos-center" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 20px 0; position: relative; z-index: 10;">
         <div class="sos-big-ring">
           <div class="sos-big-pulse"></div>
           <div class="sos-big-pulse"></div>
@@ -3171,7 +3188,8 @@
         </svg>
         Estoy a salvo — Cancelar SOS
       </button>
-    </div>\n    <!-- ══════════════════════════════
+    </div>
+    <!-- ══════════════════════════════
        SCREEN: HISTORIAL
   ══════════════════════════════ -->
     <div class="screen" id="screen-history">
@@ -3565,6 +3583,49 @@
           </button>
         </div>
       </div>
+    </div>
+
+    <!-- ══════════════════════════════
+       NAVIGATION BAR
+    ══════════════════════════════ -->
+    <div id="student-nav" style="display:flex;">
+      <button class="s-nav-item active" data-tab="home" onclick="studentTab('home', this)">
+        <div class="s-nav-icon-wrapper">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <span class="s-nav-label">Inicio</span>
+      </button>
+      <button class="s-nav-item" data-tab="history" onclick="goToHistory()">
+        <div class="s-nav-icon-wrapper">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <span class="s-nav-label">Historial</span>
+      </button>
+      <button class="s-nav-item" data-tab="profile" onclick="showProfile()">
+        <div class="s-nav-icon-wrapper">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <span class="s-nav-label">Perfil</span>
+      </button>
+      <button class="s-nav-item" data-tab="fullmap" onclick="openFullMap()">
+        <div class="s-nav-icon-wrapper">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+            <line x1="8" y1="2" x2="8" y2="18"></line>
+            <line x1="16" y1="6" x2="16" y2="22"></line>
+          </svg>
+        </div>
+        <span class="s-nav-label">Mapa</span>
+      </button>
     </div>
 
   </div><!-- end shell -->
@@ -4146,10 +4207,15 @@
       // Mostrar/Ocultar nav bar según pantalla
       const nav = document.getElementById('student-nav');
       if (nav) {
-        if (id === 'link') {
+        // Ocultar nav bar para link, sos, fullmap, y chat
+        if (id === 'link' || id === 'sos' || id === 'fullmap' || id === 'chat') {
           nav.style.display = 'none';
         } else {
           nav.style.display = 'flex';
+          // Sincronizar tab activo en la barra de navegación si coincide con el ID de pantalla
+          document.querySelectorAll('.s-nav-item').forEach(b => {
+            b.classList.toggle('active', b.dataset.tab === id);
+          });
         }
       }
     }
@@ -4704,6 +4770,8 @@
       if (titleEl) titleEl.textContent = 'Mi Ubicación';
 
       updateFullMapCoords(sensorData.lat, sensorData.lng, sensorData.accuracy);
+
+      showScreen('fullmap');
     }
 
     function closeFullMap() {
