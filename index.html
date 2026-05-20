@@ -3687,6 +3687,19 @@
       
       play(name) {
         if (!this._enabled) return;
+
+        // Evitar que se solapen los audios críticos del S.O.S
+        if (name === 'sos_countdown') {
+          this.stop('sos_activated');
+          this.stop('sos_cancelled');
+        } else if (name === 'sos_activated') {
+          this.stop('sos_countdown');
+          this.stop('sos_cancelled');
+        } else if (name === 'sos_cancelled') {
+          this.stop('sos_countdown');
+          this.stop('sos_activated');
+        }
+
         if (!this._cache[name]) {
           this._cache[name] = new Audio(`sounds/${name}.wav`);
         }
