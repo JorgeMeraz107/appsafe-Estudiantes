@@ -8,8 +8,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <title>SchoolSafe — Alumno</title>
-  <link
-    rel="stylesheet">
+  <link rel="stylesheet">
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     /* ═══════════════════════════════════════
@@ -42,7 +41,8 @@
     /* ═══════════════════════════════════════
    TOKENS — MODO OSCURO
 ═══════════════════════════════════════ */
-    html.dark, :root:not(.light) {
+    html.dark,
+    :root:not(.light) {
       --navy: #0D1B2A;
       --navy-mid: #0D1B2A;
       --navy-light: #162032;
@@ -1247,7 +1247,7 @@
       right: 0;
       z-index: 100;
       padding-bottom: env(safe-area-inset-bottom);
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
     }
 
     .s-nav-item {
@@ -1377,10 +1377,12 @@
       pointer-events: none;
       transition: opacity 0.3s;
     }
+
     .m-modal-overlay.active {
       opacity: 1;
       pointer-events: all;
     }
+
     .m-modal {
       background: var(--navy-mid);
       width: 100%;
@@ -1390,11 +1392,13 @@
       border: 1px solid var(--border-c);
       transform: scale(0.9) translateY(20px);
       transition: transform 0.3s cubic-bezier(.4, 0, .2, 1);
-      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
     }
+
     .m-modal-overlay.active .m-modal {
       transform: scale(1) translateY(0);
     }
+
     .m-modal-icon {
       width: 56px;
       height: 56px;
@@ -1406,6 +1410,7 @@
       justify-content: center;
       margin: 0 auto 20px;
     }
+
     .m-modal-title {
       font-family: 'Sora', sans-serif;
       font-size: 20px;
@@ -1414,6 +1419,7 @@
       margin-bottom: 12px;
       text-align: center;
     }
+
     .m-modal-body {
       font-size: 14px;
       color: var(--text-b);
@@ -1421,11 +1427,13 @@
       line-height: 1.5;
       margin-bottom: 28px;
     }
+
     .m-modal-actions {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
+
     .m-modal-btn {
       padding: 16px;
       border-radius: 16px;
@@ -1437,9 +1445,21 @@
       text-align: center;
       -webkit-tap-highlight-color: transparent;
     }
-    .m-modal-btn:active { transform: scale(0.97); }
-    .m-modal-btn-confirm { background: var(--danger); color: white; }
-    .m-modal-btn-cancel { background: var(--bg-item); color: var(--text-b); border: 1px solid var(--border-c); }
+
+    .m-modal-btn:active {
+      transform: scale(0.97);
+    }
+
+    .m-modal-btn-confirm {
+      background: var(--danger);
+      color: white;
+    }
+
+    .m-modal-btn-cancel {
+      background: var(--bg-item);
+      color: var(--text-b);
+      border: 1px solid var(--border-c);
+    }
 
     /* ═══════════════════════════════════════
    TOAST
@@ -2189,7 +2209,7 @@
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .avatar-picker-footer {
@@ -2281,8 +2301,13 @@
     }
 
     @keyframes loader-slide {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(250%); }
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(250%);
+      }
     }
 
     .loader-status {
@@ -2292,100 +2317,110 @@
       font-weight: 500;
       letter-spacing: 0.01em;
     }
-    
+
     /* ── Chat Bubbles (Student) ── */
-    .chat-messages { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 12px; 
-      padding: 24px 20px; 
-      flex: 1; 
-      overflow-y: auto; 
-      background: var(--bg-app); 
+    .chat-messages {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 24px 20px;
+      flex: 1;
+      overflow-y: auto;
+      background: var(--bg-app);
     }
-    
-    .chat-bubble { 
-      max-width: 75%; 
-      padding: 12px 16px; 
-      border-radius: 20px; 
-      font-size: 14.5px; 
-      line-height: 1.5; 
-      position: relative; 
-      animation: msgIn 0.4s cubic-bezier(.16, 1, .3, 1); 
+
+    .chat-bubble {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 20px;
+      font-size: 14.5px;
+      line-height: 1.5;
+      position: relative;
+      animation: msgIn 0.4s cubic-bezier(.16, 1, .3, 1);
     }
-    
-    .chat-bubble.student { 
-      align-self: flex-end; 
-      background: var(--blue); 
-      color: white; 
-      border-bottom-right-radius: 4px; 
-      box-shadow: 0 4px 16px rgba(0, 122, 255, 0.25); 
+
+    .chat-bubble.student {
+      align-self: flex-end;
+      background: var(--blue);
+      color: white;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 16px rgba(0, 122, 255, 0.25);
     }
-    
-    .chat-bubble.parent { 
-      align-self: flex-start; 
-      background: var(--bg-item); 
-      color: var(--text-h); 
-      border-bottom-left-radius: 4px; 
-      border: 1px solid var(--border-c); 
+
+    .chat-bubble.parent {
+      align-self: flex-start;
+      background: var(--bg-item);
+      color: var(--text-h);
+      border-bottom-left-radius: 4px;
+      border: 1px solid var(--border-c);
     }
-    
-    .chat-time { 
-      font-size: 10px; 
-      opacity: 0.5; 
-      margin-top: 6px; 
-      display: block; 
+
+    .chat-time {
+      font-size: 10px;
+      opacity: 0.5;
+      margin-top: 6px;
+      display: block;
       font-weight: 500;
     }
-    
-    .chat-bubble.student .chat-time { 
-      text-align: right; 
-      color: rgba(255, 255, 255, 0.7); 
+
+    .chat-bubble.student .chat-time {
+      text-align: right;
+      color: rgba(255, 255, 255, 0.7);
     }
-    
-    .chat-input-bar { 
-      padding: 16px 20px; 
-      background: var(--topbar-bg); 
+
+    .chat-input-bar {
+      padding: 16px 20px;
+      background: var(--topbar-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-top: 1px solid var(--border-c); 
-      display: flex; 
-      gap: 12px; 
-      align-items: center; 
-      padding-bottom: calc(16px + env(safe-area-inset-bottom)); 
+      border-top: 1px solid var(--border-c);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
     }
-    
-    .chat-input { 
-      flex: 1; 
-      background: var(--bg-item); 
-      border: 1px solid var(--border-c); 
-      border-radius: 24px; 
-      padding: 12px 18px; 
-      font-size: 15px; 
-      color: var(--text-h); 
-      outline: none; 
+
+    .chat-input {
+      flex: 1;
+      background: var(--bg-item);
+      border: 1px solid var(--border-c);
+      border-radius: 24px;
+      padding: 12px 18px;
+      font-size: 15px;
+      color: var(--text-h);
+      outline: none;
       font-family: 'Outfit', sans-serif;
     }
-    
-    .chat-send-btn { 
-      width: 44px; 
-      height: 44px; 
-      background: var(--blue); 
-      color: white; 
-      border: none; 
-      border-radius: 50%; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      cursor: pointer; 
+
+    .chat-send-btn {
+      width: 44px;
+      height: 44px;
+      background: var(--blue);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
       transition: transform 0.2s;
     }
 
     .chat-send-btn:active {
       transform: scale(0.9);
     }
-    
-    @keyframes msgIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    @keyframes msgIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 
@@ -2398,7 +2433,8 @@
     <div class="loader-logo">
       <svg width="42" height="42" viewBox="0 0 38 38" fill="none">
         <path d="M19 3L5 9V19C5 27.3 11.2 35.1 19 37C26.8 35.1 33 27.3 33 19V9L19 3Z" fill="white" fill-opacity="0.9" />
-        <path d="M13 19L17 23L25 15" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M13 19L17 23L25 15" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round" />
       </svg>
     </div>
     <div class="loader-title">SchoolSafe</div>
@@ -2482,10 +2518,18 @@
         Vincularme
       </button>
 
-      <div style="margin-top: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
+      <div
+        style="margin-top: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%;">
         <div style="width: 100%; height: 1px; background: var(--border-c); opacity: 0.5;"></div>
-        <button class="btn-ghost" onclick="startQRScan()" style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--blue); background: none; border: none; cursor: pointer;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <button class="btn-ghost" onclick="startQRScan()"
+          style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--blue); background: none; border: none; cursor: pointer;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
           Escanear Código QR
         </button>
       </div>
@@ -2515,8 +2559,10 @@
             <div class="student-name-top" id="student-display-name">Carlos García</div>
           </div>
         </div>
-        <div class="status-badge-top status-badge-safe" id="status-badge-top" style="background: rgba(15, 191, 122, 0.1); border: 1px solid rgba(15, 191, 122, 0.2); color: var(--safe); padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 6px; box-shadow: none;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <div class="status-badge-top status-badge-safe" id="status-badge-top"
+          style="background: rgba(15, 191, 122, 0.1); border: 1px solid rgba(15, 191, 122, 0.2); color: var(--safe); padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 6px; box-shadow: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
           </svg>
           Protegido
@@ -2932,8 +2978,10 @@
           z-index: 100;
           cursor: pointer;
           transition: transform 0.2s, box-shadow 0.2s;
-        " onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.92)'" ontouchend="this.style.transform='scale(1)'">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        " onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'"
+          ontouchstart="this.style.transform='scale(0.92)'" ontouchend="this.style.transform='scale(1)'">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
           </svg>
         </button>
@@ -2947,22 +2995,27 @@
     <div class="screen" id="screen-chat">
       <div class="history-topbar">
         <button class="back-icon-btn" onclick="goBackChat()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
         <div class="history-title">Chat de Seguridad</div>
         <div style="width:38px;"></div>
       </div>
-      
+
       <div class="chat-messages" id="chat-messages-list">
         <!-- Mensajes -->
       </div>
-      
+
       <!-- Emojis Modernos de Estilo WhatsApp (Elegantes e Interactivos con Twemoji Vector HD) -->
-      <div class="chat-emoji-bar" style="display: flex; gap: 10px; padding: 10px 14px; background: var(--bg-card); border-top: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; align-items: center; justify-content: space-around;">
+      <div class="chat-emoji-bar"
+        style="display: flex; gap: 10px; padding: 10px 14px; background: var(--bg-card); border-top: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; align-items: center; justify-content: space-around;">
         <style>
-          .chat-emoji-bar::-webkit-scrollbar { display: none; }
+          .chat-emoji-bar::-webkit-scrollbar {
+            display: none;
+          }
+
           .emoji-tray-btn {
             background: transparent;
             border: none;
@@ -2974,6 +3027,7 @@
             align-items: center;
             justify-content: center;
           }
+
           .emoji-tray-btn img {
             width: 24px;
             height: 24px;
@@ -2981,12 +3035,15 @@
             user-select: none;
             pointer-events: none;
           }
+
           .emoji-tray-btn:hover {
             background: rgba(255, 255, 255, 0.08);
           }
+
           .emoji-tray-btn:hover img {
             transform: scale(1.25) translateY(-2px);
           }
+
           .emoji-tray-btn:active img {
             transform: scale(0.9);
           }
@@ -3032,9 +3089,11 @@
         </button>
       </div>
       <div class="chat-input-bar">
-        <input type="text" id="chat-input-field" class="chat-input" placeholder="Escribe a tus padres..." onkeypress="if(event.key==='Enter') sendChatMsg()">
+        <input type="text" id="chat-input-field" class="chat-input" placeholder="Escribe a tus padres..."
+          onkeypress="if(event.key==='Enter') sendChatMsg()">
         <button class="chat-send-btn" onclick="sendChatMsg()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"></line>
             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
           </svg>
@@ -3046,7 +3105,8 @@
     <div id="modern-confirm-modal" class="m-modal-overlay">
       <div class="m-modal">
         <div class="m-modal-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
             <line x1="12" y1="9" x2="12" y2="13"></line>
             <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -3062,32 +3122,35 @@
     </div>
 
     <!-- Nav bar -->
-      <nav id="student-nav" style="display: none;">
-        <button class="s-nav-item active" data-tab="home" onclick="studentTab('home', this)">
-          <div class="s-nav-icon-wrapper">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2">
-              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-          </div>
-          <span class="s-nav-label">Inicio</span>
-        </button>
-        <button class="s-nav-item" data-tab="history" onclick="goToHistory()">
-          <div class="s-nav-icon-wrapper">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-            </svg>
-          </div>
-          <span class="s-nav-label">Historial</span>
-        </button>
-        <button class="s-nav-item" data-tab="profile" onclick="showProfile()">
-          <div class="s-nav-icon-wrapper">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
-          <span class="s-nav-label">Perfil</span>
-        </button>
-      </nav>
+    <nav id="student-nav" style="display: none;">
+      <button class="s-nav-item active" data-tab="home" onclick="studentTab('home', this)">
+        <div class="s-nav-icon-wrapper">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+        </div>
+        <span class="s-nav-label">Inicio</span>
+      </button>
+      <button class="s-nav-item" data-tab="history" onclick="goToHistory()">
+        <div class="s-nav-icon-wrapper">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+        </div>
+        <span class="s-nav-label">Historial</span>
+      </button>
+      <button class="s-nav-item" data-tab="profile" onclick="showProfile()">
+        <div class="s-nav-icon-wrapper">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </div>
+        <span class="s-nav-label">Perfil</span>
+      </button>
+    </nav>
 
     <!-- ══════════════════════════════
        SCREEN: SOS ACTIVO
@@ -3521,19 +3584,24 @@
         <div class="avatar-grid" id="avatar-grid-options">
           <!-- Opciones cargadas por JS -->
         </div>
-        
+
         <!-- Subir imagen personalizada (WebP Engine) -->
         <div style="margin: 16px 20px; text-align: center;">
-          <input type="file" id="custom-avatar-input" accept="image/*" style="display: none;" onchange="handleCustomAvatarUpload(event)">
-          <button class="btn-ghost" style="width: 100%; height: 48px; border-radius: 12px; border: 1px dashed var(--blue-acc); color: var(--blue-acc); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;" onclick="document.getElementById('custom-avatar-input').click()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <input type="file" id="custom-avatar-input" accept="image/*" style="display: none;"
+            onchange="handleCustomAvatarUpload(event)">
+          <button class="btn-ghost"
+            style="width: 100%; height: 48px; border-radius: 12px; border: 1px dashed var(--blue-acc); color: var(--blue-acc); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;"
+            onclick="document.getElementById('custom-avatar-input').click()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="17 8 12 3 7 8"></polyline>
               <line x1="12" y1="3" x2="12" y2="15"></line>
             </svg>
             Subir mi propia foto
           </button>
-          <div id="upload-status" style="font-size: 11px; color: var(--text-s); margin-top: 8px; display: none;">Optimizando imagen...</div>
+          <div id="upload-status" style="font-size: 11px; color: var(--text-s); margin-top: 8px; display: none;">
+            Optimizando imagen...</div>
         </div>
 
         <div class="avatar-picker-footer">
@@ -3593,6 +3661,32 @@
         });
       });
     }
+
+    /* ═══════════════════════════════════════
+       AUDIO MANAGER
+    ═══════════════════════════════════════ */
+    const StudentAudio = {
+      _cache: {},
+      _enabled: true,
+      
+      play(name) {
+        if (!this._enabled) return;
+        if (!this._cache[name]) {
+          this._cache[name] = new Audio(`sounds/${name}.wav`);
+        }
+        this._cache[name].currentTime = 0;
+        this._cache[name].play().catch(() => {});
+      },
+
+      stop(name) {
+        if (this._cache[name]) {
+          this._cache[name].pause();
+          this._cache[name].currentTime = 0;
+        }
+      },
+      
+      toggle() { this._enabled = !this._enabled; }
+    };
 
     /* ═══════════════════════════════════════
        STATE
@@ -3839,23 +3933,23 @@
 
     /* ── Motor Heurístico Autónomo (Edge AI) ── */
     const lastSmartAlerts = {};
-    
+
     function triggerSmartAlert(type, title, body) {
       const now = Date.now();
       // Evitar spam: solo 1 alerta del mismo tipo cada 15 minutos
       if (lastSmartAlerts[type] && now - lastSmartAlerts[type] < 15 * 60 * 1000) return;
-      
+
       lastSmartAlerts[type] = now;
       addHistoryEvent('warn', title, { detail: body });
-      
+
       const studentId = localStorage.getItem('ss_student_id');
       if (studentId && studentConfig?.parentid) {
-         sendNotificationFS(studentId, studentConfig.parentid, {
-            type: 'smart_alert',
-            title: title,
-            body: body,
-            icon: 'alert-triangle'
-         });
+        sendNotificationFS(studentId, studentConfig.parentid, {
+          type: 'smart_alert',
+          title: title,
+          body: body,
+          icon: 'alert-triangle'
+        });
       }
     }
 
@@ -3874,12 +3968,12 @@
 
       // Vector 2: Impacto Severo
       if (payload.impact && payload.speed < 5) {
-         // Evaluamos aceleración combinada
-         const mag = Math.sqrt(payload.accel_x**2 + payload.accel_y**2 + payload.accel_z**2);
-         if (mag > 25) {
-            triggerAutonomousSOS('Impacto severo detectado (Posible caída fuerte/agresión)');
-            return;
-         }
+        // Evaluamos aceleración combinada
+        const mag = Math.sqrt(payload.accel_x ** 2 + payload.accel_y ** 2 + payload.accel_z ** 2);
+        if (mag > 25) {
+          triggerAutonomousSOS('Impacto severo detectado (Posible caída fuerte/agresión)');
+          return;
+        }
       }
 
       // Vector 3: Entorno Hostil (Pánico)
@@ -3895,39 +3989,39 @@
       // Vector 4: Guardián de Mochila (Manipulación en clase)
       // Si está en el colegio, en horario de clase, la luz sube de golpe y hay movimiento (no estaba guardado)
       if (isSafeZone && inSchedule) {
-         const mag = Math.sqrt(payload.accel_x**2 + payload.accel_y**2 + payload.accel_z**2);
-         if (payload.light > 150 && mag > 2 && payload.speed < 5) {
-             triggerSmartAlert('backpack_tamper', 'Manipulación de Dispositivo', 'El celular fue sacado de su lugar de guardado durante el horario escolar.');
-         }
+        const mag = Math.sqrt(payload.accel_x ** 2 + payload.accel_y ** 2 + payload.accel_z ** 2);
+        if (payload.light > 150 && mag > 2 && payload.speed < 5) {
+          triggerSmartAlert('backpack_tamper', 'Manipulación de Dispositivo', 'El celular fue sacado de su lugar de guardado durante el horario escolar.');
+        }
       }
 
       // Vector 5: Disturbio Ambiental (Micrófono espía)
       // Si el celular está guardado (oscuro, sin moverse) pero detecta mucho ruido
       if (isSafeZone && inSchedule) {
-          const mag = Math.sqrt(payload.accel_x**2 + payload.accel_y**2 + payload.accel_z**2);
-          if (payload.light < 10 && mag < 1.5 && payload.noise > 85) {
-             triggerSmartAlert('environmental_disturbance', 'Anomalía Acústica en el Colegio', 'Se detectó ruido inusualmente alto (>85dB) cerca de las pertenencias del alumno.');
-          }
+        const mag = Math.sqrt(payload.accel_x ** 2 + payload.accel_y ** 2 + payload.accel_z ** 2);
+        if (payload.light < 10 && mag < 1.5 && payload.noise > 85) {
+          triggerSmartAlert('environmental_disturbance', 'Anomalía Acústica en el Colegio', 'Se detectó ruido inusualmente alto (>85dB) cerca de las pertenencias del alumno.');
+        }
       }
     }
 
     function triggerAutonomousSOS(reason) {
       if (sosActive) return;
       sosActive = true;
-      
+
       showSToast('PELIGRO: S.O.S Autónomo activado');
       addHistoryEvent('sos', '[AUTO-SOS] Alerta generada por IA Local', { reason: reason });
-      
+
       // Intentar vibrar fuerte para avisarle al niño que la app lo protegió
       if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 1000]);
-      
+
       // Actualizar UI al instante
       showScreen('sos');
       const timerEl = document.getElementById('sos-timer');
       const msgEl = document.querySelector('.sos-active-msg');
       if (timerEl) timerEl.textContent = "AUTÓNOMO";
       if (msgEl) msgEl.textContent = "IA DETECTÓ PELIGRO";
-      
+
       // Forzar transmisión de datos
       writeStudentSnapshot();
     }
@@ -4008,7 +4102,7 @@
 
       // 4. Cambios Críticos de Estado
       if (p.charging !== lastSentPayload.charging) return true;
-      
+
       // Batería baja o cambio significativo (cada 5%)
       const batteryDiff = Math.abs((p.battery || 0) - (lastSentPayload.battery || 0));
       if (batteryDiff >= 0.05) return true;
@@ -4434,6 +4528,7 @@
       const numEl = document.getElementById('countdown-num');
       overlay.classList.add('show');
       numEl.textContent = countdownVal;
+      StudentAudio.play('sos_countdown');
 
       countdownTimer = setInterval(() => {
         countdownVal--;
@@ -4463,6 +4558,7 @@
       overlay.classList.remove('show');
       const btn = document.getElementById('sos-btn');
       if (btn) btn.classList.remove('holding');
+      StudentAudio.stop('sos_countdown');
     }
 
     function triggerSOS() {
@@ -4474,6 +4570,8 @@
 
       // Vibrate device
       if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]);
+      
+      StudentAudio.play('sos_activated');
 
       // Update status badge
       const badge = document.getElementById('status-badge-top');
@@ -4536,6 +4634,7 @@
         showScreen('home');
         showSToast('✅ SOS cancelado — Estás a salvo');
         addHistoryEvent('safe', 'SOS cancelado — Estás a salvo');
+        StudentAudio.play('sos_cancelled');
         // In production: update Firestore status back to "safe"
       }
     }
@@ -4731,15 +4830,15 @@
       sensorData.lng = pos.coords.longitude;
       sensorData.accuracy = Math.round(pos.coords.accuracy);
       sensorData.speed = pos.coords.speed ? +(pos.coords.speed * 3.6).toFixed(1) : 0;
-      
+
       // Fallback Inteligente: Si el magnetómetro está bloqueado por permisos del navegador móvil,
       // usamos el vector de dirección (heading) del GPS cuando el alumno está en movimiento.
       if (!window.hasRealOrientation && pos.coords.heading !== null && pos.coords.speed > 0.5) {
-          sensorData.heading = pos.coords.heading;
-          const dirs = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste'];
-          const idx = Math.round(sensorData.heading / 45) % 8;
-          sensorData.orientation = dirs[idx];
-          updateAdvancedUI(); // Refresca la brújula en pantalla
+        sensorData.heading = pos.coords.heading;
+        const dirs = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste'];
+        const idx = Math.round(sensorData.heading / 45) % 8;
+        sensorData.orientation = dirs[idx];
+        updateAdvancedUI(); // Refresca la brújula en pantalla
       }
 
       updateGPSUI();
@@ -5045,13 +5144,13 @@
         let diff = targetHeading - sensorData.heading;
         if (diff > 180) diff -= 360;
         if (diff < -180) diff += 360;
-        
+
         sensorData.heading += diff * 0.04;
-        
+
         // Mantener en rango 0-360
         if (sensorData.heading >= 360) sensorData.heading -= 360;
         if (sensorData.heading < 0) sensorData.heading += 360;
-        
+
         // Al llegar cerca del target, elegir uno nuevo con giro suave
         if (Math.abs(diff) < 1.5) {
           targetHeading = sensorData.heading + (Math.random() * 70 - 35);
@@ -5068,7 +5167,7 @@
 
     function handleOrientation(e) {
       let heading = 0;
-      
+
       if (e.webkitCompassHeading !== undefined && e.webkitCompassHeading !== null) {
         heading = e.webkitCompassHeading; // iOS Safari
       } else if (e.alpha !== null && e.alpha !== undefined) {
@@ -5217,31 +5316,31 @@
       // 🚨 PATRÓN 4: Dispositivo Olvidado (Post-Escuela)
       const s = getSchedule();
       if (s && s.enabled && s.days && s.days.includes(new Date().getDay())) {
-         const [endH, endM] = (s.end || '16:00').split(':').map(Number);
-         const endMin = endH * 60 + endM;
-         const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
-         
-         // 30 a 60 minutos después de clases, sigue en zona segura y sin movimiento
-         if (nowMins > endMin + 30 && nowMins < endMin + 60 && isSafe) {
-             const mag = sensorData.accel ? Math.sqrt(sensorData.accel.x**2 + sensorData.accel.y**2 + sensorData.accel.z**2) : 0;
-             if (sensorData.speed < 2 && mag < 1.5 && sensorData.light < 10) {
-                 triggerSmartAlert('unclaimed_device', 'Dispositivo Olvidado', 'El horario escolar terminó, pero el celular sigue inmovil y guardado en el colegio.');
-             }
-         }
+        const [endH, endM] = (s.end || '16:00').split(':').map(Number);
+        const endMin = endH * 60 + endM;
+        const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
+
+        // 30 a 60 minutos después de clases, sigue en zona segura y sin movimiento
+        if (nowMins > endMin + 30 && nowMins < endMin + 60 && isSafe) {
+          const mag = sensorData.accel ? Math.sqrt(sensorData.accel.x ** 2 + sensorData.accel.y ** 2 + sensorData.accel.z ** 2) : 0;
+          if (sensorData.speed < 2 && mag < 1.5 && sensorData.light < 10) {
+            triggerSmartAlert('unclaimed_device', 'Dispositivo Olvidado', 'El horario escolar terminó, pero el celular sigue inmovil y guardado en el colegio.');
+          }
+        }
       }
 
       // 🚨 PATRÓN 5: Desviación de Ruta (Camino a Casa)
       if (!isSafe && studentConfig?.homeLat && sensorData.lat && sensorData.speed > 20) {
-          const currentDistToHome = haversineMeters(sensorData.lat, sensorData.lng, studentConfig.homeLat, studentConfig.homeLng);
-          if (!window.lastDistToHome) window.lastDistToHome = currentDistToHome;
-          
-          // Si la distancia a casa aumentó > 150m en 5 seg y va en vehículo
-          if (currentDistToHome - window.lastDistToHome > 150) {
-              triggerSmartAlert('route_deviation', 'Desviación de Ruta Detectada', 'El alumno se está alejando de casa en un vehículo a alta velocidad.');
-              risk = 'alto';
-              status = 'Desvío Peligroso';
-          }
-          window.lastDistToHome = currentDistToHome;
+        const currentDistToHome = haversineMeters(sensorData.lat, sensorData.lng, studentConfig.homeLat, studentConfig.homeLng);
+        if (!window.lastDistToHome) window.lastDistToHome = currentDistToHome;
+
+        // Si la distancia a casa aumentó > 150m en 5 seg y va en vehículo
+        if (currentDistToHome - window.lastDistToHome > 150) {
+          triggerSmartAlert('route_deviation', 'Desviación de Ruta Detectada', 'El alumno se está alejando de casa en un vehículo a alta velocidad.');
+          risk = 'alto';
+          status = 'Desvío Peligroso';
+        }
+        window.lastDistToHome = currentDistToHome;
       }
 
       sensorData.smartRisk = risk;
@@ -5573,7 +5672,7 @@
 
           localStorage.removeItem('ss_student_id');
           localStorage.removeItem('ss_student_name');
-          localStorage.removeItem('ss_student_config'); 
+          localStorage.removeItem('ss_student_config');
           localStorage.removeItem('ss_parent_id');
 
           showScreen('link');
@@ -6288,7 +6387,7 @@
     /* ═══════════════════════════════════════
        WEBP ENGINE (COMPRESIÓN INTELIGENTE)
     ═══════════════════════════════════════ */
-    window.handleCustomAvatarUpload = function(event) {
+    window.handleCustomAvatarUpload = function (event) {
       const file = event.target.files[0];
       if (!file) return;
 
@@ -6304,47 +6403,47 @@
           // 2. Crear Canvas para recortar y comprimir a WebP
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-          
+
           // Redimensionar a máximo 400x400
           const maxDim = 400;
           let width = img.width;
           let height = img.height;
-          
+
           if (width > height) {
             if (width > maxDim) { height *= maxDim / width; width = maxDim; }
           } else {
             if (height > maxDim) { width *= maxDim / height; height = maxDim; }
           }
-          
+
           // Hacerlo cuadrado recortando el centro
           const size = Math.min(width, height);
           canvas.width = size;
           canvas.height = size;
-          
+
           const offsetX = (width - size) / 2;
           const offsetY = (height - size) / 2;
-          
+
           // Dibujar la imagen escalada y centrada
           // Primero creamos un canvas temporal para el escalado
           const tempCanvas = document.createElement('canvas');
           tempCanvas.width = width;
           tempCanvas.height = height;
           tempCanvas.getContext('2d').drawImage(img, 0, 0, width, height);
-          
+
           // Luego recortamos el centro al canvas final
           ctx.drawImage(tempCanvas, offsetX, offsetY, size, size, 0, 0, size, size);
-          
+
           // 3. Exportar a WebP (0.8 calidad reduce 80% peso sin perder nitidez)
           canvas.toBlob((blob) => {
             statusEl.textContent = 'Subiendo a la nube...';
-            
+
             const sid = localStorage.getItem('ss_student_id');
             if (sid) {
               uploadCustomAvatarWebP(sid, blob)
                 .then(url => {
                   statusEl.textContent = '¡Listo!';
                   setTimeout(() => statusEl.style.display = 'none', 2000);
-                  
+
                   // Actualizar UI
                   selectedAvatarUrl = url;
                   studentConfig.photoURL = url;
@@ -6359,8 +6458,8 @@
                   showSToast('Error al subir foto');
                 });
             } else {
-               statusEl.style.display = 'none';
-               closeAvatarPicker();
+              statusEl.style.display = 'none';
+              closeAvatarPicker();
             }
           }, 'image/webp', 0.8);
         };
@@ -6502,16 +6601,16 @@
 
     /* ── Chat Logic ── */
     let chatUnsub = null;
-    window.openChat = function() {
+    window.openChat = function () {
       const studentId = localStorage.getItem('ss_student_id');
       if (!studentId) return;
 
       document.getElementById('chat-messages-list').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-s);font-size:12px;">Conectando...</div>';
-      
+
       const home = document.getElementById('screen-home');
       const chat = document.getElementById('screen-chat');
       const nav = document.getElementById('student-nav');
-      
+
       if (home) home.classList.remove('active');
       if (chat) {
         chat.classList.add('active');
@@ -6520,9 +6619,9 @@
       if (nav) nav.style.display = 'none';
 
       if (chatUnsub) {
-        try { chatUnsub(); } catch(e){}
+        try { chatUnsub(); } catch (e) { }
       }
-      
+
       try {
         if (window.ss_firebase?.subscribeToChat) {
           chatUnsub = window.ss_firebase.subscribeToChat(studentId, (msgs, err) => {
@@ -6539,10 +6638,10 @@
       }
     };
 
-    window.goBackChat = function() {
+    window.goBackChat = function () {
       document.getElementById('screen-chat').classList.remove('active');
       document.getElementById('screen-home').classList.add('active');
-      
+
       const nav = document.getElementById('student-nav');
       if (nav) nav.style.display = 'flex';
 
@@ -6608,7 +6707,7 @@
       }
     }
 
-    window.insertEmoji = function(emoji) {
+    window.insertEmoji = function (emoji) {
       const input = document.getElementById('chat-input-field');
       if (input) {
         input.value += emoji + " ";
@@ -6641,8 +6740,8 @@
       list.innerHTML = msgs.map(m => {
         const isStudent = m.sender === 'student';
         const bubbleClass = isStudent ? 'student' : 'parent';
-        const time = m.ts ? new Date(m.ts.seconds ? m.ts.seconds * 1000 : m.ts).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
-        
+        const time = m.ts ? new Date(m.ts.seconds ? m.ts.seconds * 1000 : m.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
         // Desencriptar texto E2E
         const decryptedText = decryptChatE2E(m.text);
 
@@ -6653,11 +6752,11 @@
           </div>
         `;
       }).join('');
-      
+
       list.scrollTop = list.scrollHeight;
     }
 
-    window.sendChatMsg = async function() {
+    window.sendChatMsg = async function () {
       const studentId = localStorage.getItem('ss_student_id');
       const input = document.getElementById('chat-input-field');
       const text = input?.value.trim();
@@ -6669,31 +6768,31 @@
         const encryptedPayload = encryptChatE2E(text);
 
         await window.ss_firebase.sendChatMessage(studentId, 'student', encryptedPayload);
-        
+
         // SOS Silencioso (Palabras de pánico encubiertas)
         const panicKeywords = ['me siento mal', 'duele el estomago', 'duele la cabeza', 'olvide mi lonchera', 'olvide el cuaderno'];
         const textLower = text.toLowerCase();
-        
+
         const isPanic = panicKeywords.some(kw => textLower.includes(kw));
-        
+
         if (isPanic && !sosActive) {
-            sosActive = true;
-            addHistoryEvent('sos', '[SOS SILENCIOSO] Activado por palabra clave en chat', { text: text });
-            
-            // Forzar transmisión rápida sin UI visible (ni vibración ni toast)
-            writeStudentSnapshot();
-            
-            // Enviar push notification al padre con urgencia
-            if (studentConfig?.parentid) {
-                 sendNotificationFS(studentId, studentConfig.parentid, {
-                    type: 'silent_sos',
-                    title: '🚨 ALERTA SILENCIOSA',
-                    body: `El alumno usó una frase de pánico en el chat: "${text}"`,
-                    icon: 'shield-alert'
-                 });
-            }
+          sosActive = true;
+          addHistoryEvent('sos', '[SOS SILENCIOSO] Activado por palabra clave en chat', { text: text });
+
+          // Forzar transmisión rápida sin UI visible (ni vibración ni toast)
+          writeStudentSnapshot();
+
+          // Enviar push notification al padre con urgencia
+          if (studentConfig?.parentid) {
+            sendNotificationFS(studentId, studentConfig.parentid, {
+              type: 'silent_sos',
+              title: '🚨 ALERTA SILENCIOSA',
+              body: `El alumno usó una frase de pánico en el chat: "${text}"`,
+              icon: 'shield-alert'
+            });
+          }
         }
-      } catch(e) {
+      } catch (e) {
         showSToast("Error al enviar");
       }
     };
@@ -6701,7 +6800,7 @@
     /* ── Escaneo de QR (Real con Cámara) ── */
     let html5QrCode = null;
 
-    window.startQRScan = async function() {
+    window.startQRScan = async function () {
       // 1. Verificar Seguridad (HTTPS es obligatorio para cámara en móviles)
       const isSecure = location.protocol === 'https:' || location.hostname === 'localhost';
       if (!isSecure) {
@@ -6738,20 +6837,20 @@
 
       try {
         await html5QrCode.start(
-          { facingMode: "environment" }, 
+          { facingMode: "environment" },
           config,
           (decodedText) => {
             // Éxito: El código fue detectado
             console.log("QR Detectado:", decodedText);
             stopQRScan();
             showSToast("QR Vinculado con éxito");
-            
+
             // Llenar inputs si es un código de 6 dígitos
             const code = decodedText.trim();
             if (code.length === 6 && !isNaN(code)) {
-              for(let i=0; i<6; i++) {
+              for (let i = 0; i < 6; i++) {
                 const el = document.getElementById('d' + i);
-                if(el) el.value = code[i];
+                if (el) el.value = code[i];
               }
               // Opcional: auto-vincular
               vincular();
@@ -6778,9 +6877,9 @@
       }
     };
 
-    window.stopQRScan = async function() {
+    window.stopQRScan = async function () {
       if (html5QrCode) {
-        try { await html5QrCode.stop(); } catch(e) {}
+        try { await html5QrCode.stop(); } catch (e) { }
         html5QrCode = null;
       }
       const modal = document.getElementById('qr-scan-modal');
