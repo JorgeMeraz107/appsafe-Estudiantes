@@ -4979,6 +4979,7 @@
       if (magnitude > 25 && !sensorData.impact) {
         sensorData.impact = true;
         showSToast('Impacto fuerte detectado');
+        StudentAudio.play('impact_detected'); // Sonido de impacto — solo en el alumno
         addHistoryEvent('impact', `Impacto fuerte detectado — ${magnitude.toFixed(1)} m/s²`);
 
         // Enviar a Firestore inmediatamente
