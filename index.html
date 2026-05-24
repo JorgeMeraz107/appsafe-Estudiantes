@@ -4282,6 +4282,13 @@
     function updateUIFromConfig() {
       if (!studentConfig) return;
 
+      // Sincronización BIDIRECCIONAL: Si el padre descarta el SOS (marca como 'safe')
+      // pero el alumno aún tiene la pantalla de SOS activa, se cancela automáticamente.
+      if (studentConfig.status === 'safe' && typeof sosActive !== 'undefined' && sosActive) {
+        console.log("Padre marcó como seguro. Cancelando SOS localmente.");
+        confirmCancelSOS();
+      }
+
       // Actualizar nombres en Top Bar y Home
       const name = studentConfig.name || 'Alumno';
       const displayNames = document.querySelectorAll('#student-display-name, #profile-name-display, .student-name-top');
