@@ -2913,9 +2913,28 @@
             </div>
             <!-- Overlay Offline -->
             <div class="map-offline-overlay" id="mini-map-offline">
-              <div class="map-offline-icon">📡</div>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6;margin-bottom:6px;">
+                <path d="M1 6c0 0 4-4 11-4s11 4 11 4" />
+                <path d="M5 10c0 0 2.5-2 7-2s7 2 7 2" />
+                <path d="M9 14c0 0 1-1 3-1s3 1 3 1" />
+                <circle cx="12" cy="18" r="1" fill="currentColor" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
               <div class="map-offline-msg">Modo Offline</div>
-              <div class="map-offline-sub">Mostrando última ubicación conocida. Conéctate para actualizar el mapa.</div>
+              <div class="map-offline-sub">Mostrando última ubicación conocida.</div>
+            </div>
+            <!-- Banner GPS Desactivado -->
+            <div id="mini-map-gps-off-banner"
+              style="display:none;position:absolute;bottom:0;left:0;right:0;background:rgba(234,179,8,0.92);backdrop-filter:blur(4px);padding:7px 12px;align-items:center;gap:8px;z-index:10;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+              <span style="color:white;font-size:11px;font-weight:700;letter-spacing:0.02em;">Ultima ubicación conocida
+                — GPS desactivado</span>
             </div>
           </div>
           <div class="map-accuracy-info" id="map-acc-info">
@@ -3104,9 +3123,11 @@
       </div>
 
       <div class="chat-input-bar">
-        <input type="text" id="chat-input-field" class="chat-input" placeholder="Escribe un mensaje de seguridad..." onkeydown="if(event.key === 'Enter') sendChatMsg()">
+        <input type="text" id="chat-input-field" class="chat-input" placeholder="Escribe un mensaje de seguridad..."
+          onkeydown="if(event.key === 'Enter') sendChatMsg()">
         <button class="chat-send-btn" onclick="sendChatMsg()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
             <line x1="22" y1="2" x2="11" y2="13"></line>
             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
           </svg>
@@ -3131,13 +3152,15 @@
         <div class="sos-active-timer" id="sos-timer">00:00</div>
       </div>
 
-      <div class="sos-center" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 20px 0; position: relative; z-index: 10;">
+      <div class="sos-center"
+        style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; margin: 20px 0; position: relative; z-index: 10;">
         <div class="sos-big-ring">
           <div class="sos-big-pulse"></div>
           <div class="sos-big-pulse"></div>
           <div class="sos-big-pulse"></div>
           <div class="sos-big-icon" style="display:flex; align-items:center; justify-content:center;">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: white;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round" style="color: white;">
               <path d="M12 2L2 22h20L12 2z"></path>
               <line x1="12" y1="9" x2="12" y2="13"></line>
               <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -3151,8 +3174,10 @@
           Mantente en un lugar seguro.
         </div>
 
-        <div class="sos-location-chip" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 100px; display: flex; align-items: center; gap: 8px; padding: 10px 20px; font-size: 13px; font-weight: 500; margin-top: 10px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <div class="sos-location-chip"
+          style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 100px; display: flex; align-items: center; gap: 8px; padding: 10px 20px; font-size: 13px; font-weight: 500; margin-top: 10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
             <circle cx="12" cy="10" r="3"></circle>
           </svg>
@@ -3181,8 +3206,10 @@
         </div>
       </div>
 
-      <button class="sos-cancel-btn" onclick="confirmCancelSOS()" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 16px 20px; border-radius: 100px; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; backdrop-filter: blur(10px); margin-bottom: 30px; margin-top: auto; z-index: 10; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <button class="sos-cancel-btn" onclick="confirmCancelSOS()"
+        style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 16px 20px; border-radius: 100px; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; backdrop-filter: blur(10px); margin-bottom: 30px; margin-top: auto; z-index: 10; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
           <path d="M9 12l2 2 4-4"></path>
         </svg>
@@ -3446,10 +3473,36 @@
         </iframe>
         <!-- Overlay Offline -->
         <div class="map-offline-overlay" id="full-map-offline">
-          <div class="map-offline-icon">📵</div>
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round" style="opacity:0.6;margin-bottom:8px;">
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+            <line x1="12" y1="18" x2="12.01" y2="18" />
+            <line x1="1" y1="1" x2="23" y2="23" />
+          </svg>
           <div class="map-offline-msg">Mapa no disponible offline</div>
           <div class="map-offline-sub">Se requiere conexión a internet para cargar los detalles del mapa interactivo.
           </div>
+        </div>
+        <!-- Banner GPS Desactivado (mapa completo) -->
+        <div id="fullmap-gps-off-banner"
+          style="display:none;position:absolute;top:0;left:0;right:0;background:rgba(234,179,8,0.95);backdrop-filter:blur(6px);padding:10px 16px;align-items:center;gap:10px;z-index:20;box-shadow:0 2px 12px rgba(0,0,0,0.15);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+            <line x1="1" y1="1" x2="23" y2="23" />
+          </svg>
+          <div style="flex:1;">
+            <div style="color:white;font-size:12px;font-weight:700;letter-spacing:0.02em;">Ultima ubicación conocida
+            </div>
+            <div style="color:rgba(255,255,255,0.85);font-size:10px;margin-top:1px;">GPS desactivado en este dispositivo
+              — Activa la ubicación para ver en tiempo real</div>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </div>
       </div>
 
@@ -3591,7 +3644,8 @@
     <div id="student-nav" style="display:flex;">
       <button class="s-nav-item active" data-tab="home" onclick="studentTab('home', this)">
         <div class="s-nav-icon-wrapper">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             <polyline points="9 22 9 12 15 12 15 22"></polyline>
           </svg>
@@ -3600,7 +3654,8 @@
       </button>
       <button class="s-nav-item" data-tab="history" onclick="goToHistory()">
         <div class="s-nav-icon-wrapper">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
@@ -3609,7 +3664,8 @@
       </button>
       <button class="s-nav-item" data-tab="profile" onclick="showProfile()">
         <div class="s-nav-icon-wrapper">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
@@ -3618,7 +3674,8 @@
       </button>
       <button class="s-nav-item" data-tab="fullmap" onclick="openFullMap()">
         <div class="s-nav-icon-wrapper">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-s)" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
             <line x1="8" y1="2" x2="8" y2="18"></line>
             <line x1="16" y1="6" x2="16" y2="22"></line>
@@ -3684,7 +3741,7 @@
     const StudentAudio = {
       _cache: {},
       _enabled: true,
-      
+
       play(name) {
         if (!this._enabled) return;
 
@@ -3704,7 +3761,7 @@
           this._cache[name] = new Audio(`sounds/${name}.wav`);
         }
         this._cache[name].currentTime = 0;
-        this._cache[name].play().catch(() => {});
+        this._cache[name].play().catch(() => { });
       },
 
       stop(name) {
@@ -3713,7 +3770,7 @@
           this._cache[name].currentTime = 0;
         }
       },
-      
+
       toggle() { this._enabled = !this._enabled; }
     };
 
@@ -3749,6 +3806,7 @@
       accel: { x: 0.2, y: 9.8, z: 0.1 },
       impact: false,
       fall: false,
+      gpsOff: false,       // true cuando el permiso de ubicación está denegado/desactivado
       // Smart Additions
       light: 50,
       proximity: false,
@@ -3763,6 +3821,9 @@
       heading: 0,          // grados
       orientation: 'Norte'
     };
+
+    // Antiflood: timestamp del último aviso de GPS desactivado enviado al padre
+    let lastGpsOffNotifTime = 0;
 
     /* ═══════════════════════════════════════
        CLAVE COMPARTIDA CON APP DEL PADRE
@@ -4079,6 +4140,7 @@
           storage: sensorData.storageUsage,
           heading: sensorData.heading,
           sos: sosActive,
+          gpsOff: sensorData.gpsOff || false,   // El padre puede ver si el GPS está desactivado
           mode: monitoringMode,
           ts: Date.now()
         };
@@ -4633,7 +4695,7 @@
 
       // Vibrate device
       if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 500]);
-      
+
       StudentAudio.play('sos_activated');
 
       // Update status badge
@@ -4779,17 +4841,24 @@
     function openFullMap() {
       prevFullMapScreen = currentScreen;
 
-      // Carga el mapa completo con zoom más alto
+      // Usar coords reales si están disponibles, o caché si GPS está apagado
+      const lat = sensorData.lat ?? parseFloat(localStorage.getItem('ss_last_known_lat') || '');
+      const lng = sensorData.lng ?? parseFloat(localStorage.getItem('ss_last_known_lng') || '');
+
       const fullIframe = document.getElementById('gmap-full');
-      if (fullIframe) {
-        fullIframe.src = buildMapUrl(sensorData.lat, sensorData.lng, 18);
+      if (fullIframe && !isNaN(lat) && !isNaN(lng)) {
+        fullIframe.src = buildMapUrl(lat, lng, 18);
       }
 
-      // Actualizar título si regresamos de ver una zona
+      // Actualizar título
       const titleEl = document.querySelector('.fullmap-title');
-      if (titleEl) titleEl.textContent = 'Mi Ubicación';
+      if (titleEl) titleEl.textContent = sensorData.gpsOff ? 'Ultima Ubicación Conocida' : 'Mi Ubicación';
 
-      updateFullMapCoords(sensorData.lat, sensorData.lng, sensorData.accuracy);
+      updateFullMapCoords(lat, lng, sensorData.accuracy);
+
+      // Mostrar banner de GPS desactivado si aplica
+      const gpsBanner = document.getElementById('fullmap-gps-off-banner');
+      if (gpsBanner) gpsBanner.style.display = sensorData.gpsOff ? 'flex' : 'none';
 
       showScreen('fullmap');
     }
@@ -4890,6 +4959,7 @@
     /* ── Callbacks GPS globales (usados por startGPSFull y startGPSLow) ── */
     function onGpsSuccess(pos) {
       const wasNull = sensorData.lat === null;
+      const wasGpsOff = sensorData.gpsOff === true;
 
       sensorData.lat = pos.coords.latitude;
       sensorData.lng = pos.coords.longitude;
@@ -4905,6 +4975,19 @@
         sensorData.orientation = dirs[idx];
         updateAdvancedUI(); // Refresca la brújula en pantalla
       }
+
+      // ── GPS se acaba de reactivar tras estar desactivado ────────────────
+      if (wasGpsOff) {
+        sensorData.gpsOff = false;
+        lastGpsOffNotifTime = 0; // Resetear antiflood
+        hideCachedMapBanner();   // Ocultar banner de última ubicación
+        addHistoryEvent('gps_on', 'Ubicación GPS reactivada en este dispositivo');
+      }
+
+      // Actualizar caché de última ubicación conocida
+      localStorage.setItem('ss_last_known_lat', String(sensorData.lat));
+      localStorage.setItem('ss_last_known_lng', String(sensorData.lng));
+      localStorage.setItem('ss_last_known_ts', String(Date.now()));
 
       updateGPSUI();
       writeStudentSnapshot();
@@ -4929,27 +5012,57 @@
       console.warn('GPS error:', err.code, err.message);
       const gpsEl = document.getElementById('s-gps-acc');
       const coordEl = document.getElementById('s-gps-coords');
+
       if (err.code === 1) {
-        if (gpsEl) gpsEl.textContent = 'Permiso denegado';
-        if (coordEl) coordEl.textContent = 'Activa la ubicación en ajustes';
-        showSToast('Activa la ubicación en Ajustes del celular');
-        showMapPermissionDenied();
-        addHistoryEvent('offline', 'Permiso de ubicación denegado');
+        // ── PERMISO DENEGADO / GPS DESACTIVADO ─────────────────────────────
+        // Cachear la última ubicación conocida antes de perderla
+        if (sensorData.lat !== null && sensorData.lng !== null) {
+          localStorage.setItem('ss_last_known_lat', String(sensorData.lat));
+          localStorage.setItem('ss_last_known_lng', String(sensorData.lng));
+          localStorage.setItem('ss_last_known_ts', String(Date.now()));
+        }
+
+        // Actualizar flag de estado
+        sensorData.gpsOff = true;
+
+        // Actualizar UI local
+        if (gpsEl) gpsEl.textContent = 'Ubicación desactivada';
+        if (coordEl) coordEl.textContent = 'Activa el GPS en Ajustes';
+        showSToast('Activa la ubicación GPS en Ajustes del celular');
+
+        // Mostrar mapa con ultima ubicación cacheada (no dejar vacío)
+        showCachedMapBanner();
+
+        // Antiflood: notificar al padre máximo una vez cada 30 minutos
+        const now = Date.now();
+        if (now - lastGpsOffNotifTime > 30 * 60 * 1000) {
+          lastGpsOffNotifTime = now;
+          // Registrar en historial del alumno → Firebase → notificación al padre
+          addHistoryEvent('gps_off', 'Ubicación GPS desactivada en este dispositivo');
+          // Forzar escritura inmediata con gpsOff:true para que el padre lo vea en tiempo real
+          writeStudentSnapshot();
+        }
+
       } else {
+        // Señal perdida temporalmente (no permiso denegado)
         if (gpsEl) gpsEl.textContent = 'Sin señal GPS';
         if (coordEl) coordEl.textContent = 'Buscando señal...';
         if (sensorData.lat !== null) addHistoryEvent('gps', 'Señal GPS perdida temporalmente');
       }
     }
 
-    // Carga el mini mapa con las coords GPS reales
+    // Carga el mini mapa con las coords GPS reales o cacheadas
     function loadMiniMap() {
-      if (sensorData.lat === null) return;
+      // Usar coordenadas reales si están disponibles, si no, usar caché
+      const lat = sensorData.lat ?? parseFloat(localStorage.getItem('ss_last_known_lat') || '');
+      const lng = sensorData.lng ?? parseFloat(localStorage.getItem('ss_last_known_lng') || '');
+      if (isNaN(lat) || isNaN(lng)) return;
+
       const miniIframe = document.getElementById('gmap-mini');
       const miniLoading = document.getElementById('mini-map-loading');
       if (!miniIframe) return;
 
-      const url = buildMapUrl(sensorData.lat, sensorData.lng, 17);
+      const url = buildMapUrl(lat, lng, 17);
       miniIframe.src = url;
       mapsInitialized = true;
 
@@ -4958,16 +5071,40 @@
       };
 
       updateMapAccInfo(sensorData.accuracy);
-      updateFullMapCoords(sensorData.lat, sensorData.lng, sensorData.accuracy);
+      updateFullMapCoords(lat, lng, sensorData.accuracy);
+
+      // Mostrar/ocultar banner de GPS desactivado en el mini mapa
+      if (sensorData.gpsOff) showCachedMapBanner();
     }
 
-    // Muestra mensaje si el permiso fue denegado
-    function showMapPermissionDenied() {
-      const miniLoading = document.getElementById('mini-map-loading');
-      if (miniLoading) {
-        miniLoading.querySelector('.map-loading-text').textContent = '📍 Activa la ubicación en ajustes';
-        miniLoading.querySelector('.map-spinner').style.display = 'none';
+    // Muestra el banner de "Ultima ubicacion cacheada — GPS desactivado" en ambos mapas
+    function showCachedMapBanner() {
+      // Mini mapa (pantalla inicio)
+      const miniGpsBanner = document.getElementById('mini-map-gps-off-banner');
+      if (miniGpsBanner) miniGpsBanner.style.display = 'flex';
+
+      // Mapa completo (pantalla fullmap)
+      const fullGpsBanner = document.getElementById('fullmap-gps-off-banner');
+      if (fullGpsBanner) fullGpsBanner.style.display = 'flex';
+
+      // Si el mini mapa no ha cargado aun, intentar cargarlo con coords cacheadas
+      const miniIframe = document.getElementById('gmap-mini');
+      const cachedLat = parseFloat(localStorage.getItem('ss_last_known_lat') || '');
+      const cachedLng = parseFloat(localStorage.getItem('ss_last_known_lng') || '');
+      if (miniIframe && !mapsInitialized && !isNaN(cachedLat) && !isNaN(cachedLng)) {
+        miniIframe.src = buildMapUrl(cachedLat, cachedLng, 17);
+        mapsInitialized = true;
+        const miniLoading = document.getElementById('mini-map-loading');
+        setTimeout(() => { if (miniLoading) miniLoading.classList.add('hidden'); }, 2000);
       }
+    }
+
+    // Oculta los banners de GPS desactivado cuando el GPS se reactiva
+    function hideCachedMapBanner() {
+      const miniGpsBanner = document.getElementById('mini-map-gps-off-banner');
+      if (miniGpsBanner) miniGpsBanner.style.display = 'none';
+      const fullGpsBanner = document.getElementById('fullmap-gps-off-banner');
+      if (fullGpsBanner) fullGpsBanner.style.display = 'none';
     }
 
     // ── Real motion handler ───────────────
@@ -5971,7 +6108,7 @@
           await addHistoryEventFS(studentId, ev);
 
           // 3. Notificación persistente para eventos CRÍTICOS
-          const criticalTypes = ['sos', 'impact', 'battery', 'checkin', 'offline'];
+          const criticalTypes = ['sos', 'impact', 'battery', 'checkin', 'offline', 'gps_off', 'gps_on'];
           if (criticalTypes.includes(type) && parentId) {
             const notif = {
               type,
